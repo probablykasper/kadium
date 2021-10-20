@@ -1,22 +1,28 @@
-pub fn load_data() -> Result<Option<v2::Data>, String> {
+pub fn load_migration_data() -> Result<Option<v2::MigrationData>, String> {
   v2::load_from_v1()
 }
 
 mod v2 {
   use crate::migration::v1;
   use crate::settings::{Channel, Group, Settings};
-  pub struct Data {
+  pub struct MigrationData {
+    pub update_note: String,
     pub settings: Settings,
   }
-  pub fn load_from_v1() -> Result<Option<Data>, String> {
+  pub fn load_from_v1() -> Result<Option<MigrationData>, String> {
     match v1::load_data() {
       Ok(Some(v1_data)) => Ok(Some(data_from_v1(v1_data))),
       Ok(None) => Ok(None),
       Err(e) => Err(e),
     }
   }
-  fn data_from_v1(v1_data: v1::Data) -> Data {
-    Data {
+  fn data_from_v1(v1_data: v1::MigrationData) -> MigrationData {
+    MigrationData {
+      // update_note: "Your old settings and data has been imported.\n\nTo re-enable \"Launch on Startup\", open System Preferences, go to Users & Groups > Login Items and add YouTube Email Notifier.".to_string(),
+      update_note:
+      "Your old settings and data has been imported.\n\
+      \n\
+      To re-enable \"Launch on Startup\", open System Preferences, go to Users & Groups > Login Items and add YouTube Email Notifier.".to_string(),
       settings: Settings {
         api_key: v1_data.settings.apiKey,
         from_email: v1_data.settings.fromEmail,
@@ -51,7 +57,6 @@ mod v2 {
 mod v1 {
   use crate::throw;
   use serde::{Deserialize, Serialize};
-  use serde_json::Value;
   use std::fs::File;
   use std::io::Read;
   use std::path::PathBuf;
@@ -98,10 +103,10 @@ mod v1 {
     };
     Ok(settings)
   }
-  pub struct Data {
+  pub struct MigrationData {
     pub settings: Settings,
   }
-  pub fn load_data() -> Result<Option<Data>, String> {
+  pub fn load_data() -> Result<Option<MigrationData>, String> {
     if cfg!(target_os = "macos") {
       let data_dir = tauri::api::path::data_dir().expect("No data dir");
       let app_dir = data_dir.join("YouTube Email Notifier");
@@ -111,7 +116,7 @@ mod v1 {
           Ok(settings) => settings,
           Err(err) => throw!("Error migrating v1 settings: {}", err),
         };
-        return Ok(Some(Data { settings }));
+        return Ok(Some(MigrationData { settings }));
       }
     }
     Ok(None)

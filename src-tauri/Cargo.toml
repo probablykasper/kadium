@@ -18,3 +18,4 @@ rfd = "0.5.1"
 [features]
 default = [ "custom-protocol" ]
 custom-protocol = [ "tauri/custom-protocol" ]
+skip_migration_note = []

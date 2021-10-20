@@ -15,7 +15,12 @@
     },
     "bundle": {
       "active": true,
-      "targets": "all",
+      "targets": [
+        "dmg",
+        "deb",
+        "appimage",
+        "msi"
+      ],
       "identifier": "space.kasper.youtube-email-notifier",
       "icon": [
         "icons/32x32.png",
@@ -27,9 +32,9 @@
       "resources": [],
       "externalBin": [],
       "copyright": "© 2021 kasper.space",
-      "category": "DeveloperTool",
-      "shortDescription": "",
-      "longDescription": "",
+      "category": "Utility",
+      "shortDescription": "App for YouTube upload email notifications",
+      "longDescription": "App for YouTube upload email notifications",
       "deb": {
         "depends": [],
         "useBootstrapper": false

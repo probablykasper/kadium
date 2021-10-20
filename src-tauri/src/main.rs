@@ -7,7 +7,7 @@ use std::thread;
 
 use tauri::api::{dialog, shell};
 use tauri::{
-  command, CustomMenuItem, Manager, Menu, MenuItem, Submenu, SystemTray, SystemTrayEvent, Window,
+  CustomMenuItem, Manager, Menu, MenuItem, Submenu, SystemTray, SystemTrayEvent, Window,
   WindowBuilder, WindowUrl,
 };
 
@@ -15,7 +15,6 @@ mod data;
 mod migration;
 mod settings;
 
-#[command]
 fn error_popup_main_thread(msg: impl AsRef<str>) {
   let msg = msg.as_ref().to_string();
   println!("Error: {}", msg);
@@ -24,6 +23,16 @@ fn error_popup_main_thread(msg: impl AsRef<str>) {
     .set_description(msg.as_ref())
     .set_buttons(rfd::MessageButtons::Ok)
     .set_level(rfd::MessageLevel::Error);
+  builder.show();
+}
+fn info_popup_main_thread(msg: impl AsRef<str>) {
+  let msg = msg.as_ref().to_string();
+  println!("Error: {}", msg);
+  let builder = rfd::MessageDialog::new()
+    .set_title("Error")
+    .set_description(msg.as_ref())
+    .set_buttons(rfd::MessageButtons::Ok)
+    .set_level(rfd::MessageLevel::Info);
   builder.show();
 }
 

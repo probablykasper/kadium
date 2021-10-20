@@ -21,11 +21,15 @@ impl Data {
       let settings = Settings::load(settings_file)?;
       Ok(Data { settings, app_dir })
     } else {
-      let data = match migration::load_data() {
-        Ok(Some(migrated_data)) => Data {
-          settings: migrated_data.settings,
-          app_dir: app_dir,
-        },
+      let data = match migration::load_migration_data() {
+        Ok(Some(migrated_data)) => {
+          #[cfg(not(feature = "skip_migration_note"))]
+          crate::info_popup_main_thread(migrated_data.update_note);
+          Data {
+            settings: migrated_data.settings,
+            app_dir: app_dir,
+          }
+        }
         Ok(None) => Data {
           settings: Settings::default(),
           app_dir: app_dir,

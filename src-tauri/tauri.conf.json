@@ -16,7 +16,7 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "space.kasper.yt-email-notifier",
+      "identifier": "space.kasper.youtube-email-notifier",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
@@ -52,7 +52,9 @@
       "active": false
     },
     "allowlist": {
-      "all": true
+      "shell": {
+        "open": true
+      }
     },
     "security": {
       "csp": "default-src blob: data: filesystem: ws: wss: http: https: tauri: 'unsafe-eval' 'unsafe-inline' 'self' img-src: 'self'"

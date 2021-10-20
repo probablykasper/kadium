@@ -3,10 +3,41 @@
   windows_subsystem = "windows"
 )]
 
+use std::thread;
+
+use tauri::api::{dialog, shell};
 use tauri::{
-  api, CustomMenuItem, Manager, Menu, MenuItem, Submenu, SystemTray, SystemTrayEvent,
+  command, CustomMenuItem, Manager, Menu, MenuItem, Submenu, SystemTray, SystemTrayEvent, Window,
   WindowBuilder, WindowUrl,
 };
+
+mod data;
+mod migration;
+mod settings;
+
+#[command]
+fn error_popup_main_thread(msg: impl AsRef<str>) {
+  let msg = msg.as_ref().to_string();
+  println!("Error: {}", msg);
+  let builder = rfd::MessageDialog::new()
+    .set_title("Error")
+    .set_description(msg.as_ref())
+    .set_buttons(rfd::MessageButtons::Ok)
+    .set_level(rfd::MessageLevel::Error);
+  builder.show();
+}
+
+#[macro_export]
+macro_rules! throw {
+  ($($arg:tt)*) => {{
+    return Err(format!($($arg)*))
+  }};
+}
+
+fn custom_menu(name: &str) -> CustomMenuItem {
+  let c = CustomMenuItem::new(name.to_string(), name);
+  return c;
+}
 
 fn main() {
   let tray = SystemTray::new();
@@ -27,24 +58,56 @@ fn main() {
         .add_native_item(MenuItem::Quit),
     ))
     .add_submenu(Submenu::new(
-      "Edit",
+      "File",
+      Menu::new().add_item(custom_menu("Close Window").accelerator("cmdOrControl+W")),
+    ))
+    .add_submenu(Submenu::new("Edit", {
+      let mut menu = Menu::new();
+      menu = menu.add_native_item(MenuItem::Undo);
+      menu = menu.add_native_item(MenuItem::Redo);
+      menu = menu.add_native_item(MenuItem::Separator);
+      menu = menu.add_native_item(MenuItem::Cut);
+      menu = menu.add_native_item(MenuItem::Copy);
+      menu = menu.add_native_item(MenuItem::Paste);
+      #[cfg(not(target_os = "macos"))]
+      {
+        menu = menu.add_native_item(MenuItem::Separator);
+      }
+      menu = menu.add_native_item(MenuItem::SelectAll);
+      menu
+    }))
+    .add_submenu(Submenu::new(
+      "View",
+      Menu::new().add_native_item(MenuItem::EnterFullScreen),
+    ))
+    .add_submenu(Submenu::new(
+      "Window",
       Menu::new()
-        .add_native_item(MenuItem::Undo)
-        .add_native_item(MenuItem::Redo)
-        .add_native_item(MenuItem::Separator)
-        .add_native_item(MenuItem::Cut)
-        .add_native_item(MenuItem::Copy)
-        .add_native_item(MenuItem::Paste)
-        .add_native_item(MenuItem::Separator)
-        .add_native_item(MenuItem::SelectAll),
+        .add_native_item(MenuItem::Minimize)
+        .add_native_item(MenuItem::Zoom),
     ))
     .add_submenu(Submenu::new(
       "Help",
-      Menu::new().add_item(CustomMenuItem::new("learn-more", "Learn More")),
-    ))
-    .add_native_item(MenuItem::Copy);
+      Menu::new().add_item(custom_menu("Learn More")),
+    ));
 
   let ctx = tauri::generate_context!();
+
+  let app_dir = match tauri::api::path::app_dir(ctx.config()) {
+    Some(app_dir) => app_dir,
+    None => {
+      error_popup_main_thread("No app dir");
+      panic!("No app dir");
+    }
+  };
+  let loaded_data = match data::ArcData::load(app_dir) {
+    Ok(d) => d,
+    Err(e) => {
+      error_popup_main_thread(e.to_string());
+      panic!("{}", e.to_string());
+    }
+  };
+
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![])
     .setup(|app| {
@@ -64,6 +127,7 @@ fn main() {
         .fullscreen(false);
       return (win, webview);
     })
+    .manage(loaded_data)
     .system_tray(tray)
     .on_system_tray_event(|app, event| match event {
       SystemTrayEvent::LeftClick { .. } => {
@@ -81,8 +145,11 @@ fn main() {
     })
     .menu(menu)
     .on_menu_event(|event| match event.menu_item_id() {
+      "Close" => {
+        println!("CLOSE");
+      }
       "learn-more" => {
-        api::shell::open(
+        shell::open(
           "https://github.com/probablykasper/yt-email-notifier".to_string(),
           None,
         )
@@ -92,4 +159,16 @@ fn main() {
     })
     .run(ctx)
     .expect("error while running tauri app");
+}
+
+pub fn dialog_sync<S: AsRef<str>>(w: Window, title: S, msg: S) -> bool {
+  let (sender, receiver) = std::sync::mpsc::channel();
+  let title = title.as_ref().to_string();
+  let msg = msg.as_ref().to_string();
+  thread::spawn(move || {
+    dialog::ask(Some(&w), title, msg, move |res| {
+      sender.send(res).unwrap();
+    })
+  });
+  receiver.recv().unwrap_or(false)
 }

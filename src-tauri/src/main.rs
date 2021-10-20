@@ -17,20 +17,9 @@ mod settings;
 
 fn error_popup_main_thread(msg: impl AsRef<str>) {
   let msg = msg.as_ref().to_string();
-  println!("Error: {}", msg);
   let builder = rfd::MessageDialog::new()
     .set_title("Error")
-    .set_description(msg.as_ref())
-    .set_buttons(rfd::MessageButtons::Ok)
-    .set_level(rfd::MessageLevel::Error);
-  builder.show();
-}
-fn info_popup_main_thread(msg: impl AsRef<str>) {
-  let msg = msg.as_ref().to_string();
-  println!("Error: {}", msg);
-  let builder = rfd::MessageDialog::new()
-    .set_title("Error")
-    .set_description(msg.as_ref())
+    .set_description(&msg)
     .set_buttons(rfd::MessageButtons::Ok)
     .set_level(rfd::MessageLevel::Info);
   builder.show();
@@ -102,25 +91,36 @@ fn main() {
 
   let ctx = tauri::generate_context!();
 
-  let app_dir = match tauri::api::path::app_dir(ctx.config()) {
-    Some(app_dir) => app_dir,
-    None => {
-      error_popup_main_thread("No app dir");
-      panic!("No app dir");
-    }
-  };
-  let loaded_data = match data::ArcData::load(app_dir) {
-    Ok(d) => d,
-    Err(e) => {
-      error_popup_main_thread(e.to_string());
-      panic!("{}", e.to_string());
-    }
-  };
-
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![])
     .setup(|app| {
       app.set_activation_policy(tauri::ActivationPolicy::Accessory);
+
+      let app_dir = match tauri::api::path::app_dir(&app.config()) {
+        Some(app_dir) => app_dir,
+        None => {
+          let msg = "No app dir";
+          error_popup_main_thread(msg);
+          panic!("{}", msg);
+        }
+      };
+      let (loaded_data, update_note) = match data::Data::load(app_dir) {
+        Ok(d) => d,
+        Err(e) => {
+          let msg = e.to_string();
+          error_popup_main_thread(&msg);
+          panic!("{}", msg);
+        }
+      };
+      #[cfg(not(feature = "skip_migration_note"))]
+      if let Some(msg) = update_note {
+        let win = app.get_window("main").expect("get main window");
+        thread::spawn(move || {
+          dialog::message(Some(&win), "Update note", msg);
+        });
+      }
+      app.manage(data::ArcData::new(loaded_data));
+
       Ok(())
     })
     .create_window("main", WindowUrl::default(), |win, webview| {
@@ -136,7 +136,6 @@ fn main() {
         .fullscreen(false);
       return (win, webview);
     })
-    .manage(loaded_data)
     .system_tray(tray)
     .on_system_tray_event(|app, event| match event {
       SystemTrayEvent::LeftClick { .. } => {

@@ -6,7 +6,7 @@ mod v2 {
   use crate::migration::v1;
   use crate::settings::{Channel, Group, Settings};
   pub struct MigrationData {
-    pub update_note: String,
+    pub update_note: Option<String>,
     pub settings: Settings,
   }
   pub fn load_from_v1() -> Result<Option<MigrationData>, String> {
@@ -20,9 +20,9 @@ mod v2 {
     MigrationData {
       // update_note: "Your old settings and data has been imported.\n\nTo re-enable \"Launch on Startup\", open System Preferences, go to Users & Groups > Login Items and add YouTube Email Notifier.".to_string(),
       update_note:
-      "Your old settings and data has been imported.\n\
+      Some("Your old settings and data has been imported.\n\
       \n\
-      To re-enable \"Launch on Startup\", open System Preferences, go to Users & Groups > Login Items and add YouTube Email Notifier.".to_string(),
+      To re-enable \"Launch on Startup\", open System Preferences, go to Users & Groups > Login Items and add YouTube Email Notifier.".to_string()),
       settings: Settings {
         api_key: v1_data.settings.apiKey,
         from_email: v1_data.settings.fromEmail,

@@ -3,11 +3,14 @@
   windows_subsystem = "windows"
 )]
 
+use std::path::PathBuf;
 use std::thread;
 
+use crate::settings::Settings;
+use data::Data;
 use tauri::api::{dialog, shell};
 use tauri::{
-  CustomMenuItem, Manager, Menu, MenuItem, Submenu, SystemTray, SystemTrayEvent, Window,
+  command, CustomMenuItem, Manager, Menu, MenuItem, Submenu, SystemTray, SystemTrayEvent, Window,
   WindowBuilder, WindowUrl,
 };
 
@@ -32,9 +35,56 @@ macro_rules! throw {
   }};
 }
 
+#[command]
+fn error_popup(msg: String, win: Window) {
+  println!("Error: {}", msg);
+  thread::spawn(move || {
+    dialog::message(Some(&win), "Error", msg);
+  });
+}
+
 fn custom_menu(name: &str) -> CustomMenuItem {
   let c = CustomMenuItem::new(name.to_string(), name);
   return c;
+}
+
+fn load_data(app_dir: PathBuf, win: Window) -> Result<Data, String> {
+  if app_dir.exists() {
+    match Data::load(app_dir) {
+      Ok(d) => Ok(d),
+      Err(e) => Err(e.to_string()),
+    }
+  } else {
+    let migration_result = migration::load_migration_data()?;
+    #[cfg(not(feature = "skip_migration_note"))]
+    let win2 = win.clone();
+    match migration_result {
+      Some(migrated_data) => {
+        #[cfg(not(feature = "skip_migration_note"))]
+        if let Some(note) = migrated_data.update_note {
+          thread::spawn(move || {
+            dialog::message(Some(&win2), "Update note", note);
+          });
+        }
+        let migrated_data = Data {
+          settings: migrated_data.settings,
+          app_dir: app_dir,
+        };
+        println!("Migrated data");
+        match migrated_data.save_settings() {
+          Ok(()) => {}
+          Err(e) => {
+            error_popup(e, win);
+          }
+        }
+        Ok(migrated_data)
+      }
+      None => Ok(Data {
+        settings: Settings::default(),
+        app_dir: app_dir,
+      }),
+    }
+  }
 }
 
 fn main() {
@@ -92,7 +142,7 @@ fn main() {
   let ctx = tauri::generate_context!();
 
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![])
+    .invoke_handler(tauri::generate_handler![error_popup])
     .setup(|app| {
       app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 
@@ -104,21 +154,14 @@ fn main() {
           panic!("{}", msg);
         }
       };
-      let (loaded_data, update_note) = match data::Data::load(app_dir) {
+      let win = app.get_window("main").expect("get main window");
+      let loaded_data = match load_data(app_dir, win) {
         Ok(d) => d,
         Err(e) => {
-          let msg = e.to_string();
-          error_popup_main_thread(&msg);
-          panic!("{}", msg);
+          error_popup_main_thread(&e);
+          panic!("{}", e);
         }
       };
-      #[cfg(not(feature = "skip_migration_note"))]
-      if let Some(msg) = update_note {
-        let win = app.get_window("main").expect("get main window");
-        thread::spawn(move || {
-          dialog::message(Some(&win), "Update note", msg);
-        });
-      }
       app.manage(data::ArcData::new(loaded_data));
 
       Ok(())

@@ -2,10 +2,19 @@ use crate::settings::Settings;
 use crate::throw;
 use atomicwrites::{AllowOverwrite, AtomicFile};
 use serde::Serialize;
+use serde_json::Value;
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
+use tauri::{command, State};
+
+pub fn to_json<T: Serialize>(data: &T) -> Result<Value, String> {
+  match serde_json::to_value(data) {
+    Ok(v) => Ok(v),
+    Err(e) => throw!("Error serializing {}", e),
+  }
+}
 
 pub fn get_settings_file_path(app_dir: &PathBuf) -> PathBuf {
   app_dir.join("settings.json")
@@ -56,10 +65,17 @@ impl Data {
   }
 }
 
+#[command]
+// pub fn get_settings(data: DataState) -> Result<Value, String> {
+pub fn get_settings(data: State<ArcData>) -> Result<Value, String> {
+  let data = data.0.lock().unwrap();
+  to_json(&data.settings)
+}
+
 pub struct ArcData(pub Arc<Mutex<Data>>);
 
 impl ArcData {
-  pub fn new(data: Data) -> Result<Self, String> {
-    Ok(Self(Arc::new(Mutex::new(data))))
+  pub fn new(data: Data) -> Self {
+    Self(Arc::new(Mutex::new(data)))
   }
 }

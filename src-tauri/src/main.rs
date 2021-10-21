@@ -142,7 +142,7 @@ fn main() {
   let ctx = tauri::generate_context!();
 
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![error_popup])
+    .invoke_handler(tauri::generate_handler![error_popup, data::get_settings])
     .setup(|app| {
       app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 

@@ -174,7 +174,7 @@ fn main() {
         .decorations(true)
         .always_on_top(false)
         .inner_size(900.0, 800.0)
-        .min_inner_size(300.0, 150.0)
+        .min_inner_size(440.0, 150.0)
         .skip_taskbar(true)
         .fullscreen(false);
       return (win, webview);
@@ -196,8 +196,8 @@ fn main() {
     })
     .menu(menu)
     .on_menu_event(|event| match event.menu_item_id() {
-      "Close" => {
-        println!("CLOSE");
+      "Close Window" => {
+        let _ = event.window().hide();
       }
       "learn-more" => {
         shell::open(

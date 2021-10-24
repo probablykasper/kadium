@@ -4,14 +4,12 @@ export type Channel = {
   icon: string
   uploads_playlist_id: string
   from_time: number
-}
-export type Group = {
-  name: string
   minutes_between_refreshes: number
-  channels: Channel[]
+  tags: string[]
 }
+
 export type Settings = {
   api_key: string
   max_concurrent_requests: number
-  groups: Group[]
+  channels: Channel[]
 }

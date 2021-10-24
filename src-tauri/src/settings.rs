@@ -1,33 +1,216 @@
+use crate::throw;
+use atomicwrites::{AllowOverwrite, AtomicFile};
 use serde::{Deserialize, Serialize};
+use std::fs::File;
+use std::io::{Read, Write};
+use std::path::PathBuf;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize)]
+#[serde(tag = "version")]
+pub enum VersionedSettings {
+  V1(Settings),
+}
+impl Default for VersionedSettings {
+  fn default() -> Self {
+    Self::V1(Settings {
+      api_key: "".to_string(),
+      max_concurrent_requests: 5,
+      channels: Vec::new(),
+    })
+  }
+}
+impl VersionedSettings {
+  pub fn unwrap(&mut self) -> &mut Settings {
+    match self {
+      VersionedSettings::V1(user_data) => user_data,
+    }
+  }
+  pub fn load(app_dir: &PathBuf) -> Result<Self, String> {
+    let mut settings_file = match File::open(&get_settings_file_path(&app_dir)) {
+      Ok(file) => file,
+      Err(e) => throw!("{}", e.to_string()),
+    };
+    let mut json_str = String::new();
+    match settings_file.read_to_string(&mut json_str) {
+      Ok(_) => {}
+      Err(err) => throw!("Error reading file: {}", err),
+    };
+    match serde_json::from_str(&mut json_str) {
+      Ok(settings) => Ok(settings),
+      Err(err) => {
+        throw!("Error parsing file: {}", err.to_string());
+      }
+    }
+  }
+  pub fn save(&self, app_dir: &PathBuf) -> Result<(), String> {
+    let mut json = Vec::new();
+    let formatter = serde_json::ser::PrettyFormatter::with_indent(b"\t");
+    let mut ser = serde_json::Serializer::with_formatter(&mut json, formatter);
+    match self.serialize(&mut ser) {
+      Ok(_) => {}
+      Err(e) => throw!("Error saving content: {}", e.to_string()),
+    }
+    let settings_file_path = get_settings_file_path(&app_dir);
+    match write_atomically(settings_file_path, &json) {
+      Ok(_) => {}
+      Err(e) => throw!("Error saving: {}", e.to_string()),
+    }
+    Ok(())
+  }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Channel {
   pub id: String,
   pub name: String,
   pub icon: String,
   pub uploads_playlist_id: String,
   pub from_time: u64,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Group {
-  pub name: String,
   pub minutes_between_refreshes: f64,
-  pub channels: Vec<Channel>,
+  pub tags: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Settings {
   pub api_key: String,
   pub max_concurrent_requests: u32,
-  pub groups: Vec<Group>,
+  pub channels: Vec<Channel>,
 }
-impl Default for Settings {
-  fn default() -> Self {
-    Settings {
-      api_key: "".to_string(),
-      max_concurrent_requests: 5,
-      groups: Vec::new(),
+impl Settings {
+  pub fn wrap(self) -> VersionedSettings {
+    VersionedSettings::V1(self)
+  }
+}
+
+pub fn write_atomically(file_path: PathBuf, buf: &[u8]) -> Result<(), String> {
+  if let Some(parent) = file_path.parent() {
+    if let Err(e) = std::fs::create_dir_all(parent) {
+      throw!("Error creating parent folder: {}", e.to_string());
+    }
+  }
+  let af = AtomicFile::new(&file_path, AllowOverwrite);
+  match af.write(|f| f.write_all(&buf)) {
+    Ok(_) => Ok(()),
+    Err(e) => Err(e.to_string()),
+  }
+}
+
+pub fn get_settings_file_path(app_dir: &PathBuf) -> PathBuf {
+  app_dir.join("settings.json")
+}
+
+pub mod v1 {
+  pub use super::{Channel, Settings};
+}
+
+#[allow(non_snake_case)]
+pub mod yt_email_notifier {
+  use crate::settings::v1;
+  use crate::throw;
+  use serde::{Deserialize, Serialize};
+  use std::fs::File;
+  use std::io::Read;
+  use std::path::PathBuf;
+
+  #[derive(Serialize, Deserialize, Debug)]
+  pub struct Channel {
+    pub id: String,
+    pub name: String,
+    pub icon: String,
+    pub uploadsPlaylistId: String,
+    pub fromTime: u64,
+  }
+
+  #[derive(Serialize, Deserialize, Debug)]
+  pub struct Instance {
+    pub email: String,
+    pub minutesBetweenRefreshes: String,
+    pub channels: Vec<Channel>,
+  }
+
+  #[derive(Serialize, Deserialize, Debug)]
+  pub struct Settings {
+    pub apiKey: String,
+    pub fromEmail: String,
+    pub unreadErrors: bool,
+    pub maxConcurrentRequests: u32,
+    pub instances: Vec<Instance>,
+  }
+  fn load_settings(file_path: PathBuf) -> Result<Settings, String> {
+    let mut file = match File::open(&file_path) {
+      Ok(file) => file,
+      Err(e) => throw!("Error opening file: {}", e.to_string()),
+    };
+    let mut json_str = String::new();
+    match file.read_to_string(&mut json_str) {
+      Ok(_) => {}
+      Err(err) => throw!("Error reading file: {}", err),
+    };
+    let settings: Settings = match serde_json::from_str(&mut json_str) {
+      Ok(v) => v,
+      Err(err) => {
+        throw!("Error parsing file: {}", err.to_string());
+      }
+    };
+    Ok(settings)
+  }
+  fn convert(settings: Settings) -> v1::Settings {
+    v1::Settings {
+      api_key: settings.apiKey,
+      max_concurrent_requests: settings.maxConcurrentRequests,
+      channels: {
+        let mut channels = Vec::new();
+        for v1_instance in settings.instances.iter() {
+          for v1_channel in v1_instance.channels.iter() {
+            channels.push(v1::Channel {
+              id: v1_channel.id.clone(),
+              name: v1_channel.name.clone(),
+              icon: v1_channel.icon.clone(),
+              uploads_playlist_id: v1_channel.uploadsPlaylistId.clone(),
+              from_time: v1_channel.fromTime,
+              minutes_between_refreshes: v1_instance
+                .minutesBetweenRefreshes
+                .parse()
+                .unwrap_or(60.0),
+              tags: vec![v1_instance.email.clone()],
+            });
+          }
+        }
+        channels
+      },
+    }
+  }
+  fn app_dir() -> PathBuf {
+    let data_dir = tauri::api::path::data_dir().expect("No data dir");
+    data_dir.join("YouTube Email Notifier")
+  }
+  pub fn can_import() -> bool {
+    if cfg!(target_os = "macos") {
+      app_dir().exists()
+    } else {
+      false
+    }
+  }
+  pub struct ImportedStuff {
+    pub settings: v1::Settings,
+    pub update_note: String,
+  }
+  pub fn import() -> Result<Option<ImportedStuff>, String> {
+    if can_import() {
+      let app_dir = app_dir();
+      let settings = match load_settings(app_dir.join("settings.json")) {
+        Ok(settings) => settings,
+        Err(err) => throw!("Error migrating v1 settings: {}", err),
+      };
+      let imported_user_data = convert(settings);
+      Ok(Some(ImportedStuff{
+        settings: imported_user_data,
+        update_note: "Your old settings and data has been imported.\n\
+          \n\
+          To re-enable \"Launch on Startup\", open System Preferences, go to Users & Groups > Login Items and add YouTube Email Notifier.".to_string(),
+      }))
+    } else {
+      Ok(None)
     }
   }
 }

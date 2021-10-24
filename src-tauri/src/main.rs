@@ -3,8 +3,9 @@
   windows_subsystem = "windows"
 )]
 
-use crate::settings::Settings;
+use crate::settings::yt_email_notifier;
 use data::Data;
+use settings::VersionedSettings;
 use std::path::PathBuf;
 use std::thread;
 use tauri::api::{dialog, shell};
@@ -12,11 +13,9 @@ use tauri::{
   command, CustomMenuItem, Manager, Menu, MenuItem, Submenu, SystemTray, SystemTrayEvent, Window,
   WindowBuilder, WindowUrl,
 };
-use user_data::yt_email_notifier;
 
 mod data;
-pub mod settings;
-mod user_data;
+mod settings;
 
 fn error_popup_main_thread(msg: impl AsRef<str>) {
   let msg = msg.as_ref().to_string();
@@ -48,11 +47,11 @@ fn custom_menu(name: &str) -> CustomMenuItem {
   return c;
 }
 
-fn load_data(app_dir: PathBuf, win: Window) -> Result<Data, String> {
+fn load_data(app_dir: PathBuf, _win: Window) -> Result<Data, String> {
   if app_dir.exists() {
-    return match user_data::UserData::load(&app_dir) {
-      Ok(d) => Ok(data::Data {
-        settings: d.settings,
+    return match settings::VersionedSettings::load(&app_dir) {
+      Ok(settings) => Ok(data::Data {
+        versioned_settings: settings,
         app_dir,
       }),
       Err(e) => Err(e.to_string()),
@@ -76,21 +75,22 @@ fn load_data(app_dir: PathBuf, win: Window) -> Result<Data, String> {
     // });
     // if receiver.recv().unwrap() == true {}
     match yt_email_notifier::import()? {
-      Some(imported_data) => {
-        let user_data = imported_data.unwrap();
-        user_data.save(&app_dir)?;
+      Some(imported_stuff) => {
+        let settings = imported_stuff.settings.wrap();
+        settings.save(&app_dir)?;
 
         #[cfg(not(feature = "skip_migration_note"))]
-        if let Some(note) = user_data.update_note {
-          let win2 = win.clone();
+        {
+          let win2 = _win.clone();
+          let note = imported_stuff.update_note.clone();
           thread::spawn(move || {
             dialog::message(Some(&win2), "Data imported", note);
           });
         }
 
         return Ok(Data {
-          settings: user_data.settings,
-          app_dir,
+          versioned_settings: settings,
+          app_dir: app_dir.clone(),
         });
       }
       None => {}
@@ -98,7 +98,7 @@ fn load_data(app_dir: PathBuf, win: Window) -> Result<Data, String> {
   }
 
   Ok(Data {
-    settings: Settings::default(),
+    versioned_settings: VersionedSettings::default(),
     app_dir: app_dir,
   })
 }
@@ -158,9 +158,13 @@ fn main() {
   let ctx = tauri::generate_context!();
 
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![error_popup, data::get_settings])
+    .invoke_handler(tauri::generate_handler![
+      error_popup,
+      data::get_settings,
+      data::set_channels
+    ])
     .setup(|app| {
-      app.set_activation_policy(tauri::ActivationPolicy::Accessory);
+      // app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 
       let app_dir = tauri::api::path::app_dir(&app.config()).unwrap();
       let win = app.get_window("main").expect("get main window");
@@ -168,7 +172,7 @@ fn main() {
         Ok(d) => d,
         Err(e) => {
           app.manage(data::ArcData::new(Data {
-            settings: Settings::default(),
+            versioned_settings: VersionedSettings::default(),
             app_dir: app_dir,
           }));
           error_popup_main_thread(&e);

@@ -6,7 +6,7 @@ export type Channel = {
   from_time: number
 }
 export type Group = {
-  email: string
+  name: string
   minutes_between_refreshes: number
   channels: Channel[]
 }

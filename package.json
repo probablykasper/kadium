@@ -16,15 +16,16 @@
     "@tauri-apps/cli": "1.0.0-beta.10",
     "@typescript-eslint/eslint-plugin": "^5.1.0",
     "@typescript-eslint/parser": "^5.1.0",
-    "eslint": "^8.0.1",
+    "eslint": "^8.1.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-svelte3": "^3.2.1",
     "prettier": "^2.4.1",
     "prettier-plugin-svelte": "^2.4.0",
-    "sass": "^1.43.2",
+    "sass": "^1.43.3",
     "svelte": "^3.44.0",
     "svelte-check": "^2.2.7",
     "svelte-preprocess": "^4.9.8",
+    "tinro": "^0.6.7",
     "vite": "^2.6.10"
   },
   "prettier": {

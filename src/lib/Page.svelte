@@ -1,80 +1,53 @@
 <script lang="ts">
+  import Link from './Link.svelte'
+
   import type { Settings } from './data'
+
   export let settings: Settings
   console.log(settings)
 </script>
 
-<div class="page">
-  <button class="normal">Setup</button>
-
-  {#each settings.groups as group}
-    <h2>{group.email} <button class="text">Edit</button></h2>
-    <p>Minutes between refreshes: {group.minutes_between_refreshes}</p>
-    <div class="channels">
-      {#each group.channels as channel}
-        <div class="channel">
-          <img src={channel.icon} alt="" />
-          <div class="details">
-            <a href="https://youtube.com/channel/{channel.id}" target="_blank" class="title"
-              >{channel.name}</a>
-            <div class="content">
-              <span>{channel.id}</span>
-              <span>Check for videos after {new Date(channel.from_time).toLocaleString()}</span>
-            </div>
+{#each settings.groups as group}
+  <h2 class="selectable">{group.name}</h2><Link>Edit</Link>
+  <div class="text-container">
+    <p class="selectable p">Minutes between refreshes: {group.minutes_between_refreshes}</p>
+  </div>
+  <div class="channels">
+    {#each group.channels as channel}
+      <div class="channel selectable">
+        <img src={channel.icon} alt="" />
+        <div class="details">
+          <a href="https://youtube.com/channel/{channel.id}" target="_blank" class="title"
+            >{channel.name}</a>
+          <div class="content">
+            <span>{channel.id}</span>
+            <span>Check for videos after {new Date(channel.from_time).toLocaleString()}</span>
           </div>
-          <button class="text space-left">Edit</button>
         </div>
-      {/each}
-    </div>
-  {/each}
-</div>
+        <div class="spacer" />
+        <Link>Edit</Link>
+      </div>
+    {/each}
+  </div>
+{/each}
 
 <style lang="sass">
-  .page
-    padding: 20px
-  .space-left
-    margin-left: auto
+  .spacer
+    flex-grow: 1
   h2
+    display: inline-block
+    margin-right: 5px
+    margin-bottom: 0px
     font-weight: 600
-  button.text
-    cursor: pointer
-    font-size: 13px
-    vertical-align: middle
-    color: hsl(210, 100%, 55%)
-    background-color: transparent
-    padding: 0px
-    border: none
-    &:hover
-      color: hsl(210, 100%, 45%)
-  button.normal
-    cursor: pointer
-    padding: 9px 22px
-    font-size: 13px
-    border: none
-    color: #ffffff
-    font-weight: 500
-    border-radius: 8px
-    background-color: transparent
-    position: relative
-    outline: none
-    transition: all 180ms cubic-bezier(0.4, 0.0, 0.2, 1)
-    &::before
-      content: ''
-      position: absolute
-      z-index: -1
-      left: 0px
-      top: 0px
-      bottom: 0px
-      right: 0px
-      border-radius: 10px
-      background-color: hsl(220, 100%, 46%)
-      border: 1px solid hsla(0, 0%, 100%, 0.1)
-      transition: all 80ms cubic-bezier(0.4, 0.0, 0.2, 1)
-    &:hover::before
-      background-color: hsl(220, 100%, 52%)
-      transform: scale(1.04, 1)
-    &:focus::before
-      box-shadow: 0px 0px 0px 3px hsla(220, 100%, 50%, 0.5)
+  .selectable
+    user-select: text
+    -webkit-user-select: text
+  .text-container
+    margin-block-start: 1em
+    margin-block-end: 1em
+    p
+      display: inline-block
+      margin: 0px
   .channels
     display: flex
     flex-wrap: wrap

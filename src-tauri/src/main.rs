@@ -3,20 +3,21 @@
   windows_subsystem = "windows"
 )]
 
-use std::path::PathBuf;
-use std::thread;
-
 use crate::settings::Settings;
 use data::Data;
+use std::path::PathBuf;
+use std::sync::mpsc::channel;
+use std::thread;
 use tauri::api::{dialog, shell};
 use tauri::{
   command, CustomMenuItem, Manager, Menu, MenuItem, Submenu, SystemTray, SystemTrayEvent, Window,
   WindowBuilder, WindowUrl,
 };
+use user_data::yt_email_notifier;
 
 mod data;
-mod migration;
-mod settings;
+pub mod settings;
+mod user_data;
 
 fn error_popup_main_thread(msg: impl AsRef<str>) {
   let msg = msg.as_ref().to_string();
@@ -50,41 +51,57 @@ fn custom_menu(name: &str) -> CustomMenuItem {
 
 fn load_data(app_dir: PathBuf, win: Window) -> Result<Data, String> {
   if app_dir.exists() {
-    match Data::load(app_dir) {
-      Ok(d) => Ok(d),
+    return match user_data::UserData::load(&app_dir) {
+      Ok(d) => Ok(data::Data {
+        settings: d.settings,
+        app_dir,
+      }),
       Err(e) => Err(e.to_string()),
-    }
-  } else {
-    let migration_result = migration::load_migration_data()?;
-    #[cfg(not(feature = "skip_migration_note"))]
-    let win2 = win.clone();
-    match migration_result {
-      Some(migrated_data) => {
+    };
+  }
+
+  if yt_email_notifier::can_import() {
+    // let (sender, receiver) = channel();
+    // let win2 = win.clone();
+    // thread::spawn(move || {
+    //   println!("1");
+    //   dialog::ask(
+    //     Some(&win2),
+    //     "Yo",
+    //     "Do you want to import from YouTube Email Notifier?",
+    //     move |response| {
+    //       println!("2");
+    //       sender.send(response).unwrap();
+    //     },
+    //   );
+    // });
+    // if receiver.recv().unwrap() == true {}
+    match yt_email_notifier::import()? {
+      Some(imported_data) => {
+        let user_data = imported_data.unwrap();
+        user_data.save(&app_dir)?;
+
         #[cfg(not(feature = "skip_migration_note"))]
-        if let Some(note) = migrated_data.update_note {
+        if let Some(note) = user_data.update_note {
+          let win2 = win.clone();
           thread::spawn(move || {
-            dialog::message(Some(&win2), "Update note", note);
+            dialog::message(Some(&win2), "Data imported", note);
           });
         }
-        let migrated_data = Data {
-          settings: migrated_data.settings,
-          app_dir: app_dir,
-        };
-        println!("Migrated data");
-        match migrated_data.save_settings() {
-          Ok(()) => {}
-          Err(e) => {
-            error_popup(e, win);
-          }
-        }
-        Ok(migrated_data)
+
+        return Ok(Data {
+          settings: user_data.settings,
+          app_dir,
+        });
       }
-      None => Ok(Data {
-        settings: Settings::default(),
-        app_dir: app_dir,
-      }),
+      None => {}
     }
   }
+
+  Ok(Data {
+    settings: Settings::default(),
+    app_dir: app_dir,
+  })
 }
 
 fn main() {
@@ -146,18 +163,15 @@ fn main() {
     .setup(|app| {
       app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 
-      let app_dir = match tauri::api::path::app_dir(&app.config()) {
-        Some(app_dir) => app_dir,
-        None => {
-          let msg = "No app dir";
-          error_popup_main_thread(msg);
-          panic!("{}", msg);
-        }
-      };
+      let app_dir = tauri::api::path::app_dir(&app.config()).unwrap();
       let win = app.get_window("main").expect("get main window");
-      let loaded_data = match load_data(app_dir, win) {
+      let loaded_data = match load_data(app_dir.clone(), win) {
         Ok(d) => d,
         Err(e) => {
+          app.manage(data::ArcData::new(Data {
+            settings: Settings::default(),
+            app_dir: app_dir,
+          }));
           error_popup_main_thread(&e);
           panic!("{}", e);
         }

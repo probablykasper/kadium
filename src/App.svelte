@@ -2,7 +2,7 @@
   import Page from './lib/Page.svelte'
   import { runCmd } from './lib/general'
   import type { Settings } from './lib/data'
-  import Modal from './lib/Modal.svelte'
+  import { Route, active } from 'tinro'
 
   let settings: Promise<Settings> = runCmd('get_settings')
   function sample() {
@@ -14,7 +14,7 @@
         max_concurrent_requests: 5,
         groups: [
           {
-            email: '1@example.com',
+            name: 'Group',
             minutes_between_refreshes: 60,
             channels: (() => {
               let channels = []
@@ -36,10 +36,20 @@
   }
 </script>
 
-<Modal />
-
 {#await settings then settings}
-  <Page {settings} />
+  <nav>
+    <a use:active data-exact href="/">Videos</a>
+    <a use:active data-exact href="/channels">Channels</a>
+    <a use:active data-exact href="/settings">Settings</a>
+    {#each settings.groups as group, i}
+      <a use:active data-exact href="/group/{i}-{group.name}">{group.name}</a>
+    {/each}
+  </nav>
+  <div class="page">
+    <Route path="/">Videos page</Route>
+    <Route path="/channels"><Page {settings} /></Route>
+    <Route path="/settings">Settings</Route>
+  </div>
 {:catch e}
   Error loading.
 
@@ -54,8 +64,33 @@
     background-color: hsl(220, 25%, 8%)
     color: #f2f2f2
     color-scheme: dark
+    user-select: none
+    -webkit-user-select: none
   :global(body)
-    overflow: auto
     height: 100%
     margin: 0px
+    display: flex
+    flex-direction: column
+  nav
+    cursor: default
+    background-color: hsla(0, 0%, 100%, 0.05)
+    border-bottom: 1px solid hsla(0, 0%, 100%, 0.05)
+    padding: 15px
+  .page
+    padding: 20px
+    padding-top: 0px
+    overflow: auto
+  a
+    font-size: 16px
+    margin-right: 15px
+    text-decoration: none
+    padding: 12px 0px
+    vertical-align: middle
+    color: hsl(210, 100%, 55%)
+    background-color: transparent
+    border: none
+    &:hover
+      color: hsl(210, 100%, 45%)
+    &:global(.active)
+      color: hsl(216, 30%, 93%)
 </style>

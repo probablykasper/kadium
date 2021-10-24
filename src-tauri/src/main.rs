@@ -3,15 +3,16 @@
   windows_subsystem = "windows"
 )]
 
+use crate::data::{to_json, AppPaths};
 use crate::settings::yt_email_notifier;
-use data::Data;
+use data::{ArcData, Data};
+use serde_json::Value;
 use settings::VersionedSettings;
-use std::path::PathBuf;
 use std::thread;
 use tauri::api::{dialog, shell};
 use tauri::{
-  command, CustomMenuItem, Manager, Menu, MenuItem, Submenu, SystemTray, SystemTrayEvent, Window,
-  WindowBuilder, WindowUrl,
+  command, CustomMenuItem, Manager, Menu, MenuItem, State, Submenu, SystemTray, SystemTrayEvent,
+  Window, WindowBuilder, WindowUrl,
 };
 
 mod data;
@@ -47,60 +48,59 @@ fn custom_menu(name: &str) -> CustomMenuItem {
   return c;
 }
 
-fn load_data(app_dir: PathBuf, _win: Window) -> Result<Data, String> {
-  if app_dir.exists() {
-    return match settings::VersionedSettings::load(&app_dir) {
+fn load_data(paths: &AppPaths, _win: Window) -> Result<Data, String> {
+  if paths.settings_file.exists() {
+    return match settings::VersionedSettings::load(&paths) {
       Ok(settings) => Ok(data::Data {
         versioned_settings: settings,
-        app_dir,
+        paths: paths.clone(),
       }),
-      Err(e) => Err(e.to_string()),
+      Err(e) => Err(e),
     };
   }
 
-  if yt_email_notifier::can_import() {
-    // let (sender, receiver) = mpsc::channel();
-    // let win2 = win.clone();
-    // thread::spawn(move || {
-    //   println!("1");
-    //   dialog::ask(
-    //     Some(&win2),
-    //     "Yo",
-    //     "Do you want to import from YouTube Email Notifier?",
-    //     move |response| {
-    //       println!("2");
-    //       sender.send(response).unwrap();
-    //     },
-    //   );
-    // });
-    // if receiver.recv().unwrap() == true {}
-    match yt_email_notifier::import()? {
-      Some(imported_stuff) => {
-        let settings = imported_stuff.settings.wrap();
-        settings.save(&app_dir)?;
-
-        #[cfg(not(feature = "skip_migration_note"))]
-        {
-          let win2 = _win.clone();
-          let note = imported_stuff.update_note.clone();
-          thread::spawn(move || {
-            dialog::message(Some(&win2), "Data imported", note);
-          });
-        }
-
-        return Ok(Data {
-          versioned_settings: settings,
-          app_dir: app_dir.clone(),
-        });
-      }
-      None => {}
-    }
-  }
-
+  // dont save this yet, otherwise importing popup will not work
   Ok(Data {
     versioned_settings: VersionedSettings::default(),
-    app_dir: app_dir,
+    paths: paths.clone(),
   })
+}
+
+#[command]
+fn maybe_ask_for_import(data: State<ArcData>, win: Window) -> Result<Value, String> {
+  let mut data = data.0.lock().unwrap();
+  if yt_email_notifier::can_import() {
+    let msg = "Do you want to import your data from YouTube Email Notifier?";
+    let builder = rfd::MessageDialog::new()
+      .set_title("Import")
+      .set_description(&msg)
+      .set_buttons(rfd::MessageButtons::YesNo)
+      .set_level(rfd::MessageLevel::Info);
+    let wants_to_import = builder.show();
+    println!("wants_to_import{}", wants_to_import);
+    if wants_to_import {
+      match yt_email_notifier::import()? {
+        Some(imported_stuff) => {
+          data.versioned_settings = imported_stuff.settings.wrap();
+          data.versioned_settings.save(&data.paths)?;
+
+          #[cfg(not(feature = "skip_migration_note"))]
+          {
+            let win2 = win.clone();
+            let note = imported_stuff.update_note.clone();
+            thread::spawn(move || {
+              dialog::message(Some(&win2), "Data imported", note);
+            });
+          }
+
+          let settings = data.versioned_settings.unwrap();
+          return Ok(to_json(settings)?);
+        }
+        None => {}
+      }
+    }
+  }
+  Ok(Value::Null)
 }
 
 fn main() {
@@ -161,19 +161,20 @@ fn main() {
     .invoke_handler(tauri::generate_handler![
       error_popup,
       data::get_settings,
-      data::set_channels
+      data::set_channels,
+      maybe_ask_for_import,
     ])
     .setup(|app| {
       // app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 
-      let app_dir = tauri::api::path::app_dir(&app.config()).unwrap();
+      let app_paths = AppPaths::from_tauri_config(&app.config());
       let win = app.get_window("main").expect("get main window");
-      let loaded_data = match load_data(app_dir.clone(), win) {
+      let loaded_data = match load_data(&app_paths, win) {
         Ok(d) => d,
         Err(e) => {
           app.manage(data::ArcData::new(Data {
             versioned_settings: VersionedSettings::default(),
-            app_dir: app_dir,
+            paths: app_paths,
           }));
           error_popup_main_thread(&e);
           panic!("{}", e);

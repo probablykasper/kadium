@@ -1,3 +1,4 @@
+use crate::data::AppPaths;
 use crate::throw;
 use atomicwrites::{AllowOverwrite, AtomicFile};
 use serde::{Deserialize, Serialize};
@@ -25,8 +26,8 @@ impl VersionedSettings {
       VersionedSettings::V1(user_data) => user_data,
     }
   }
-  pub fn load(app_dir: &PathBuf) -> Result<Self, String> {
-    let mut settings_file = match File::open(&get_settings_file_path(&app_dir)) {
+  pub fn load(paths: &AppPaths) -> Result<Self, String> {
+    let mut settings_file = match File::open(&paths.settings_file) {
       Ok(file) => file,
       Err(e) => throw!("{}", e.to_string()),
     };
@@ -42,7 +43,7 @@ impl VersionedSettings {
       }
     }
   }
-  pub fn save(&self, app_dir: &PathBuf) -> Result<(), String> {
+  pub fn save(&self, paths: &AppPaths) -> Result<(), String> {
     let mut json = Vec::new();
     let formatter = serde_json::ser::PrettyFormatter::with_indent(b"\t");
     let mut ser = serde_json::Serializer::with_formatter(&mut json, formatter);
@@ -50,8 +51,7 @@ impl VersionedSettings {
       Ok(_) => {}
       Err(e) => throw!("Error saving content: {}", e.to_string()),
     }
-    let settings_file_path = get_settings_file_path(&app_dir);
-    match write_atomically(settings_file_path, &json) {
+    match write_atomically(&paths.settings_file, &json) {
       Ok(_) => {}
       Err(e) => throw!("Error saving: {}", e.to_string()),
     }
@@ -82,7 +82,7 @@ impl Settings {
   }
 }
 
-pub fn write_atomically(file_path: PathBuf, buf: &[u8]) -> Result<(), String> {
+pub fn write_atomically(file_path: &PathBuf, buf: &[u8]) -> Result<(), String> {
   if let Some(parent) = file_path.parent() {
     if let Err(e) = std::fs::create_dir_all(parent) {
       throw!("Error creating parent folder: {}", e.to_string());
@@ -93,10 +93,6 @@ pub fn write_atomically(file_path: PathBuf, buf: &[u8]) -> Result<(), String> {
     Ok(_) => Ok(()),
     Err(e) => Err(e.to_string()),
   }
-}
-
-pub fn get_settings_file_path(app_dir: &PathBuf) -> PathBuf {
-  app_dir.join("settings.json")
 }
 
 pub mod v1 {

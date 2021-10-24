@@ -4,25 +4,40 @@ use serde::Serialize;
 use serde_json::Value;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
-use tauri::{command, State};
+use tauri::{command, Config, State};
 
-pub fn to_json<T: Serialize>(data: &T) -> Result<Value, String> {
-  match serde_json::to_value(data) {
-    Ok(v) => Ok(v),
-    Err(e) => throw!("Error serializing {}", e),
+#[derive(Clone)]
+pub struct AppPaths {
+  pub app_dir: PathBuf,
+  pub settings_file: PathBuf,
+}
+impl AppPaths {
+  pub fn from_tauri_config(config: &Config) -> Self {
+    let app_dir = tauri::api::path::app_dir(config).unwrap();
+    AppPaths {
+      app_dir: app_dir.clone(),
+      settings_file: app_dir.join("settings.json"),
+    }
   }
 }
 
 pub struct Data {
   pub versioned_settings: VersionedSettings,
-  pub app_dir: PathBuf,
+  pub paths: AppPaths,
 }
 impl Data {
   pub fn settings(&mut self) -> &mut Settings {
     self.versioned_settings.unwrap()
   }
   pub fn save_settings(&mut self) -> Result<(), String> {
-    self.versioned_settings.save(&self.app_dir)
+    self.versioned_settings.save(&self.paths)
+  }
+}
+
+pub fn to_json<T: Serialize>(data: &T) -> Result<Value, String> {
+  match serde_json::to_value(data) {
+    Ok(v) => Ok(v),
+    Err(e) => throw!("Error serializing {}", e),
   }
 }
 

@@ -40,7 +40,7 @@
   function onBlur() {
     if (editing) {
       applyEditing()
-    } else {
+    } else if (text !== '') {
       value.push(text)
       update(value)
     }

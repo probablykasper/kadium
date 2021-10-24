@@ -19,7 +19,7 @@
         <a href="https://youtube.com/channel/{channel.id}" target="_blank" class="title"
           >{channel.name}</a>
         <div class="content">
-          <span>{channel.id}</span>
+          <!-- <span>{channel.id}</span> -->
           <span>Check for videos after {new Date(channel.from_time).toLocaleString()}</span>
           <span>Minutes between refreshes: {channel.minutes_between_refreshes}</span>
         </div>
@@ -35,7 +35,6 @@
     user-select: text
     -webkit-user-select: text
   .channels
-    // display: flex
     flex-wrap: wrap
     margin: 15px
   .channel
@@ -43,12 +42,12 @@
     flex-grow: 1
     align-items: center
     border-radius: 7px
-    transition: all 120ms cubic-bezier(0.4, 0.0, 0.2, 1)
+    transition: border 120ms cubic-bezier(0.4, 0.0, 0.2, 1)
     padding: 15px 5px
     border: 1px solid transparent
     @media screen and (min-width: 800px)
       padding: 15px
-      margin: 8px
+      margin: 15px 0px
       background-color: hsla(0, 0%, 100%, 0.03)
       box-shadow: 0px 4px 8px 0px hsla(0, 0%, 0%, 0.1)
       border: 1px solid hsla(0, 0%, 50%, 0.04)
@@ -60,7 +59,6 @@
     padding-right: 20px
   .details
     padding-right: 15px
-    // margin-right: auto
     flex-grow: 1
     a.title
       color: inherit

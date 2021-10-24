@@ -1314,6 +1314,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "kadium"
+version = "2.0.0"
+dependencies = [
+ "atomicwrites",
+ "rfd",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+]
+
+[[package]]
 name = "kuchiki"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3370,18 +3382,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "244c3741f4240ef46274860397c7c74e50eb23624996930e484c16679633a54c"
 dependencies = [
  "libc",
-]
-
-[[package]]
-name = "youtube-email-notifier"
-version = "2.0.0"
-dependencies = [
- "atomicwrites",
- "rfd",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
 ]
 
 [[package]]

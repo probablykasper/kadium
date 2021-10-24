@@ -203,7 +203,7 @@ pub mod yt_email_notifier {
         settings: imported_user_data,
         update_note: "Your old settings and data has been imported.\n\
           \n\
-          To re-enable \"Launch on Startup\", open System Preferences, go to Users & Groups > Login Items and add YouTube Email Notifier.".to_string(),
+          To enable \"Launch on Startup\", open System Preferences, go to Users & Groups > Login Items and add YouTube Email Notifier.".to_string(),
       }))
     } else {
       Ok(None)

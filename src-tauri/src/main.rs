@@ -186,7 +186,7 @@ fn main() {
     })
     .create_window("main", WindowUrl::default(), |win, webview| {
       let win = win
-        .title("YouTube Email Notifier")
+        .title("Kadium")
         .resizable(true)
         .transparent(false)
         .decorations(true)
@@ -218,11 +218,7 @@ fn main() {
         let _ = event.window().hide();
       }
       "learn-more" => {
-        shell::open(
-          "https://github.com/probablykasper/yt-email-notifier".to_string(),
-          None,
-        )
-        .unwrap();
+        shell::open("https://github.com/probablykasper/kadium".to_string(), None).unwrap();
       }
       _ => {}
     })

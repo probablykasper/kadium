@@ -1,8 +1,8 @@
 [package]
-name = "youtube-email-notifier"
+name = "kadium"
 version = "2.0.0"
 description = "Spotlight alternative"
-default-run = "youtube-email-notifier"
+default-run = "kadium"
 edition = "2018"
 build = "src/build.rs"
 

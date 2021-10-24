@@ -1,6 +1,5 @@
 <script lang="ts">
   import Link from './Link.svelte'
-
   import type { Settings } from './data'
 
   export let settings: Settings

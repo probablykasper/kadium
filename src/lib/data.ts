@@ -12,8 +12,6 @@ export type Group = {
 }
 export type Settings = {
   api_key: string
-  from_email: string
-  unread_errors: boolean
   max_concurrent_requests: number
   groups: Group[]
 }

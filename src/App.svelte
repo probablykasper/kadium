@@ -9,8 +9,6 @@
     settings = new Promise((resolve) => {
       resolve({
         api_key: 'example key',
-        from_email: 'who@example.com',
-        unread_errors: false,
         max_concurrent_requests: 5,
         groups: [
           {

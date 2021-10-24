@@ -6,7 +6,6 @@
 use crate::settings::Settings;
 use data::Data;
 use std::path::PathBuf;
-use std::sync::mpsc::channel;
 use std::thread;
 use tauri::api::{dialog, shell};
 use tauri::{
@@ -61,7 +60,7 @@ fn load_data(app_dir: PathBuf, win: Window) -> Result<Data, String> {
   }
 
   if yt_email_notifier::can_import() {
-    // let (sender, receiver) = channel();
+    // let (sender, receiver) = mpsc::channel();
     // let win2 = win.clone();
     // thread::spawn(move || {
     //   println!("1");

@@ -4,6 +4,7 @@
 )]
 
 use crate::data::{to_json, AppPaths};
+use crate::menu::AddDefaultSubmenus;
 use crate::settings::yt_email_notifier;
 use data::{ArcData, Data};
 use serde_json::Value;
@@ -11,11 +12,12 @@ use settings::VersionedSettings;
 use std::thread;
 use tauri::api::{dialog, shell};
 use tauri::{
-  command, CustomMenuItem, Manager, Menu, MenuItem, State, Submenu, SystemTray, SystemTrayEvent,
-  Window, WindowBuilder, WindowUrl,
+  command, CustomMenuItem, Manager, Menu, State, Submenu, SystemTray, SystemTrayEvent, Window,
+  WindowBuilder, WindowUrl,
 };
 
 mod data;
+mod menu;
 mod settings;
 
 fn error_popup_main_thread(msg: impl AsRef<str>) {
@@ -43,7 +45,7 @@ fn error_popup(msg: String, win: Window) {
   });
 }
 
-fn custom_menu(name: &str) -> CustomMenuItem {
+fn custom_item(name: &str) -> CustomMenuItem {
   let c = CustomMenuItem::new(name.to_string(), name);
   return c;
 }
@@ -67,7 +69,7 @@ fn load_data(paths: &AppPaths, _win: Window) -> Result<Data, String> {
 }
 
 #[command]
-fn maybe_ask_for_import(data: State<ArcData>, win: Window) -> Result<Value, String> {
+fn maybe_ask_for_import(data: State<ArcData>, _win: Window) -> Result<Value, String> {
   let mut data = data.0.lock().unwrap();
   if yt_email_notifier::can_import() {
     let msg = "Do you want to import your data from YouTube Email Notifier?";
@@ -77,7 +79,6 @@ fn maybe_ask_for_import(data: State<ArcData>, win: Window) -> Result<Value, Stri
       .set_buttons(rfd::MessageButtons::YesNo)
       .set_level(rfd::MessageLevel::Info);
     let wants_to_import = builder.show();
-    println!("wants_to_import{}", wants_to_import);
     if wants_to_import {
       match yt_email_notifier::import()? {
         Some(imported_stuff) => {
@@ -86,10 +87,9 @@ fn maybe_ask_for_import(data: State<ArcData>, win: Window) -> Result<Value, Stri
 
           #[cfg(not(feature = "skip_migration_note"))]
           {
-            let win2 = win.clone();
             let note = imported_stuff.update_note.clone();
             thread::spawn(move || {
-              dialog::message(Some(&win2), "Data imported", note);
+              dialog::message(Some(&_win), "Data imported", note);
             });
           }
 
@@ -105,58 +105,7 @@ fn maybe_ask_for_import(data: State<ArcData>, win: Window) -> Result<Value, Stri
 
 fn main() {
   let tray = SystemTray::new();
-
-  let menu = Menu::new()
-    .add_submenu(Submenu::new(
-      // on macOS first menu is always app name
-      "YouTube Email Notifier",
-      Menu::new()
-        .add_native_item(MenuItem::About("YouTube Email Notifier".to_string()))
-        .add_native_item(MenuItem::Separator)
-        .add_native_item(MenuItem::Services)
-        .add_native_item(MenuItem::Separator)
-        .add_native_item(MenuItem::Hide)
-        .add_native_item(MenuItem::HideOthers)
-        .add_native_item(MenuItem::ShowAll)
-        .add_native_item(MenuItem::Separator)
-        .add_native_item(MenuItem::Quit),
-    ))
-    .add_submenu(Submenu::new(
-      "File",
-      Menu::new().add_item(custom_menu("Close Window").accelerator("cmdOrControl+W")),
-    ))
-    .add_submenu(Submenu::new("Edit", {
-      let mut menu = Menu::new();
-      menu = menu.add_native_item(MenuItem::Undo);
-      menu = menu.add_native_item(MenuItem::Redo);
-      menu = menu.add_native_item(MenuItem::Separator);
-      menu = menu.add_native_item(MenuItem::Cut);
-      menu = menu.add_native_item(MenuItem::Copy);
-      menu = menu.add_native_item(MenuItem::Paste);
-      #[cfg(not(target_os = "macos"))]
-      {
-        menu = menu.add_native_item(MenuItem::Separator);
-      }
-      menu = menu.add_native_item(MenuItem::SelectAll);
-      menu
-    }))
-    .add_submenu(Submenu::new(
-      "View",
-      Menu::new().add_native_item(MenuItem::EnterFullScreen),
-    ))
-    .add_submenu(Submenu::new(
-      "Window",
-      Menu::new()
-        .add_native_item(MenuItem::Minimize)
-        .add_native_item(MenuItem::Zoom),
-    ))
-    .add_submenu(Submenu::new(
-      "Help",
-      Menu::new().add_item(custom_menu("Learn More")),
-    ));
-
   let ctx = tauri::generate_context!();
-
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
       error_popup,
@@ -212,12 +161,23 @@ fn main() {
       }
       _ => {}
     })
-    .menu(menu)
+    .menu(
+      Menu::new()
+        .add_default_app_submenu_if_macos(&ctx.package_info().name)
+        .add_default_file_submenu()
+        .add_default_edit_submenu()
+        .add_default_view_submenu()
+        .add_default_window_submenu()
+        .add_submenu(Submenu::new(
+          "Help",
+          Menu::new().add_item(custom_item("Learn More")),
+        )),
+    )
     .on_menu_event(|event| match event.menu_item_id() {
       "Close Window" => {
         let _ = event.window().hide();
       }
-      "learn-more" => {
+      "Learn More" => {
         shell::open("https://github.com/probablykasper/kadium".to_string(), None).unwrap();
       }
       _ => {}

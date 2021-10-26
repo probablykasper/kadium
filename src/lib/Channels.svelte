@@ -48,7 +48,7 @@
     @media screen and (min-width: 800px)
       padding: 15px
       margin: 15px 0px
-      background-color: hsla(0, 0%, 100%, 0.03)
+      background-color: hsla(223, 33%, 64%, 0.05)
       box-shadow: 0px 4px 8px 0px hsla(0, 0%, 0%, 0.1)
       border: 1px solid hsla(0, 0%, 50%, 0.04)
       // border: 1px solid transparent

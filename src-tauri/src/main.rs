@@ -111,10 +111,11 @@ fn main() {
       error_popup,
       data::get_settings,
       data::set_channels,
+      data::set_general_settings,
       maybe_ask_for_import,
     ])
     .setup(|app| {
-      // app.set_activation_policy(tauri::ActivationPolicy::Accessory);
+      app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 
       let app_paths = AppPaths::from_tauri_config(&app.config());
       let win = app.get_window("main").expect("get main window");
@@ -154,8 +155,6 @@ fn main() {
         if is_visible {
           window.hide().unwrap();
         } else {
-          window.show().unwrap();
-          std::thread::sleep(std::time::Duration::from_millis(5));
           window.set_focus().unwrap();
         }
       }
@@ -183,17 +182,5 @@ fn main() {
       _ => {}
     })
     .run(ctx)
-    .expect("error while running tauri app");
-}
-
-pub fn dialog_sync<S: AsRef<str>>(w: Window, title: S, msg: S) -> bool {
-  let (sender, receiver) = std::sync::mpsc::channel();
-  let title = title.as_ref().to_string();
-  let msg = msg.as_ref().to_string();
-  thread::spawn(move || {
-    dialog::ask(Some(&w), title, msg, move |res| {
-      sender.send(res).unwrap();
-    })
-  });
-  receiver.recv().unwrap_or(false)
+    .expect("Error running tauri app");
 }

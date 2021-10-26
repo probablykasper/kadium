@@ -55,6 +55,19 @@ pub fn set_channels(channels: Vec<Channel>, data: State<ArcData>) -> Result<(), 
   Ok(())
 }
 
+#[command]
+pub fn set_general_settings(
+  api_key: String,
+  max_concurrent_requests: u32,
+  data: State<ArcData>,
+) -> Result<(), String> {
+  let mut data = data.0.lock().unwrap();
+  data.settings().api_key = api_key;
+  data.settings().max_concurrent_requests = max_concurrent_requests;
+  data.save_settings()?;
+  Ok(())
+}
+
 pub struct ArcData(pub Arc<Mutex<Data>>);
 
 impl ArcData {

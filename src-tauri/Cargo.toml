@@ -1,7 +1,7 @@
 [package]
 name = "kadium"
-version = "2.0.0"
-description = "Spotlight alternative"
+version = "0.1.0"
+description = "App for YouTube upload notifications"
 default-run = "kadium"
 edition = "2018"
 build = "src/build.rs"

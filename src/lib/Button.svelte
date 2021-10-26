@@ -1,10 +1,11 @@
-<button><slot /></button>
+<button on:click on:mousedown><slot /></button>
 
 <style lang="sass">
   button
     cursor: pointer
-    padding: 9px 22px
-    font-size: 13px
+    padding: 8px 20px
+    margin: 2px
+    font-size: 14px
     border: none
     color: #ffffff
     font-weight: 500

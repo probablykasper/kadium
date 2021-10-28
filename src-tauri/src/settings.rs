@@ -191,22 +191,18 @@ pub mod yt_email_notifier {
     pub settings: v1::Settings,
     pub update_note: String,
   }
-  pub fn import() -> Result<Option<ImportedStuff>, String> {
-    if can_import() {
-      let app_dir = app_dir();
-      let settings = match load_settings(app_dir.join("settings.json")) {
-        Ok(settings) => settings,
-        Err(err) => throw!("Error migrating v1 settings: {}", err),
-      };
-      let imported_user_data = convert(settings);
-      Ok(Some(ImportedStuff{
-        settings: imported_user_data,
-        update_note: "Your old settings and data has been imported.\n\
-          \n\
-          To enable \"Launch on Startup\", open System Preferences, go to Users & Groups > Login Items and add YouTube Email Notifier.".to_string(),
-      }))
-    } else {
-      Ok(None)
-    }
+  pub fn import() -> Result<ImportedStuff, String> {
+    let app_dir = app_dir();
+    let settings = match load_settings(app_dir.join("settings.json")) {
+      Ok(settings) => settings,
+      Err(err) => throw!("Error migrating v1 settings: {}", err),
+    };
+    let imported_user_data = convert(settings);
+    Ok(ImportedStuff{
+      settings: imported_user_data,
+      update_note: "Your old settings and data has been imported.\n\
+        \n\
+        To enable \"Launch on Startup\", open System Preferences, go to Users & Groups > Login Items and add YouTube Email Notifier.".to_string(),
+    })
   }
 }

@@ -22,17 +22,6 @@ export const settings: Writable<null | Settings> = writable(null)
 export function loadSettings() {
   runCmd('get_settings').then(async (settingsResponse: Settings) => {
     settings.set(settingsResponse)
-    if (settingsResponse.channels.length === 0) {
-      const importedSettings = await runCmd('maybe_ask_for_import')
-      if (importedSettings !== null) {
-        settings.set(importedSettings)
-      }
-    }
-  })
-}
-export function reloadSettings() {
-  runCmd('get_settings').then(async (settingsResponse: Settings) => {
-    settings.set(settingsResponse)
   })
 }
 

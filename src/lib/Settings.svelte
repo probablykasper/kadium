@@ -2,7 +2,7 @@
   import Button from './Button.svelte'
   import { router } from 'tinro'
   import { runCmd } from './general'
-  import { reloadSettings } from './data'
+  import { loadSettings } from './data'
 
   export let apiKey: string
   export let maxConcurrentRequests: number
@@ -12,21 +12,21 @@
       apiKey,
       maxConcurrentRequests,
     }).then(() => {
-      reloadSettings()
+      loadSettings()
       router.goto('/')
     })
   }
 </script>
 
-<div class="page">
+<form class="page" on:submit|preventDefault={setGeneralSettings}>
   <p>API Key</p>
   <input type="text" bind:value={apiKey} />
   <p>Max Concurrent Requests</p>
   <input type="number" bind:value={maxConcurrentRequests} />
   <div>
-    <Button on:click={setGeneralSettings}>Save</Button>
+    <Button>Save</Button>
   </div>
-</div>
+</form>
 
 <style lang="sass">
   .page

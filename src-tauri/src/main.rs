@@ -3,17 +3,15 @@
   windows_subsystem = "windows"
 )]
 
-use crate::data::{to_json, AppPaths};
-use crate::menu::AddDefaultSubmenus;
+use crate::data::{AppPaths, ArcData, Data};
+use crate::menu::Item as MenuItem;
 use crate::settings::yt_email_notifier;
-use data::{ArcData, Data};
-use serde_json::Value;
-use settings::VersionedSettings;
+use crate::settings::VersionedSettings;
 use std::thread;
 use tauri::api::{dialog, shell};
 use tauri::{
-  command, CustomMenuItem, Manager, Menu, State, Submenu, SystemTray, SystemTrayEvent, Window,
-  WindowBuilder, WindowUrl,
+  command, CustomMenuItem, Manager, Submenu, SystemTray, SystemTrayEvent, Window, WindowBuilder,
+  WindowUrl,
 };
 
 mod data;
@@ -46,92 +44,91 @@ fn error_popup(msg: String, win: Window) {
 }
 
 fn custom_item(name: &str) -> CustomMenuItem {
-  let c = CustomMenuItem::new(name.to_string(), name);
-  return c;
+  CustomMenuItem::new(name.to_string(), name)
 }
 
-fn load_data(paths: &AppPaths, _win: Window) -> Result<Data, String> {
+/// Note title and message to show asynchronously when/after the app starts
+type ImportedNote = Option<(String, String)>;
+
+/// This can display dialogs, which needs to happen before tauri runs to not panic
+fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
   if paths.settings_file.exists() {
     return match settings::VersionedSettings::load(&paths) {
-      Ok(settings) => Ok(data::Data {
-        versioned_settings: settings,
-        paths: paths.clone(),
-      }),
+      Ok(settings) => {
+        let data = Data {
+          versioned_settings: settings,
+          paths: paths.clone(),
+        };
+        return Ok((data, None));
+      }
       Err(e) => Err(e),
     };
   }
 
-  // dont save this yet, otherwise importing popup will not work
-  Ok(Data {
+  let will_import = match yt_email_notifier::can_import() {
+    true => {
+      let msg = "Do you want to import your data from YouTube Email Notifier?";
+      let wants_to_import = rfd::MessageDialog::new()
+        .set_title("Import")
+        .set_description(&msg)
+        .set_buttons(rfd::MessageButtons::YesNo)
+        .set_level(rfd::MessageLevel::Info)
+        .show();
+      wants_to_import
+    }
+    false => false,
+  };
+  if will_import {
+    let imported_stuff = yt_email_notifier::import()?;
+    let versioned_settings = imported_stuff.settings.wrap();
+    versioned_settings.save(&paths)?;
+
+    let data = Data {
+      versioned_settings,
+      paths: paths.clone(),
+    };
+    let import_note = Some(("Import note".to_string(), imported_stuff.update_note));
+    return Ok((data, import_note));
+  }
+
+  let data = Data {
     versioned_settings: VersionedSettings::default(),
     paths: paths.clone(),
-  })
-}
-
-#[command]
-fn maybe_ask_for_import(data: State<ArcData>, _win: Window) -> Result<Value, String> {
-  let mut data = data.0.lock().unwrap();
-  if yt_email_notifier::can_import() {
-    let msg = "Do you want to import your data from YouTube Email Notifier?";
-    let builder = rfd::MessageDialog::new()
-      .set_title("Import")
-      .set_description(&msg)
-      .set_buttons(rfd::MessageButtons::YesNo)
-      .set_level(rfd::MessageLevel::Info);
-    let wants_to_import = builder.show();
-    if wants_to_import {
-      match yt_email_notifier::import()? {
-        Some(imported_stuff) => {
-          data.versioned_settings = imported_stuff.settings.wrap();
-          data.versioned_settings.save(&data.paths)?;
-
-          #[cfg(not(feature = "skip_migration_note"))]
-          {
-            let note = imported_stuff.update_note.clone();
-            thread::spawn(move || {
-              dialog::message(Some(&_win), "Data imported", note);
-            });
-          }
-
-          let settings = data.versioned_settings.unwrap();
-          return Ok(to_json(settings)?);
-        }
-        None => {}
-      }
-    }
-  }
-  Ok(Value::Null)
+  };
+  Ok((data, None))
 }
 
 fn main() {
-  let tray = SystemTray::new();
   let ctx = tauri::generate_context!();
-  tauri::Builder::default()
+
+  let app_paths = AppPaths::from_tauri_config(&ctx.config());
+  let (loaded_data, note) = match load_data(&app_paths) {
+    Ok(v) => v,
+    Err(e) => {
+      error_popup_main_thread(&e);
+      rfd::MessageDialog::new()
+        .set_title("Error")
+        .set_description(&e)
+        .set_buttons(rfd::MessageButtons::Ok)
+        .set_level(rfd::MessageLevel::Info)
+        .show();
+      panic!("{}", e);
+    }
+  };
+
+  let app = tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
       error_popup,
       data::get_settings,
       data::set_channels,
       data::set_general_settings,
-      maybe_ask_for_import,
     ])
-    .setup(|app| {
-      app.set_activation_policy(tauri::ActivationPolicy::Accessory);
-
-      let app_paths = AppPaths::from_tauri_config(&app.config());
-      let win = app.get_window("main").expect("get main window");
-      let loaded_data = match load_data(&app_paths, win) {
-        Ok(d) => d,
-        Err(e) => {
-          app.manage(data::ArcData::new(Data {
-            versioned_settings: VersionedSettings::default(),
-            paths: app_paths,
-          }));
-          error_popup_main_thread(&e);
-          panic!("{}", e);
-        }
-      };
-      app.manage(data::ArcData::new(loaded_data));
-
+    .setup(move |_app| {
+      if let Some(note) = note.clone() {
+        thread::spawn(move || {
+          dialog::message(Option::<&tauri::Window<tauri::Wry>>::None, note.0, note.1);
+        });
+      }
       Ok(())
     })
     .create_window("main", WindowUrl::default(), |win, webview| {
@@ -147,7 +144,8 @@ fn main() {
         .fullscreen(false);
       return (win, webview);
     })
-    .system_tray(tray)
+    .manage(ArcData::new(loaded_data))
+    .system_tray(SystemTray::new())
     .on_system_tray_event(|app, event| match event {
       SystemTrayEvent::LeftClick { .. } => {
         let window = app.get_window("main").unwrap();
@@ -160,18 +158,33 @@ fn main() {
       }
       _ => {}
     })
-    .menu(
-      Menu::new()
-        .add_default_app_submenu_if_macos(&ctx.package_info().name)
-        .add_default_file_submenu()
-        .add_default_edit_submenu()
-        .add_default_view_submenu()
-        .add_default_window_submenu()
-        .add_submenu(Submenu::new(
-          "Help",
-          Menu::new().add_item(custom_item("Learn More")),
-        )),
-    )
+    .menu(menu::new(vec![
+      #[cfg(target_os = "macos")]
+      MenuItem::Submenu(Submenu::new(
+        &ctx.package_info().name,
+        menu::new(vec![
+          MenuItem::About(ctx.package_info().name.clone()),
+          MenuItem::Separator,
+          MenuItem::Custom(custom_item("Preferences").accelerator("CmdOrCtrl+,")),
+          MenuItem::Separator,
+          MenuItem::Services,
+          MenuItem::Separator,
+          MenuItem::Hide,
+          MenuItem::HideOthers,
+          MenuItem::ShowAll,
+          MenuItem::Separator,
+          MenuItem::Quit,
+        ]),
+      )),
+      menu::default_file_submenu(),
+      menu::default_edit_submenu(),
+      menu::default_view_submenu(),
+      menu::default_window_submenu(),
+      MenuItem::Submenu(Submenu::new(
+        "Help",
+        menu::new(vec![MenuItem::Custom(custom_item("Learn More"))]),
+      )),
+    ]))
     .on_menu_event(|event| match event.menu_item_id() {
       "Close Window" => {
         let _ = event.window().hide();
@@ -181,6 +194,9 @@ fn main() {
       }
       _ => {}
     })
-    .run(ctx)
+    .build(ctx)
     .expect("Error running tauri app");
+  println!("X");
+  app.run(|_, _| {});
+  // app.run(app).expect("Error running tauri app");
 }

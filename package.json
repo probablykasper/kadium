@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "tauri": "tauri",
-    "dev": "tauri dev --features skip_migration_note",
+    "dev": "tauri dev",
     "build": "tauri build",
     "dev:web": "vite",
     "build:web": "vite build",

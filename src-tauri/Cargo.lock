@@ -87,9 +87,9 @@ dependencies = [
 
 [[package]]
 name = "attohttpc"
-version = "0.17.0"
+version = "0.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a8bda305457262b339322106c776e3fd21df860018e566eb6a5b1aa4b6ae02d"
+checksum = "e69e13a99a7e6e070bb114f7ff381e58c7ccc188630121fc4c2fe4bcf24cd072"
 dependencies = [
  "flate2",
  "http",
@@ -2379,14 +2379,14 @@ dependencies = [
 
 [[package]]
 name = "serde_urlencoded"
-version = "0.6.1"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9ec5d77e2d4c73717816afac02670d5c4f534ea95ed430442cad02e7a6e32c97"
+checksum = "edfa57a7f8d9c1d260a549e7224100f6c43d43f9103e06dd8b4095a9b2b43ce9"
 dependencies = [
- "dtoa",
+ "form_urlencoded",
  "itoa",
+ "ryu",
  "serde",
- "url",
 ]
 
 [[package]]
@@ -2635,7 +2635,7 @@ dependencies = [
 [[package]]
 name = "tauri"
 version = "1.0.0-beta.8"
-source = "git+https://github.com/tauri-apps/tauri?rev=6c92bb4#6c92bb402b1b02aaf089cdb80cebf271828b5714"
+source = "git+https://github.com/tauri-apps/tauri?rev=651fc01#651fc01492f74cc0dafba20b2fcbbb7a3a3f05e1"
 dependencies = [
  "attohttpc",
  "bincode",
@@ -2665,7 +2665,7 @@ dependencies = [
  "tauri-macros",
  "tauri-runtime",
  "tauri-runtime-wry",
- "tauri-utils 1.0.0-beta.3 (git+https://github.com/tauri-apps/tauri?rev=6c92bb4)",
+ "tauri-utils 1.0.0-beta.3 (git+https://github.com/tauri-apps/tauri?rev=651fc01)",
  "tempfile",
  "thiserror",
  "tokio",
@@ -2691,7 +2691,7 @@ dependencies = [
 [[package]]
 name = "tauri-codegen"
 version = "1.0.0-beta.4"
-source = "git+https://github.com/tauri-apps/tauri?rev=6c92bb4#6c92bb402b1b02aaf089cdb80cebf271828b5714"
+source = "git+https://github.com/tauri-apps/tauri?rev=651fc01#651fc01492f74cc0dafba20b2fcbbb7a3a3f05e1"
 dependencies = [
  "blake3",
  "kuchiki",
@@ -2700,7 +2700,7 @@ dependencies = [
  "regex",
  "serde",
  "serde_json",
- "tauri-utils 1.0.0-beta.3 (git+https://github.com/tauri-apps/tauri?rev=6c92bb4)",
+ "tauri-utils 1.0.0-beta.3 (git+https://github.com/tauri-apps/tauri?rev=651fc01)",
  "thiserror",
  "walkdir",
  "zstd",
@@ -2709,7 +2709,7 @@ dependencies = [
 [[package]]
 name = "tauri-macros"
 version = "1.0.0-beta.5"
-source = "git+https://github.com/tauri-apps/tauri?rev=6c92bb4#6c92bb402b1b02aaf089cdb80cebf271828b5714"
+source = "git+https://github.com/tauri-apps/tauri?rev=651fc01#651fc01492f74cc0dafba20b2fcbbb7a3a3f05e1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2720,7 +2720,7 @@ dependencies = [
 [[package]]
 name = "tauri-runtime"
 version = "0.2.1"
-source = "git+https://github.com/tauri-apps/tauri?rev=6c92bb4#6c92bb402b1b02aaf089cdb80cebf271828b5714"
+source = "git+https://github.com/tauri-apps/tauri?rev=651fc01#651fc01492f74cc0dafba20b2fcbbb7a3a3f05e1"
 dependencies = [
  "gtk",
  "http",
@@ -2728,7 +2728,7 @@ dependencies = [
  "infer",
  "serde",
  "serde_json",
- "tauri-utils 1.0.0-beta.3 (git+https://github.com/tauri-apps/tauri?rev=6c92bb4)",
+ "tauri-utils 1.0.0-beta.3 (git+https://github.com/tauri-apps/tauri?rev=651fc01)",
  "thiserror",
  "uuid",
  "webview2-com-sys",
@@ -2737,14 +2737,14 @@ dependencies = [
 [[package]]
 name = "tauri-runtime-wry"
 version = "0.2.1"
-source = "git+https://github.com/tauri-apps/tauri?rev=6c92bb4#6c92bb402b1b02aaf089cdb80cebf271828b5714"
+source = "git+https://github.com/tauri-apps/tauri?rev=651fc01#651fc01492f74cc0dafba20b2fcbbb7a3a3f05e1"
 dependencies = [
  "gtk",
  "ico",
  "infer",
  "png 0.16.8",
  "tauri-runtime",
- "tauri-utils 1.0.0-beta.3 (git+https://github.com/tauri-apps/tauri?rev=6c92bb4)",
+ "tauri-utils 1.0.0-beta.3 (git+https://github.com/tauri-apps/tauri?rev=651fc01)",
  "uuid",
  "webview2-com",
  "wry",
@@ -2771,7 +2771,7 @@ dependencies = [
 [[package]]
 name = "tauri-utils"
 version = "1.0.0-beta.3"
-source = "git+https://github.com/tauri-apps/tauri?rev=6c92bb4#6c92bb402b1b02aaf089cdb80cebf271828b5714"
+source = "git+https://github.com/tauri-apps/tauri?rev=651fc01#651fc01492f74cc0dafba20b2fcbbb7a3a3f05e1"
 dependencies = [
  "heck",
  "html5ever",
@@ -3247,9 +3247,9 @@ dependencies = [
 
 [[package]]
 name = "wildmatch"
-version = "1.1.0"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f44b95f62d34113cf558c93511ac93027e03e9c29a60dd0fd70e6e025c7270a"
+checksum = "d6c48bd20df7e4ced539c12f570f937c6b4884928a87fee70a479d72f031d4e0"
 
 [[package]]
 name = "winapi"

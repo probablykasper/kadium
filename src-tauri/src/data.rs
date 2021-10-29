@@ -1,5 +1,5 @@
 use crate::settings::{Channel, Settings, VersionedSettings};
-use crate::throw;
+use crate::{fetcher_runtime, throw};
 use serde::Serialize;
 use serde_json::Value;
 use std::path::PathBuf;
@@ -22,6 +22,7 @@ impl AppPaths {
 }
 
 pub struct Data {
+  pub fetcher_runtime: Option<fetcher_runtime::FetcherHandle>,
   pub versioned_settings: VersionedSettings,
   pub paths: AppPaths,
 }
@@ -30,7 +31,9 @@ impl Data {
     self.versioned_settings.unwrap()
   }
   pub fn save_settings(&mut self) -> Result<(), String> {
-    self.versioned_settings.save(&self.paths)
+    self.versioned_settings.save(&self.paths)?;
+    self.fetcher_runtime = fetcher_runtime::spawn(self.settings());
+    Ok(())
   }
 }
 

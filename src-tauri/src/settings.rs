@@ -66,7 +66,8 @@ pub struct Channel {
   pub icon: String,
   pub uploads_playlist_id: String,
   pub from_time: u64,
-  pub minutes_between_refreshes: f64,
+  /// Milliseconds between refreshes
+  pub refresh_rate: u64,
   pub tags: Vec<String>,
 }
 
@@ -164,10 +165,7 @@ pub mod yt_email_notifier {
               icon: v1_channel.icon.clone(),
               uploads_playlist_id: v1_channel.uploadsPlaylistId.clone(),
               from_time: v1_channel.fromTime,
-              minutes_between_refreshes: v1_instance
-                .minutesBetweenRefreshes
-                .parse()
-                .unwrap_or(60.0),
+              refresh_rate: v1_instance.minutesBetweenRefreshes.parse().unwrap_or(60),
               tags: vec![v1_instance.email.clone()],
             });
           }

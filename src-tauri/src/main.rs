@@ -15,6 +15,7 @@ use tauri::{
 };
 
 mod data;
+mod fetcher_runtime;
 mod menu;
 mod settings;
 
@@ -54,8 +55,9 @@ type ImportedNote = Option<(String, String)>;
 fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
   if paths.settings_file.exists() {
     return match settings::VersionedSettings::load(&paths) {
-      Ok(settings) => {
+      Ok(mut settings) => {
         let data = Data {
+          fetcher_runtime: fetcher_runtime::spawn(&settings.unwrap()),
           versioned_settings: settings,
           paths: paths.clone(),
         };
@@ -80,10 +82,12 @@ fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
   };
   if will_import {
     let imported_stuff = yt_email_notifier::import()?;
+    let rt = fetcher_runtime::spawn(&imported_stuff.settings);
     let versioned_settings = imported_stuff.settings.wrap();
     versioned_settings.save(&paths)?;
 
     let data = Data {
+      fetcher_runtime: rt,
       versioned_settings,
       paths: paths.clone(),
     };
@@ -91,8 +95,10 @@ fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
     return Ok((data, import_note));
   }
 
+  let mut default_settings = VersionedSettings::default();
   let data = Data {
-    versioned_settings: VersionedSettings::default(),
+    fetcher_runtime: fetcher_runtime::spawn(default_settings.unwrap()),
+    versioned_settings: default_settings,
     paths: paths.clone(),
   };
   Ok((data, None))
@@ -196,7 +202,5 @@ fn main() {
     })
     .build(ctx)
     .expect("Error running tauri app");
-  println!("X");
   app.run(|_, _| {});
-  // app.run(app).expect("Error running tauri app");
 }

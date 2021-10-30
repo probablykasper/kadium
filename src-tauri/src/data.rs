@@ -32,6 +32,10 @@ impl Data {
   }
   pub fn save_settings(&mut self) -> Result<(), String> {
     self.versioned_settings.save(&self.paths)?;
+    if let Some(fetcher_handle) = self.fetcher_handle.take() {
+      fetcher_handle.stop();
+      fetcher_handle.wait_until_stopped()?;
+    }
     self.fetcher_handle = fetcher_runtime::spawn(self.settings());
     Ok(())
   }

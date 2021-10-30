@@ -126,9 +126,9 @@ checksum = "cf1de2fe8c75bc145a2f577add951f8134889b4795d47466a54a5c846d691693"
 
 [[package]]
 name = "blake3"
-version = "1.0.0"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dcd555c66291d5f836dbb6883b48660ece810fe25a31f3bdfb911945dff2691f"
+checksum = "2607a74355ce2e252d0c483b2d8a348e1bba36036e786ccc2dcd777213c86ffd"
 dependencies = [
  "arrayref",
  "arrayvec",
@@ -1318,6 +1318,7 @@ name = "kadium"
 version = "0.1.0"
 dependencies = [
  "atomicwrites",
+ "macos-app-nap",
  "rfd",
  "serde",
  "serde_json",
@@ -1411,6 +1412,17 @@ name = "mac"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c41e0c4fef86961ac6d6f8a82609f55f31b05e4fce149ac5710e439df7619ba4"
+
+[[package]]
+name = "macos-app-nap"
+version = "0.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9701bd74bcff7fb5f9bff8ff4930a889a55f9cccc8a0dfc4c51ea08b786f0c6a"
+dependencies = [
+ "cc",
+ "cocoa-foundation",
+ "objc",
+]
 
 [[package]]
 name = "malloc_buf"
@@ -2636,7 +2648,7 @@ dependencies = [
 [[package]]
 name = "tauri"
 version = "1.0.0-beta.8"
-source = "git+https://github.com/tauri-apps/tauri?rev=651fc01#651fc01492f74cc0dafba20b2fcbbb7a3a3f05e1"
+source = "git+https://github.com/probablykasper/tauri?rev=8101fa5#8101fa5f862d2227447a55a32ca4acf64de451f6"
 dependencies = [
  "attohttpc",
  "bincode",
@@ -2666,7 +2678,7 @@ dependencies = [
  "tauri-macros",
  "tauri-runtime",
  "tauri-runtime-wry",
- "tauri-utils 1.0.0-beta.3 (git+https://github.com/tauri-apps/tauri?rev=651fc01)",
+ "tauri-utils 1.0.0-beta.3 (git+https://github.com/probablykasper/tauri?rev=8101fa5)",
  "tempfile",
  "thiserror",
  "tokio",
@@ -2692,7 +2704,7 @@ dependencies = [
 [[package]]
 name = "tauri-codegen"
 version = "1.0.0-beta.4"
-source = "git+https://github.com/tauri-apps/tauri?rev=651fc01#651fc01492f74cc0dafba20b2fcbbb7a3a3f05e1"
+source = "git+https://github.com/probablykasper/tauri?rev=8101fa5#8101fa5f862d2227447a55a32ca4acf64de451f6"
 dependencies = [
  "blake3",
  "kuchiki",
@@ -2701,7 +2713,7 @@ dependencies = [
  "regex",
  "serde",
  "serde_json",
- "tauri-utils 1.0.0-beta.3 (git+https://github.com/tauri-apps/tauri?rev=651fc01)",
+ "tauri-utils 1.0.0-beta.3 (git+https://github.com/probablykasper/tauri?rev=8101fa5)",
  "thiserror",
  "walkdir",
  "zstd",
@@ -2710,7 +2722,7 @@ dependencies = [
 [[package]]
 name = "tauri-macros"
 version = "1.0.0-beta.5"
-source = "git+https://github.com/tauri-apps/tauri?rev=651fc01#651fc01492f74cc0dafba20b2fcbbb7a3a3f05e1"
+source = "git+https://github.com/probablykasper/tauri?rev=8101fa5#8101fa5f862d2227447a55a32ca4acf64de451f6"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2721,7 +2733,7 @@ dependencies = [
 [[package]]
 name = "tauri-runtime"
 version = "0.2.1"
-source = "git+https://github.com/tauri-apps/tauri?rev=651fc01#651fc01492f74cc0dafba20b2fcbbb7a3a3f05e1"
+source = "git+https://github.com/probablykasper/tauri?rev=8101fa5#8101fa5f862d2227447a55a32ca4acf64de451f6"
 dependencies = [
  "gtk",
  "http",
@@ -2729,7 +2741,7 @@ dependencies = [
  "infer",
  "serde",
  "serde_json",
- "tauri-utils 1.0.0-beta.3 (git+https://github.com/tauri-apps/tauri?rev=651fc01)",
+ "tauri-utils 1.0.0-beta.3 (git+https://github.com/probablykasper/tauri?rev=8101fa5)",
  "thiserror",
  "uuid",
  "webview2-com-sys",
@@ -2738,14 +2750,14 @@ dependencies = [
 [[package]]
 name = "tauri-runtime-wry"
 version = "0.2.1"
-source = "git+https://github.com/tauri-apps/tauri?rev=651fc01#651fc01492f74cc0dafba20b2fcbbb7a3a3f05e1"
+source = "git+https://github.com/probablykasper/tauri?rev=8101fa5#8101fa5f862d2227447a55a32ca4acf64de451f6"
 dependencies = [
  "gtk",
  "ico",
  "infer",
  "png 0.16.8",
  "tauri-runtime",
- "tauri-utils 1.0.0-beta.3 (git+https://github.com/tauri-apps/tauri?rev=651fc01)",
+ "tauri-utils 1.0.0-beta.3 (git+https://github.com/probablykasper/tauri?rev=8101fa5)",
  "uuid",
  "webview2-com",
  "wry",
@@ -2772,7 +2784,7 @@ dependencies = [
 [[package]]
 name = "tauri-utils"
 version = "1.0.0-beta.3"
-source = "git+https://github.com/tauri-apps/tauri?rev=651fc01#651fc01492f74cc0dafba20b2fcbbb7a3a3f05e1"
+source = "git+https://github.com/probablykasper/tauri?rev=8101fa5#8101fa5f862d2227447a55a32ca4acf64de451f6"
 dependencies = [
  "heck",
  "html5ever",

@@ -10,8 +10,7 @@ use crate::settings::VersionedSettings;
 use std::thread;
 use tauri::api::{dialog, shell};
 use tauri::{
-  command, CustomMenuItem, Manager, Submenu, SystemTray, SystemTrayEvent, Window, WindowBuilder,
-  WindowUrl,
+  command, CustomMenuItem, Submenu, Window, WindowBuilder, WindowUrl,
 };
 
 mod data;
@@ -104,6 +103,8 @@ fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
   Ok((data, None))
 }
 
+const MAIN_WIN: &str = "main";
+
 fn main() {
   let ctx = tauri::generate_context!();
 
@@ -134,6 +135,7 @@ fn main() {
       data::set_general_settings,
     ])
     .setup(move |_app| {
+      #[cfg(target_os = "macos")]
       if let Some(note) = note.clone() {
         thread::spawn(move || {
           dialog::message(Option::<&tauri::Window<tauri::Wry>>::None, note.0, note.1);
@@ -141,7 +143,7 @@ fn main() {
       }
       Ok(())
     })
-    .create_window("main", WindowUrl::default(), |win, webview| {
+    .create_window(MAIN_WIN, WindowUrl::default(), |win, webview| {
       let win = win
         .title("Kadium")
         .resizable(true)
@@ -150,24 +152,10 @@ fn main() {
         .always_on_top(false)
         .inner_size(900.0, 800.0)
         .min_inner_size(440.0, 150.0)
-        .skip_taskbar(true)
         .fullscreen(false);
       return (win, webview);
     })
     .manage(ArcData::new(loaded_data))
-    .system_tray(SystemTray::new())
-    .on_system_tray_event(|app, event| match event {
-      SystemTrayEvent::LeftClick { .. } => {
-        let window = app.get_window("main").unwrap();
-        let is_visible = window.is_visible().unwrap();
-        if is_visible {
-          window.hide().unwrap();
-        } else {
-          window.set_focus().unwrap();
-        }
-      }
-      _ => {}
-    })
     .menu(menu::new(vec![
       #[cfg(target_os = "macos")]
       MenuItem::Submenu(Submenu::new(
@@ -196,9 +184,6 @@ fn main() {
       )),
     ]))
     .on_menu_event(|event| match event.menu_item_id() {
-      "Close Window" => {
-        let _ = event.window().hide();
-      }
       "Learn More" => {
         shell::open("https://github.com/probablykasper/kadium".to_string(), None).unwrap();
       }
@@ -206,5 +191,13 @@ fn main() {
     })
     .build(ctx)
     .expect("Error running tauri app");
-  app.run(|_, _| {});
+  app.run(|app_handle, e| match e {
+    tauri::Event::CloseRequested { label: _, api, .. } => {
+      if cfg!(target_os = "macos") {
+        api.prevent_close();
+        app_handle.hide().unwrap();
+      }
+    }
+    _ => {}
+  });
 }

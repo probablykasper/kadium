@@ -57,7 +57,7 @@ fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
     return match settings::VersionedSettings::load(&paths) {
       Ok(mut settings) => {
         let data = Data {
-          fetcher_runtime: fetcher_runtime::spawn(&settings.unwrap()),
+          fetcher_handle: fetcher_runtime::spawn(&settings.unwrap()),
           versioned_settings: settings,
           paths: paths.clone(),
         };
@@ -87,7 +87,7 @@ fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
     versioned_settings.save(&paths)?;
 
     let data = Data {
-      fetcher_runtime: rt,
+      fetcher_handle: rt,
       versioned_settings,
       paths: paths.clone(),
     };
@@ -97,7 +97,7 @@ fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
 
   let mut default_settings = VersionedSettings::default();
   let data = Data {
-    fetcher_runtime: fetcher_runtime::spawn(default_settings.unwrap()),
+    fetcher_handle: fetcher_runtime::spawn(default_settings.unwrap()),
     versioned_settings: default_settings,
     paths: paths.clone(),
   };
@@ -106,6 +106,10 @@ fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
 
 fn main() {
   let ctx = tauri::generate_context!();
+
+  // macOS "App Nap" periodically pauses our app when it's in the background.
+  // We need to prevent that so our intervals are not interrupted.
+  macos_app_nap::prevent();
 
   let app_paths = AppPaths::from_tauri_config(&ctx.config());
   let (loaded_data, note) = match load_data(&app_paths) {

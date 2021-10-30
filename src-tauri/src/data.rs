@@ -22,7 +22,7 @@ impl AppPaths {
 }
 
 pub struct Data {
-  pub fetcher_runtime: Option<fetcher_runtime::FetcherHandle>,
+  pub fetcher_handle: Option<fetcher_runtime::FetcherHandle>,
   pub versioned_settings: VersionedSettings,
   pub paths: AppPaths,
 }
@@ -32,7 +32,7 @@ impl Data {
   }
   pub fn save_settings(&mut self) -> Result<(), String> {
     self.versioned_settings.save(&self.paths)?;
-    self.fetcher_runtime = fetcher_runtime::spawn(self.settings());
+    self.fetcher_handle = fetcher_runtime::spawn(self.settings());
     Ok(())
   }
 }

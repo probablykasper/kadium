@@ -111,11 +111,9 @@ async fn start_intervals(
     let handle = task::spawn(async move {
       tokio::select! {
         _ = run_interval(i, interval_info) => {
-          println!("run_interval done");
-          return Ok(());
+          throw!("Interval unexpectedly completed");
         }
         result = stop_receiver.recv() => {
-          println!("stop_receiver received");
           match result {
             Ok(_) => return Ok(()),
             Err(e) => {

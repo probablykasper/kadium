@@ -1,7 +1,8 @@
 use crate::settings::{Channel, Settings, VersionedSettings};
-use crate::{fetcher_runtime, throw};
+use crate::{background, throw};
 use serde::Serialize;
 use serde_json::Value;
+use sqlx::SqlitePool;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use tauri::{command, Config, State};
@@ -10,19 +11,22 @@ use tauri::{command, Config, State};
 pub struct AppPaths {
   pub app_dir: PathBuf,
   pub settings_file: PathBuf,
+  pub db: String,
 }
 impl AppPaths {
   pub fn from_tauri_config(config: &Config) -> Self {
     let app_dir = tauri::api::path::app_dir(config).unwrap();
     AppPaths {
       app_dir: app_dir.clone(),
-      settings_file: app_dir.join("settings.json"),
+      settings_file: app_dir.join("Settings.json"),
+      db: app_dir.join("Kadium.sqlite").to_string_lossy().to_string(),
     }
   }
 }
 
 pub struct Data {
-  pub fetcher_handle: Option<fetcher_runtime::FetcherHandle>,
+  pub fetcher_handle: Option<background::FetcherHandle>,
+  pub db_pool: SqlitePool,
   pub versioned_settings: VersionedSettings,
   pub paths: AppPaths,
 }
@@ -30,13 +34,16 @@ impl Data {
   pub fn settings(&mut self) -> &mut Settings {
     self.versioned_settings.unwrap()
   }
+  pub fn settings_ref(&self) -> &Settings {
+    self.versioned_settings.unwrap_ref()
+  }
   pub fn save_settings(&mut self) -> Result<(), String> {
     self.versioned_settings.save(&self.paths)?;
     if let Some(fetcher_handle) = self.fetcher_handle.take() {
       fetcher_handle.stop();
       fetcher_handle.wait_until_stopped()?;
     }
-    self.fetcher_handle = fetcher_runtime::spawn(self.settings());
+    self.fetcher_handle = background::spawn(self.settings_ref(), &self.db_pool);
     Ok(())
   }
 }

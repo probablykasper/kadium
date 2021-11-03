@@ -9,12 +9,11 @@ use crate::settings::yt_email_notifier;
 use crate::settings::VersionedSettings;
 use std::thread;
 use tauri::api::{dialog, shell};
-use tauri::{
-  command, CustomMenuItem, Submenu, Window, WindowBuilder, WindowUrl,
-};
+use tauri::{command, CustomMenuItem, Submenu, Window, WindowBuilder, WindowUrl};
 
+mod background;
 mod data;
-mod fetcher_runtime;
+mod db;
 mod menu;
 mod settings;
 
@@ -51,12 +50,15 @@ fn custom_item(name: &str) -> CustomMenuItem {
 type ImportedNote = Option<(String, String)>;
 
 /// This can display dialogs, which needs to happen before tauri runs to not panic
-fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
+async fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
+  let db_pool_future = db::init(&paths.db);
   if paths.settings_file.exists() {
     return match settings::VersionedSettings::load(&paths) {
       Ok(mut settings) => {
+        let pool = db_pool_future.await?;
         let data = Data {
-          fetcher_handle: fetcher_runtime::spawn(&settings.unwrap()),
+          fetcher_handle: background::spawn(&settings.unwrap(), &pool),
+          db_pool: pool,
           versioned_settings: settings,
           paths: paths.clone(),
         };
@@ -81,12 +83,14 @@ fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
   };
   if will_import {
     let imported_stuff = yt_email_notifier::import()?;
-    let rt = fetcher_runtime::spawn(&imported_stuff.settings);
+    let pool = db_pool_future.await?;
+    let rt = background::spawn(&imported_stuff.settings, &pool);
     let versioned_settings = imported_stuff.settings.wrap();
     versioned_settings.save(&paths)?;
 
     let data = Data {
       fetcher_handle: rt,
+      db_pool: pool,
       versioned_settings,
       paths: paths.clone(),
     };
@@ -95,8 +99,10 @@ fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
   }
 
   let mut default_settings = VersionedSettings::default();
+  let pool = db_pool_future.await?;
   let data = Data {
-    fetcher_handle: fetcher_runtime::spawn(default_settings.unwrap()),
+    fetcher_handle: background::spawn(default_settings.unwrap(), &pool),
+    db_pool: pool,
     versioned_settings: default_settings,
     paths: paths.clone(),
   };
@@ -105,7 +111,8 @@ fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
 
 const MAIN_WIN: &str = "main";
 
-fn main() {
+#[tokio::main]
+async fn main() {
   let ctx = tauri::generate_context!();
 
   // macOS "App Nap" periodically pauses our app when it's in the background.
@@ -113,7 +120,7 @@ fn main() {
   macos_app_nap::prevent();
 
   let app_paths = AppPaths::from_tauri_config(&ctx.config());
-  let (loaded_data, note) = match load_data(&app_paths) {
+  let (loaded_data, note) = match load_data(&app_paths).await {
     Ok(v) => v,
     Err(e) => {
       error_popup_main_thread(&e);

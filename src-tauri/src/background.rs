@@ -1,5 +1,7 @@
 use crate::{settings, throw};
+use chrono::{DateTime, FixedOffset};
 use serde::de::DeserializeOwned;
+use sqlx::{Row, SqlitePool};
 use std::collections::HashMap;
 use std::thread;
 use std::time::Duration;
@@ -14,7 +16,7 @@ pub struct IntervalInfo {
 pub struct ChannelInfo {
   pub name: String,
   pub uploads_playlist_id: String,
-  pub from_time: u64,
+  pub from_time: i64,
 }
 
 pub struct FetcherHandle {
@@ -54,28 +56,23 @@ fn interval_info_test() -> HashMap<u64, IntervalInfo> {
     1000 * 60 * 60,
     IntervalInfo {
       ms: 1000 * 60 * 60,
-      channels: vec![
-        ChannelInfo {
-          name: "Bendover Productions".to_string(),
-          uploads_playlist_id: "UU9RM-iSvTu1uPJb8X5yp3EQ".to_string(),
-          from_time: 1633816800000,
-        },
-        // ChannelIntervalInfo {
-        //   uploads_playlist_id: "wawowii2".to_string(),
-        //   from_time: 1635617176866,
-        // },
-      ],
+      channels: vec![ChannelInfo {
+        name: "Bendover Productions".to_string(),
+        uploads_playlist_id: "UU9RM-iSvTu1uPJb8X5yp3EQ".to_string(),
+        from_time: 1623715200000,
+      }],
     },
   );
   map
 }
 
-pub fn spawn(settings: &settings::Settings) -> Option<FetcherHandle> {
+pub fn spawn(settings: &settings::Settings, pool: &SqlitePool) -> Option<FetcherHandle> {
   if settings.channels.len() == 0 {
     return None;
   }
 
   let api_key = settings.api_key.clone();
+  let pool = pool.clone();
 
   let _interval_map = new_intervals_map(&settings.channels);
   let interval_map = interval_info_test();
@@ -92,7 +89,7 @@ pub fn spawn(settings: &settings::Settings) -> Option<FetcherHandle> {
 
     return runtime.block_on(async {
       // start intervals inside tokio runtime
-      return start_intervals(api_key, interval_infos, stop_sender2).await;
+      return start_intervals(pool, api_key, interval_infos, stop_sender2).await;
     });
   });
 
@@ -124,6 +121,7 @@ fn new_intervals_map(channels: &Vec<settings::Channel>) -> IntervalMap {
 }
 
 async fn start_intervals(
+  pool: SqlitePool,
   api_key: String,
   interval_infos: Vec<IntervalInfo>,
   sender: broadcast::Sender<()>,
@@ -131,10 +129,11 @@ async fn start_intervals(
   let mut tasks = Vec::new();
   for interval_info in interval_infos {
     let key = api_key.clone();
+    let pool = pool.clone();
     let mut stop_receiver = sender.subscribe();
     let handle = task::spawn(async move {
       tokio::select! {
-        _ = run_interval(key, interval_info) => {
+        _ = run_interval(pool, key, interval_info) => {
           throw!("Interval unexpectedly completed");
         }
         result = stop_receiver.recv() => {
@@ -161,7 +160,7 @@ async fn start_intervals(
   Err("No intervals started".to_string())
 }
 
-async fn run_interval(api_key: String, interval_info: IntervalInfo) {
+async fn run_interval(pool: SqlitePool, api_key: String, interval_info: IntervalInfo) {
   let mut interval = time::interval(Duration::from_millis(interval_info.ms));
   interval.set_missed_tick_behavior(time::MissedTickBehavior::Delay);
   let mut run_num = 0;
@@ -169,7 +168,7 @@ async fn run_interval(api_key: String, interval_info: IntervalInfo) {
     interval.tick().await;
     println!("{}ms task: {}", interval_info.ms, run_num);
     for channel in &interval_info.channels {
-      match check_channel(&api_key, &channel).await {
+      match check_channel(&pool, &api_key, &channel).await {
         Ok(()) => {}
         Err(e) => {
           println!("{}", e);
@@ -181,23 +180,100 @@ async fn run_interval(api_key: String, interval_info: IntervalInfo) {
   }
 }
 
-async fn check_channel(api_key: &str, channel: &ChannelInfo) -> Result<(), String> {
+async fn check_channel(
+  pool: &SqlitePool,
+  api_key: &str,
+  channel: &ChannelInfo,
+) -> Result<(), String> {
   let url = "https://www.googleapis.com/youtube/v3/playlistItems".to_string()
-    + "?part=snippet,contentDetails"
+    + "?part=contentDetails"
     + "&maxResults=50"
     + "&playlistId="
     + &channel.uploads_playlist_id;
-  #[derive(serde::Deserialize, Debug)]
-  struct Testie {
-    yo: String,
-  }
-  let res = yt_request::<playlist_items::SuccessResponse>(&url, api_key)
+  let uploads = yt_request::<playlist_items::Response>(&url, api_key)
     .await
     .map_err(|e| format!("Error checking channel \"{}\": {}", channel.name, e))?;
-  println!("{:#?}", res);
-  // check if there are any new videos
-  // if so, fetch their metadata (duration)
+
+  if uploads.items.len() == 0 {
+    return Ok(()); // no channel videos returned
+  }
+
+  let existing_ids = get_ids(&uploads.items, pool).await?;
+  println!("{} existing IDs: {:?}", existing_ids.len(), existing_ids);
+
+  let mut new_ids: Vec<String> = Vec::new();
+  for fetched_video in uploads.items {
+    let fetched_id = &fetched_video.content_details.video_id;
+    if existing_ids.contains(fetched_id) {
+      println!("Existing ID: {}", fetched_id);
+      continue;
+    }
+
+    let published_str = fetched_video.content_details.video_published_at;
+    let published_time = parse_datetime(&published_str)?.timestamp_millis();
+    if published_time < channel.from_time {
+      println!("Too old ID: {}", fetched_id);
+      continue;
+    }
+
+    new_ids.push(fetched_video.content_details.video_id);
+  }
+
+  if new_ids.len() == 0 {
+    return Ok(()); // no new videos
+  }
+  println!("New IDs: {:?}", new_ids);
+
+  let url = "https://www.googleapis.com/youtube/v3/videos".to_string()
+    + "?part=contentDetails,liveStreamingDetails,snippet"
+    + "&id="
+    + &new_ids.join(",");
+  let videos = yt_request::<videos::Response>(&url, api_key)
+    .await
+    .map_err(|e| format!("Error checking channel \"{}\": {}", channel.name, e))?;
+
+  let mut videos_to_add: Vec<videos::Video> = Vec::new();
+  for video in videos.items {
+    if let Some(live_streaming_details) = &video.live_streaming_details {
+      let start_time = &live_streaming_details.scheduled_start_time;
+      let start_timestamp = parse_datetime(&start_time)?;
+      if start_timestamp > chrono::Utc::now() {
+        continue; // skip future livestreams
+      }
+    }
+    videos_to_add.push(video);
+  }
   Ok(())
+}
+
+async fn get_ids(
+  videos: &Vec<playlist_items::Playlist>,
+  pool: &SqlitePool,
+) -> Result<Vec<String>, String> {
+  // let mut id_placeholders = "\"?\"".to_string();
+  let mut id_placeholders = "?".to_string();
+  for _n in 0..(videos.len() - 1) {
+    // id_placeholders.push_str(",\"?\"");
+    id_placeholders.push_str(",?");
+  }
+
+  let query_str = format!("SELECT id FROM videos WHERE id IN ({});", id_placeholders);
+  let mut query = sqlx::query(&query_str);
+  for video in videos {
+    query = query.bind(&video.content_details.video_id);
+  }
+  let rows = match query.fetch_all(pool).await {
+    Ok(rows) => rows,
+    Err(e) => throw!("Unable to get video IDs: {}", e),
+  };
+  let mut existing_ids: Vec<String> = Vec::new();
+  for row in rows {
+    match row.try_get(0) {
+      Ok(id) => existing_ids.push(id),
+      Err(e) => throw!("Unable to get video ID from database row: {}", e),
+    };
+  }
+  Ok(existing_ids)
 }
 
 async fn yt_request<T: DeserializeOwned>(url: &str, key: &str) -> Result<T, String> {
@@ -229,17 +305,71 @@ async fn yt_request<T: DeserializeOwned>(url: &str, key: &str) -> Result<T, Stri
   }
 }
 
+mod videos {
+  use serde::Deserialize;
+
+  /// Lists the fields we use only. Documentation:
+  /// https://developers.google.com/youtube/v3/docs/videos/list#properties
+  #[derive(Deserialize, Debug)]
+  pub struct Response {
+    pub items: Vec<Video>,
+  }
+  /// Lists the fields we use only. Documentation:
+  /// https://developers.google.com/youtube/v3/docs/videos#properties
+  #[derive(Deserialize, Debug)]
+  #[serde(rename_all = "camelCase")]
+  pub struct Video {
+    pub content_details: ContentDetails,
+    pub live_streaming_details: Option<LiveStreamingDetails>,
+    pub snippet: Snippet,
+  }
+  #[derive(Deserialize, Debug)]
+  pub struct ContentDetails {
+    pub duration: String,
+  }
+  #[derive(Deserialize, Debug)]
+  #[serde(rename_all = "camelCase")]
+  pub struct LiveStreamingDetails {
+    pub scheduled_start_time: String,
+  }
+
+  #[derive(Deserialize, Debug)]
+  #[serde(rename_all = "camelCase")]
+  pub struct Snippet {
+    pub channel_id: String,
+    pub channel_title: String,
+    pub title: String,
+    pub description: String,
+    pub thumbnails: Thumbnails,
+  }
+  /// default, medium and high always exist:
+  /// default 120x90:   https://i.ytimg.com/vi/___ID___/default.jpg
+  /// medium 320x180:   https://i.ytimg.com/vi/___ID___/mqdefault.jpg
+  /// high 480x360:     https://i.ytimg.com/vi/___ID___/hqdefault.jpg
+  /// standard 640x480: https://i.ytimg.com/vi/___ID___/sddefault.jpg
+  /// maxres 1280x720:  https://i.ytimg.com/vi/___ID___/maxresdefault.jpg
+  #[derive(Deserialize, Debug)]
+  pub struct Thumbnails {
+    pub standard: Option<Thumbnail>,
+    pub maxres: Option<Thumbnail>,
+  }
+  #[derive(Deserialize, Debug)]
+  pub struct Thumbnail {
+    pub url: String,
+  }
+}
+
 mod playlist_items {
   use serde::Deserialize;
 
   /// Lists the fields we use only. Documentation:
   /// https://developers.google.com/youtube/v3/docs/playlistItems/list#properties
   #[derive(Deserialize, Debug)]
-  pub struct SuccessResponse {
-    pub items: Vec<Item>,
+  pub struct Response {
+    pub items: Vec<Playlist>,
   }
   /// Lists the fields we use only. Documentation:
-  /// https://developers.google.com/youtube/v3/docs/playlistItems
+  /// https://developers.google.com/youtube/v3/docs/playlistItems#properties
   /// weird date situation:
   ///  `snippet.publishedAt` is when the video was added to the uploads playlist.
   ///  `contentDetails.videoPublishedAt` is when the video was published
@@ -254,39 +384,20 @@ mod playlist_items {
   ///  :/
   #[derive(Deserialize, Debug)]
   #[serde(rename_all = "camelCase")]
-  pub struct Item {
-    pub snippet: Snippet,
+  pub struct Playlist {
     pub content_details: ContentDetails,
-  }
-  #[derive(Deserialize, Debug)]
-  #[serde(rename_all = "camelCase")]
-  pub struct Snippet {
-    pub title: String,
-    pub description: String,
-    pub channel_title: String,
-    pub thumbnails: Thumbnails,
-    pub resource_id: ResourceId,
-  }
-  #[derive(Deserialize, Debug)]
-  pub struct Thumbnails {
-    pub default: Option<Thumbnail>,
-    pub medium: Option<Thumbnail>,
-    pub high: Option<Thumbnail>,
-    pub standard: Option<Thumbnail>,
-    pub maxres: Option<Thumbnail>,
-  }
-  #[derive(Deserialize, Debug)]
-  pub struct Thumbnail {
-    pub url: String,
-  }
-  #[derive(Deserialize, Debug)]
-  #[serde(rename_all = "camelCase")]
-  pub struct ResourceId {
-    pub video_id: String,
   }
   #[derive(Deserialize, Debug)]
   #[serde(rename_all = "camelCase")]
   pub struct ContentDetails {
     pub video_published_at: String,
+    pub video_id: String,
+  }
+}
+
+pub fn parse_datetime(value: &str) -> Result<DateTime<FixedOffset>, String> {
+  match DateTime::parse_from_rfc3339(&value) {
+    Ok(datetime) => Ok(datetime),
+    Err(e) => throw!("Unexpected video publish date: {}", e),
   }
 }

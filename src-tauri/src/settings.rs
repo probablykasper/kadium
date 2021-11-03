@@ -26,6 +26,11 @@ impl VersionedSettings {
       VersionedSettings::V1(user_data) => user_data,
     }
   }
+  pub fn unwrap_ref(&self) -> &Settings {
+    match self {
+      VersionedSettings::V1(user_data) => user_data,
+    }
+  }
   pub fn load(paths: &AppPaths) -> Result<Self, String> {
     let mut settings_file = match File::open(&paths.settings_file) {
       Ok(file) => file,
@@ -65,7 +70,7 @@ pub struct Channel {
   pub name: String,
   pub icon: String,
   pub uploads_playlist_id: String,
-  pub from_time: u64,
+  pub from_time: i64,
   /// Milliseconds between refreshes
   pub refresh_rate: u64,
   pub tags: Vec<String>,
@@ -115,7 +120,7 @@ pub mod yt_email_notifier {
     pub name: String,
     pub icon: String,
     pub uploadsPlaylistId: String,
-    pub fromTime: u64,
+    pub fromTime: i64,
   }
 
   #[derive(Serialize, Deserialize, Debug)]

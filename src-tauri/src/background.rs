@@ -284,7 +284,7 @@ pub fn parse_absolute_duration(value: &str) -> Result<i64, String> {
           + duration.minute as f64 as f64 * 60.0
           + duration.hour as f64 * 60.0 * 60.0
           + duration.day as f64 * 60.0 * 60.0 * 24.0;
-        let ms = seconds / 1000.0;
+        let ms = seconds * 1000.0;
         let ms_clamped = ms.max(std::i64::MIN as f64).min(std::i64::MAX as f64);
         let ms_int = ms_clamped.round() as i64;
         Ok(ms_int)

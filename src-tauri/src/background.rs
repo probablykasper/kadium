@@ -1,7 +1,8 @@
-use crate::{settings, throw};
+use crate::api::{playlist_items, videos, yt_request};
+use crate::{db, settings, throw};
 use chrono::{DateTime, FixedOffset};
-use serde::de::DeserializeOwned;
-use sqlx::{Row, SqlitePool};
+use iso8601_duration::Duration as IsoDuration;
+use sqlx::SqlitePool;
 use std::collections::HashMap;
 use std::thread;
 use std::time::Duration;
@@ -198,9 +199,10 @@ async fn check_channel(
     return Ok(()); // no channel videos returned
   }
 
-  let existing_ids = get_ids(&uploads.items, pool).await?;
+  let existing_ids = db::get_ids(&uploads.items, pool).await?;
   println!("{} existing IDs: {:?}", existing_ids.len(), existing_ids);
 
+  // check which videos are new
   let mut new_ids: Vec<String> = Vec::new();
   for fetched_video in uploads.items {
     let fetched_id = &fetched_video.content_details.video_id;
@@ -224,6 +226,7 @@ async fn check_channel(
   }
   println!("New IDs: {:?}", new_ids);
 
+  // get info about the videos
   let url = "https://www.googleapis.com/youtube/v3/videos".to_string()
     + "?part=contentDetails,liveStreamingDetails,snippet"
     + "&id="
@@ -232,8 +235,9 @@ async fn check_channel(
     .await
     .map_err(|e| format!("Error checking channel \"{}\": {}", channel.name, e))?;
 
-  let mut videos_to_add: Vec<videos::Video> = Vec::new();
+  let mut videos_to_add: Vec<db::Video> = Vec::new();
   for video in videos.items {
+    // skip future livestreams
     if let Some(live_streaming_details) = &video.live_streaming_details {
       let start_time = &live_streaming_details.scheduled_start_time;
       let start_timestamp = parse_datetime(&start_time)?;
@@ -241,163 +245,53 @@ async fn check_channel(
         continue; // skip future livestreams
       }
     }
-    videos_to_add.push(video);
+    let publish_time = parse_datetime(&video.snippet.published_at)?;
+    let duration_ms = parse_absolute_duration(&video.content_details.duration)?;
+    videos_to_add.push(db::Video {
+      id: video.id,
+      title: video.snippet.title,
+      description: video.snippet.description,
+      publish_time_ms: publish_time.timestamp_millis(),
+      duration_ms: duration_ms,
+      thumbnail_standard: video.snippet.thumbnails.standard.is_some(),
+      thumbnail_maxres: video.snippet.thumbnails.maxres.is_some(),
+      channel_id: video.snippet.channel_id,
+      channel_name: video.snippet.channel_title,
+      unread: true,
+    });
+  }
+
+  for video in videos_to_add {
+    db::insert_video(&video, pool).await?;
   }
   Ok(())
-}
-
-async fn get_ids(
-  videos: &Vec<playlist_items::Playlist>,
-  pool: &SqlitePool,
-) -> Result<Vec<String>, String> {
-  // let mut id_placeholders = "\"?\"".to_string();
-  let mut id_placeholders = "?".to_string();
-  for _n in 0..(videos.len() - 1) {
-    // id_placeholders.push_str(",\"?\"");
-    id_placeholders.push_str(",?");
-  }
-
-  let query_str = format!("SELECT id FROM videos WHERE id IN ({});", id_placeholders);
-  let mut query = sqlx::query(&query_str);
-  for video in videos {
-    query = query.bind(&video.content_details.video_id);
-  }
-  let rows = match query.fetch_all(pool).await {
-    Ok(rows) => rows,
-    Err(e) => throw!("Unable to get video IDs: {}", e),
-  };
-  let mut existing_ids: Vec<String> = Vec::new();
-  for row in rows {
-    match row.try_get(0) {
-      Ok(id) => existing_ids.push(id),
-      Err(e) => throw!("Unable to get video ID from database row: {}", e),
-    };
-  }
-  Ok(existing_ids)
-}
-
-async fn yt_request<T: DeserializeOwned>(url: &str, key: &str) -> Result<T, String> {
-  let client = reqwest::Client::new();
-  let json: serde_json::Value = client
-    .get(url)
-    .header("X-Goog-Api-Key", key)
-    .send()
-    .await
-    .map_err(|e| format!("API request failed: {}", e))?
-    .json()
-    .await
-    .map_err(|e| format!("API response was not JSON: {}", e))?;
-
-  match json.get("error") {
-    Some(error_obj) => {
-      let code = error_obj.get("code").map(|v| v.as_i64()).flatten();
-      let code_str = code.map(|n| n.to_string()).unwrap_or_default();
-      let message = error_obj.get("message").map(|v| v.as_str()).flatten();
-      throw!("API error: {} {}", code_str, message.unwrap_or_default());
-    }
-    _ => {}
-  }
-  match serde_json::from_value::<T>(json) {
-    Ok(v) => Ok(v),
-    Err(e) => {
-      throw!("Unexpected API response: {}", e);
-    }
-  }
-}
-
-mod videos {
-  use serde::Deserialize;
-
-  /// Lists the fields we use only. Documentation:
-  /// https://developers.google.com/youtube/v3/docs/videos/list#properties
-  #[derive(Deserialize, Debug)]
-  pub struct Response {
-    pub items: Vec<Video>,
-  }
-  /// Lists the fields we use only. Documentation:
-  /// https://developers.google.com/youtube/v3/docs/videos#properties
-  #[derive(Deserialize, Debug)]
-  #[serde(rename_all = "camelCase")]
-  pub struct Video {
-    pub content_details: ContentDetails,
-    pub live_streaming_details: Option<LiveStreamingDetails>,
-    pub snippet: Snippet,
-  }
-  #[derive(Deserialize, Debug)]
-  pub struct ContentDetails {
-    pub duration: String,
-  }
-  #[derive(Deserialize, Debug)]
-  #[serde(rename_all = "camelCase")]
-  pub struct LiveStreamingDetails {
-    pub scheduled_start_time: String,
-  }
-
-  #[derive(Deserialize, Debug)]
-  #[serde(rename_all = "camelCase")]
-  pub struct Snippet {
-    pub channel_id: String,
-    pub channel_title: String,
-    pub title: String,
-    pub description: String,
-    pub thumbnails: Thumbnails,
-  }
-  /// default, medium and high always exist:
-  /// default 120x90:   https://i.ytimg.com/vi/___ID___/default.jpg
-  /// medium 320x180:   https://i.ytimg.com/vi/___ID___/mqdefault.jpg
-  /// high 480x360:     https://i.ytimg.com/vi/___ID___/hqdefault.jpg
-  /// standard 640x480: https://i.ytimg.com/vi/___ID___/sddefault.jpg
-  /// maxres 1280x720:  https://i.ytimg.com/vi/___ID___/maxresdefault.jpg
-  #[derive(Deserialize, Debug)]
-  pub struct Thumbnails {
-    pub standard: Option<Thumbnail>,
-    pub maxres: Option<Thumbnail>,
-  }
-  #[derive(Deserialize, Debug)]
-  pub struct Thumbnail {
-    pub url: String,
-  }
-}
-
-mod playlist_items {
-  use serde::Deserialize;
-
-  /// Lists the fields we use only. Documentation:
-  /// https://developers.google.com/youtube/v3/docs/playlistItems/list#properties
-  #[derive(Deserialize, Debug)]
-  pub struct Response {
-    pub items: Vec<Playlist>,
-  }
-  /// Lists the fields we use only. Documentation:
-  /// https://developers.google.com/youtube/v3/docs/playlistItems#properties
-  /// weird date situation:
-  ///  `snippet.publishedAt` is when the video was added to the uploads playlist.
-  ///  `contentDetails.videoPublishedAt` is when the video was published
-  ///  Soemtimes these are a few seconds different, other times an hour
-  ///  (like with Monstercat). No idea why.
-  ///  Additionally, I tried to compare with what YouTube shows:
-  ///  - What YouTube shows: 19:56 (should be up to 1 hour inaccurate)
-  ///  - publishedAt: 17:31
-  ///  - 18:00
-  ///  YouTube only shows "9 hours ago", so you'd expect it to be up to
-  ///  an hour off... But it's almost 2 hours off, if not 2.5 hours.
-  ///  :/
-  #[derive(Deserialize, Debug)]
-  #[serde(rename_all = "camelCase")]
-  pub struct Playlist {
-    pub content_details: ContentDetails,
-  }
-  #[derive(Deserialize, Debug)]
-  #[serde(rename_all = "camelCase")]
-  pub struct ContentDetails {
-    pub video_published_at: String,
-    pub video_id: String,
-  }
 }
 
 pub fn parse_datetime(value: &str) -> Result<DateTime<FixedOffset>, String> {
   match DateTime::parse_from_rfc3339(&value) {
     Ok(datetime) => Ok(datetime),
     Err(e) => throw!("Unexpected video publish date: {}", e),
+  }
+}
+/// Parse a duration that cannot include year or month, because
+/// years and months have different lengths depending on what month or year
+/// it is.
+pub fn parse_absolute_duration(value: &str) -> Result<i64, String> {
+  match IsoDuration::parse(&value) {
+    Ok(duration) => {
+      if duration.month == 0.0 && duration.year == 0.0 {
+        let seconds = duration.second as f64
+          + duration.minute as f64 as f64 * 60.0
+          + duration.hour as f64 * 60.0 * 60.0
+          + duration.day as f64 * 60.0 * 60.0 * 24.0;
+        let ms = seconds / 1000.0;
+        let ms_clamped = ms.max(std::i64::MIN as f64).min(std::i64::MAX as f64);
+        let ms_int = ms_clamped.round() as i64;
+        Ok(ms_int)
+      } else {
+        throw!("Cannot parse duration with year or month: {}", value);
+      }
+    }
+    Err(e) => throw!("Unexpected video duration: {}", e),
   }
 }

@@ -11,6 +11,7 @@ use std::thread;
 use tauri::api::{dialog, shell};
 use tauri::{command, CustomMenuItem, Submenu, Window, WindowBuilder, WindowUrl};
 
+mod api;
 mod background;
 mod data;
 mod db;

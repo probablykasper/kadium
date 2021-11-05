@@ -1,3 +1,4 @@
+use crate::db::Options;
 use crate::settings::{Channel, Settings, VersionedSettings};
 use crate::{background, db, throw};
 use atomicwrites::{AtomicFile, OverwriteBehavior};
@@ -78,14 +79,15 @@ pub fn write_atomically(file_path: &PathBuf, buf: &[u8]) -> Result<(), String> {
 }
 
 #[command]
-pub async fn get_videos(data: State<'_, ArcData>) -> Result<Value, String> {
+pub async fn get_videos(view_options: Options, data: DataState<'_>) -> Result<Value, String> {
   let data = data.0.lock().await;
-  let videos = db::get_videos(&data.db_pool).await?;
+  let videos = db::get_videos(&data.db_pool, view_options).await?;
   to_json(&videos)
 }
 
 #[command]
-pub async fn video_update_counter(data: State<'_, ArcData>) -> Result<u64, String> {
+pub async fn video_update_counter(data: DataState<'_>) -> Result<u64, String> {
+  println!("Check counter, todo: prevent this when window is hidden");
   let data = data.0.lock().await;
   match &data.fetcher_handle {
     Some(fetcher_handle) => {
@@ -97,13 +99,13 @@ pub async fn video_update_counter(data: State<'_, ArcData>) -> Result<u64, Strin
 }
 
 #[command]
-pub async fn get_settings(data: State<'_, ArcData>) -> Result<Value, String> {
+pub async fn get_settings(data: DataState<'_>) -> Result<Value, String> {
   let mut data = data.0.lock().await;
   to_json(&data.settings())
 }
 
 #[command]
-pub async fn set_channels(channels: Vec<Channel>, data: State<'_, ArcData>) -> Result<(), String> {
+pub async fn set_channels(channels: Vec<Channel>, data: DataState<'_>) -> Result<(), String> {
   let mut data = data.0.lock().await;
   data.settings().channels = channels;
   data.save_settings()?;
@@ -114,7 +116,7 @@ pub async fn set_channels(channels: Vec<Channel>, data: State<'_, ArcData>) -> R
 pub async fn set_general_settings(
   api_key: String,
   max_concurrent_requests: u32,
-  data: State<'_, ArcData>,
+  data: DataState<'_>,
 ) -> Result<(), String> {
   let mut data = data.0.lock().await;
   data.settings().api_key = api_key;
@@ -123,8 +125,8 @@ pub async fn set_general_settings(
   Ok(())
 }
 
+type DataState<'a> = State<'a, ArcData>;
 pub struct ArcData(pub Arc<Mutex<Data>>);
-
 impl ArcData {
   pub fn new(data: Data) -> Self {
     Self(Arc::new(Mutex::new(data)))

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { ViewOptions, viewOptions } from '../lib/data'
+
   import { onDestroy } from 'svelte'
   import { runCmd } from '../lib/general'
 
@@ -15,17 +17,18 @@
     unread: boolean
   }
   let videos: Video[] = []
-  async function getVideos() {
-    videos = await runCmd('get_videos')
+
+  async function getVideos(options: ViewOptions) {
+    videos = await runCmd('get_videos', { viewOptions: options })
   }
-  getVideos()
+  $: getVideos($viewOptions)
 
   let updateCounter = 0
   const updateInterval = setInterval(async () => {
     const newCount = await runCmd('video_update_counter')
     console.log('newCount', newCount)
     if (newCount > updateCounter) {
-      getVideos()
+      getVideos($viewOptions)
     }
   }, 2000)
   onDestroy(() => {
@@ -82,11 +85,15 @@
     box-sizing: border-box
     display: grid
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr))
+    @media screen and (max-width: 430px)
+      grid-template-columns: 1fr
+      grid-gap: 15px
+      .box
+        margin: 0px auto
     grid-gap: 15px
     padding: 20px
   .box
     max-width: 280px
-    margin: 0px auto
     user-select: none
     -webkit-user-select: none
   img

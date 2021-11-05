@@ -47,3 +47,12 @@ export function useSampleSettings() {
     })(),
   })
 }
+
+export type ViewOptions = {
+  show_all: boolean
+  show_archived: boolean
+}
+export const viewOptions: Writable<ViewOptions> = writable({
+  show_all: false,
+  show_archived: false,
+})

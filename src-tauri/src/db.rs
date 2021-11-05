@@ -2,7 +2,7 @@ use crate::api::playlist_items;
 use crate::data::AppPaths;
 use crate::throw;
 use log;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sqlx::migrate::MigrateDatabase;
 use sqlx::sqlite::{SqliteConnectOptions, SqliteRow};
 use sqlx::{ConnectOptions, Row, Sqlite, SqlitePool};
@@ -125,8 +125,21 @@ pub async fn insert_video(video: &Video, pool: &SqlitePool) -> Result<(), String
   Ok(())
 }
 
-pub async fn get_videos(pool: &SqlitePool) -> Result<Vec<Video>, String> {
-  let query = sqlx::query_as("SELECT * FROM videos");
+#[derive(Serialize, Deserialize)]
+pub struct Options {
+  show_all: bool,
+  show_archived: bool,
+}
+
+pub async fn get_videos(pool: &SqlitePool, options: Options) -> Result<Vec<Video>, String> {
+  let query_str = if options.show_all {
+    "SELECT * FROM videos"
+  } else if options.show_archived {
+    "SELECT * FROM videos WHERE archived = true"
+  } else {
+    "SELECT * FROM videos WHERE archived = false"
+  };
+  let query = sqlx::query_as(query_str);
   let videos: Vec<Video> = match query.fetch_all(pool).await {
     Ok(videos) => videos,
     Err(e) => throw!("Error getting videos: {}", e),

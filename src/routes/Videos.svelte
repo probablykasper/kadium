@@ -1,5 +1,6 @@
 <script lang="ts">
   import { ViewOptions, viewOptions } from '../lib/data'
+  import { listen } from '@tauri-apps/api/event'
 
   import { onDestroy } from 'svelte'
   import { runCmd } from '../lib/general'
@@ -24,16 +25,28 @@
   $: getVideos($viewOptions)
 
   let updateCounter = 0
-  const updateInterval = setInterval(async () => {
-    const newCount = await runCmd('video_update_counter')
-    console.log('newCount', newCount)
-    if (newCount > updateCounter) {
-      getVideos($viewOptions)
+  let updateInterval: number | null = null
+  function startCheckingCounter() {
+    stopCheckingCounter()
+    updateInterval = setInterval(async () => {
+      const newCount = await runCmd('video_update_counter')
+      console.log('newCount', newCount)
+      if (newCount > updateCounter) {
+        getVideos($viewOptions)
+      }
+    }, 2000)
+  }
+  function stopCheckingCounter() {
+    if (updateInterval !== null) {
+      clearInterval(updateInterval)
     }
-  }, 2000)
+  }
+  startCheckingCounter()
   onDestroy(() => {
-    clearInterval(updateInterval)
+    stopCheckingCounter()
   })
+  listen('tauri://focus', startCheckingCounter)
+  listen('tauri://blur', stopCheckingCounter)
 
   const months = [
     'Jan',

@@ -25,28 +25,27 @@
   $: getVideos($viewOptions)
 
   let updateCounter = 0
-  let updateInterval: number | null = null
-  function startCheckingCounter() {
-    stopCheckingCounter()
-    updateInterval = setInterval(async () => {
-      const newCount = await runCmd('video_update_counter')
-      console.log('newCount', newCount)
-      if (newCount > updateCounter) {
-        getVideos($viewOptions)
-      }
-    }, 2000)
-  }
-  function stopCheckingCounter() {
-    if (updateInterval !== null) {
-      clearInterval(updateInterval)
+  async function getCount() {
+    const newCount = await runCmd('video_update_counter')
+    console.log('newCount', newCount)
+    if (newCount > updateCounter) {
+      getVideos($viewOptions)
     }
   }
-  startCheckingCounter()
-  onDestroy(() => {
-    stopCheckingCounter()
+  let updateInterval = setInterval(getCount, 2000)
+  const focusUnlistener = listen('tauri://focus', () => {
+    clearInterval(updateInterval)
+    getCount()
+    updateInterval = setInterval(getCount, 2000)
   })
-  listen('tauri://focus', startCheckingCounter)
-  listen('tauri://blur', stopCheckingCounter)
+  const blurUnlistener = listen('tauri://blur', () => {
+    clearInterval(updateInterval)
+  })
+  onDestroy(async () => {
+    clearInterval(updateInterval)
+    ;(await focusUnlistener)()
+    ;(await blurUnlistener)()
+  })
 
   const months = [
     'Jan',

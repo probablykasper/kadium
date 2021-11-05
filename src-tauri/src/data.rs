@@ -87,7 +87,6 @@ pub async fn get_videos(view_options: Options, data: DataState<'_>) -> Result<Va
 
 #[command]
 pub async fn video_update_counter(data: DataState<'_>) -> Result<u64, String> {
-  println!("Check counter, todo: prevent this when window is hidden");
   let data = data.0.lock().await;
   match &data.fetcher_handle {
     Some(fetcher_handle) => {

@@ -127,8 +127,8 @@ fn main() {
 
   let data_load_result = match Runtime::new() {
     Ok(runtime) => runtime.block_on(async {
-      // load data in separate async thread. If main() is an async runtime,
-      // tauri will crash on drag-and-drop
+      // load data in separate async thread
+      // workaround for https://github.com/tauri-apps/tauri/issues/2838
       return load_data(&app_paths).await;
     }),
     Err(e) => Err(e.to_string()),

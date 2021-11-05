@@ -1,8 +1,8 @@
 <script lang="ts">
-  import Link from './Link.svelte'
-  import type { Channel } from './data'
-  import Tags from './Tags.svelte'
-  import { runCmd } from './general'
+  import Link from '../lib/Link.svelte'
+  import type { Channel } from '../lib/data'
+  import Tags from '../lib/Tags.svelte'
+  import { runCmd } from '../lib/general'
 
   export let channels: Channel[]
 
@@ -21,7 +21,7 @@
         <div class="content">
           <!-- <span>{channel.id}</span> -->
           <span>Check for videos after {new Date(channel.from_time).toLocaleString()}</span>
-          <span>Minutes between refreshes: {channel.minutes_between_refreshes}</span>
+          <span>Minutes between refreshes: {channel.refresh_rate}</span>
         </div>
         <Tags bind:value={channel.tags} on:update={saveChannels} />
       </div>

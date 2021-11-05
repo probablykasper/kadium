@@ -205,20 +205,18 @@ async fn check_channel(
   // check which videos are new
   let mut new_ids: Vec<String> = Vec::new();
   for fetched_video in uploads.items {
-    let fetched_id = &fetched_video.content_details.video_id;
+    let fetched_id = &fetched_video.contentDetails.videoId;
     if existing_ids.contains(fetched_id) {
-      println!("Existing ID: {}", fetched_id);
       continue;
     }
 
-    let published_str = fetched_video.content_details.video_published_at;
+    let published_str = fetched_video.contentDetails.videoPublishedAt;
     let published_time = parse_datetime(&published_str)?.timestamp_millis();
     if published_time < channel.from_time {
-      println!("Too old ID: {}", fetched_id);
       continue;
     }
 
-    new_ids.push(fetched_video.content_details.video_id);
+    new_ids.push(fetched_video.contentDetails.videoId);
   }
 
   if new_ids.len() == 0 {
@@ -238,25 +236,25 @@ async fn check_channel(
   let mut videos_to_add: Vec<db::Video> = Vec::new();
   for video in videos.items {
     // skip future livestreams
-    if let Some(live_streaming_details) = &video.live_streaming_details {
-      let start_time = &live_streaming_details.scheduled_start_time;
+    if let Some(live_streaming_details) = &video.liveStreamingDetails {
+      let start_time = &live_streaming_details.scheduledStartTime;
       let start_timestamp = parse_datetime(&start_time)?;
       if start_timestamp > chrono::Utc::now() {
         continue; // skip future livestreams
       }
     }
-    let publish_time = parse_datetime(&video.snippet.published_at)?;
-    let duration_ms = parse_absolute_duration(&video.content_details.duration)?;
+    let publish_time = parse_datetime(&video.snippet.publishedAt)?;
+    let duration_ms = parse_absolute_duration(&video.contentDetails.duration)?;
     videos_to_add.push(db::Video {
       id: video.id,
       title: video.snippet.title,
       description: video.snippet.description,
-      publish_time_ms: publish_time.timestamp_millis(),
-      duration_ms: duration_ms,
-      thumbnail_standard: video.snippet.thumbnails.standard.is_some(),
-      thumbnail_maxres: video.snippet.thumbnails.maxres.is_some(),
-      channel_id: video.snippet.channel_id,
-      channel_name: video.snippet.channel_title,
+      publishTimeMs: publish_time.timestamp_millis(),
+      durationMs: duration_ms,
+      thumbnailStandard: video.snippet.thumbnails.standard.is_some(),
+      thumbnailMaxres: video.snippet.thumbnails.maxres.is_some(),
+      channelId: video.snippet.channelId,
+      channelName: video.snippet.channelTitle,
       unread: true,
     });
   }

@@ -9,5 +9,6 @@ CREATE TABLE IF NOT EXISTS videos
     thumbnailMaxres   BOOLEAN NOT NULL,
     channelName       TEXT    NOT NULL,
     channelId         TEXT    NOT NULL,
-    unread            BOOLEAN NOT NULL DEFAULT 1
+    unread            BOOLEAN NOT NULL DEFAULT 1,
+    archived          BOOLEAN NOT NULL DEFAULT 0
 );

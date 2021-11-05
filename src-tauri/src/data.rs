@@ -1,11 +1,12 @@
 use crate::settings::{Channel, Settings, VersionedSettings};
-use crate::{background, throw};
+use crate::{background, db, throw};
 use serde::Serialize;
 use serde_json::Value;
 use sqlx::SqlitePool;
 use std::path::PathBuf;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use tauri::{command, Config, State};
+use tokio::sync::Mutex;
 
 #[derive(Clone)]
 pub struct AppPaths {
@@ -56,26 +57,33 @@ pub fn to_json<T: Serialize>(data: &T) -> Result<Value, String> {
 }
 
 #[command]
-pub fn get_settings(data: State<ArcData>) -> Result<Value, String> {
-  let mut data = data.0.lock().unwrap();
+pub async fn get_videos(data: State<'_, ArcData>) -> Result<Value, String> {
+  let data = data.0.lock().await;
+  let videos = db::get_videos(&data.db_pool).await?;
+  to_json(&videos)
+}
+
+#[command]
+pub async fn get_settings(data: State<'_, ArcData>) -> Result<Value, String> {
+  let mut data = data.0.lock().await;
   to_json(&data.settings())
 }
 
 #[command]
-pub fn set_channels(channels: Vec<Channel>, data: State<ArcData>) -> Result<(), String> {
-  let mut data = data.0.lock().unwrap();
+pub async fn set_channels(channels: Vec<Channel>, data: State<'_, ArcData>) -> Result<(), String> {
+  let mut data = data.0.lock().await;
   data.settings().channels = channels;
   data.save_settings()?;
   Ok(())
 }
 
 #[command]
-pub fn set_general_settings(
+pub async fn set_general_settings(
   api_key: String,
   max_concurrent_requests: u32,
-  data: State<ArcData>,
+  data: State<'_, ArcData>,
 ) -> Result<(), String> {
-  let mut data = data.0.lock().unwrap();
+  let mut data = data.0.lock().await;
   data.settings().api_key = api_key;
   data.settings().max_concurrent_requests = max_concurrent_requests;
   data.save_settings()?;

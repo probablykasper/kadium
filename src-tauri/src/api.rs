@@ -42,11 +42,11 @@ pub mod videos {
   /// Lists the fields we use only. Documentation:
   /// https://developers.google.com/youtube/v3/docs/videos#properties
   #[derive(Deserialize, Debug)]
-  #[serde(rename_all = "camelCase")]
+  #[allow(non_snake_case)]
   pub struct Video {
     pub id: String,
-    pub content_details: ContentDetails,
-    pub live_streaming_details: Option<LiveStreamingDetails>,
+    pub contentDetails: ContentDetails,
+    pub liveStreamingDetails: Option<LiveStreamingDetails>,
     pub snippet: Snippet,
   }
   #[derive(Deserialize, Debug)]
@@ -54,20 +54,20 @@ pub mod videos {
     pub duration: String,
   }
   #[derive(Deserialize, Debug)]
-  #[serde(rename_all = "camelCase")]
+  #[allow(non_snake_case)]
   pub struct LiveStreamingDetails {
-    pub scheduled_start_time: String,
+    pub scheduledStartTime: String,
   }
 
   #[derive(Deserialize, Debug)]
-  #[serde(rename_all = "camelCase")]
+  #[allow(non_snake_case)]
   pub struct Snippet {
-    pub published_at: String,
+    pub publishedAt: String,
     pub title: String,
     pub description: String,
     pub thumbnails: Thumbnails,
-    pub channel_id: String,
-    pub channel_title: String,
+    pub channelId: String,
+    pub channelTitle: String,
   }
   /// default, medium and high always exist:
   /// default 120x90:   https://i.ytimg.com/vi/___ID___/default.jpg
@@ -110,14 +110,14 @@ pub mod playlist_items {
   ///  an hour off... But it's almost 2 hours off, if not 2.5 hours.
   ///  :/
   #[derive(Deserialize, Debug)]
-  #[serde(rename_all = "camelCase")]
+  #[allow(non_snake_case)]
   pub struct Playlist {
-    pub content_details: ContentDetails,
+    pub contentDetails: ContentDetails,
   }
   #[derive(Deserialize, Debug)]
-  #[serde(rename_all = "camelCase")]
+  #[allow(non_snake_case)]
   pub struct ContentDetails {
-    pub video_published_at: String,
-    pub video_id: String,
+    pub videoPublishedAt: String,
+    pub videoId: String,
   }
 }

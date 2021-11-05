@@ -1,8 +1,8 @@
 <script lang="ts">
-  import Button from './Button.svelte'
+  import Button from '../lib/Button.svelte'
   import { router } from 'tinro'
-  import { runCmd } from './general'
-  import { loadSettings } from './data'
+  import { runCmd } from '../lib/general'
+  import { loadSettings } from '../lib/data'
 
   export let apiKey: string
   export let maxConcurrentRequests: number

@@ -8,7 +8,8 @@ export type Channel = {
   icon: string
   uploads_playlist_id: string
   from_time: number
-  minutes_between_refreshes: number
+  /// Milliseconds between refreshes
+  refresh_rate: number
   tags: string[]
 }
 
@@ -38,7 +39,7 @@ export function useSampleSettings() {
           id: 'UCp4csaOD64mSzPxbfuzJcuA',
           name: 'Chuckle Sandwich ' + i,
           uploads_playlist_id: 'UUp4csaOD64mSzPxbfuzJcuA',
-          minutes_between_refreshes: 60,
+          refresh_rate: 60,
           tags: ['Chungus'],
         })
       }

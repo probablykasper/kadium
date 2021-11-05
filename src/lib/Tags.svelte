@@ -2,7 +2,6 @@
   import { createEventDispatcher } from 'svelte'
   import { checkShortcut } from './general'
 
-  let tagsEl: HTMLDivElement
   let inputEl: HTMLInputElement
 
   let editing = false
@@ -96,7 +95,7 @@
   }
 </script>
 
-<div class="tags" bind:this={tagsEl}>
+<div class="tags">
   <div class="label">Tags</div>
   {#each value as tag, i}
     {#if i === value.length - 1 && editing}

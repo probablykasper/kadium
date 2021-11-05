@@ -1,9 +1,10 @@
 <script lang="ts">
-  import ChannelsPage from './lib/Channels.svelte'
-  import SettingsPage from './lib/Settings.svelte'
+  import ChannelsPage from './routes/Channels.svelte'
+  import SettingsPage from './routes/Settings.svelte'
   import { checkShortcut } from './lib/general'
   import { loadSettings, settings, useSampleSettings } from './lib/data'
   import { Route, active, router } from 'tinro'
+  import VideosPage from './routes/Videos.svelte'
 
   function go(e: MouseEvent) {
     if (e.target instanceof HTMLElement) {
@@ -40,12 +41,12 @@
   <button on:click={useSampleSettings}>Check out sample data?</button>
 {:else}
   <nav>
-    <a on:mousedown={go} use:active data-exact href="/">Videos</a>
-    <a on:mousedown={go} use:active href="/channels">Channels</a>
-    <a on:mousedown={go} use:active href="/settings">Settings</a>
+    <a on:mousedown={go} use:active data-exact href="/"><button>Videos</button></a>
+    <a on:mousedown={go} use:active href="/channels"><button>Channels</button></a>
+    <a on:mousedown={go} use:active href="/settings"><button>Settings</button></a>
   </nav>
   <div class="page">
-    <Route path="/">Videos page</Route>
+    <Route path="/"><VideosPage /></Route>
     <Route path="/channels"><ChannelsPage channels={$settings.channels} /></Route>
     <Route path="/settings">
       <SettingsPage
@@ -80,14 +81,21 @@
     overflow: auto
     height: calc(100% - $nav-height)
   a
+    background-color: transparent
+    border: none
     display: inline-block
-    font-size: 16px
     margin-right: 15px
     text-decoration: none
-    padding: 6px 0px
     color: hsl(210, 100%, 55%)
     &:hover
       color: hsl(210, 100%, 45%)
     &:global(.active)
       color: hsl(216, 30%, 93%)
+    button
+      background-color: transparent
+      border: none
+      font-size: 16px
+      color: inherit
+      margin: 0px
+      padding: 6px 0px
 </style>

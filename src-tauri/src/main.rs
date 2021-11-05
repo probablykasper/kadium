@@ -10,6 +10,7 @@ use crate::settings::VersionedSettings;
 use std::thread;
 use tauri::api::{dialog, shell};
 use tauri::{command, CustomMenuItem, Submenu, Window, WindowBuilder, WindowUrl};
+use tokio::runtime::Runtime;
 
 mod api;
 mod background;
@@ -112,8 +113,7 @@ async fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
 
 const MAIN_WIN: &str = "main";
 
-#[tokio::main]
-async fn main() {
+fn main() {
   let ctx = tauri::generate_context!();
 
   // macOS "App Nap" periodically pauses our app when it's in the background.
@@ -121,7 +121,17 @@ async fn main() {
   macos_app_nap::prevent();
 
   let app_paths = AppPaths::from_tauri_config(&ctx.config());
-  let (loaded_data, note) = match load_data(&app_paths).await {
+
+  let data_load_result = match Runtime::new() {
+    Ok(runtime) => runtime.block_on(async {
+      // load data in separate async thread. If main() is an async runtime,
+      // tauri will crash on drag-and-drop
+      return load_data(&app_paths).await;
+    }),
+    Err(e) => Err(e.to_string()),
+  };
+
+  let (loaded_data, note) = match data_load_result {
     Ok(v) => v,
     Err(e) => {
       error_popup_main_thread(&e);
@@ -138,6 +148,7 @@ async fn main() {
   let app = tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
       error_popup,
+      data::get_videos,
       data::get_settings,
       data::set_channels,
       data::set_general_settings,
@@ -159,7 +170,7 @@ async fn main() {
         .decorations(true)
         .always_on_top(false)
         .inner_size(900.0, 800.0)
-        .min_inner_size(440.0, 150.0)
+        .min_inner_size(400.0, 150.0)
         .fullscreen(false);
       return (win, webview);
     })

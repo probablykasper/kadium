@@ -4,8 +4,10 @@ use chrono::{DateTime, FixedOffset};
 use iso8601_duration::Duration as IsoDuration;
 use sqlx::SqlitePool;
 use std::collections::HashMap;
+use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
+use tauri::async_runtime::Mutex;
 use tokio::runtime::Runtime;
 use tokio::sync::broadcast;
 use tokio::{task, time};
@@ -23,6 +25,7 @@ pub struct ChannelInfo {
 pub struct FetcherHandle {
   pub handle: thread::JoinHandle<Result<(), String>>,
   pub stop_sender: broadcast::Sender<()>,
+  pub update_counter: Arc<Mutex<u64>>,
 }
 
 impl FetcherHandle {
@@ -82,6 +85,9 @@ pub fn spawn(settings: &settings::Settings, pool: &SqlitePool) -> Option<Fetcher
   let (stop_sender, _stop_receiver) = broadcast::channel(1);
   let stop_sender2 = stop_sender.clone();
 
+  let update_counter = Arc::new(Mutex::new(0));
+  let update_counter2 = update_counter.clone();
+
   let tokio_thread = thread::spawn(move || {
     let runtime = match Runtime::new() {
       Ok(r) => r,
@@ -90,13 +96,14 @@ pub fn spawn(settings: &settings::Settings, pool: &SqlitePool) -> Option<Fetcher
 
     return runtime.block_on(async {
       // start intervals inside tokio runtime
-      return start_intervals(pool, api_key, interval_infos, stop_sender2).await;
+      return start_intervals(pool, api_key, interval_infos, stop_sender2, update_counter2).await;
     });
   });
 
   Some(FetcherHandle {
     handle: tokio_thread,
     stop_sender,
+    update_counter,
   })
 }
 
@@ -125,16 +132,18 @@ async fn start_intervals(
   pool: SqlitePool,
   api_key: String,
   interval_infos: Vec<IntervalInfo>,
-  sender: broadcast::Sender<()>,
+  stop_sender: broadcast::Sender<()>,
+  update_counter: Arc<Mutex<u64>>,
 ) -> Result<(), String> {
   let mut tasks = Vec::new();
   for interval_info in interval_infos {
     let key = api_key.clone();
     let pool = pool.clone();
-    let mut stop_receiver = sender.subscribe();
+    let mut stop_receiver = stop_sender.subscribe();
+    let update_counter = update_counter.clone();
     let handle = task::spawn(async move {
       tokio::select! {
-        _ = run_interval(pool, key, interval_info) => {
+        _ = run_interval(pool, key, interval_info, update_counter) => {
           throw!("Interval unexpectedly completed");
         }
         result = stop_receiver.recv() => {
@@ -161,7 +170,12 @@ async fn start_intervals(
   Err("No intervals started".to_string())
 }
 
-async fn run_interval(pool: SqlitePool, api_key: String, interval_info: IntervalInfo) {
+async fn run_interval(
+  pool: SqlitePool,
+  api_key: String,
+  interval_info: IntervalInfo,
+  update_counter: Arc<Mutex<u64>>,
+) {
   let mut interval = time::interval(Duration::from_millis(interval_info.ms));
   interval.set_missed_tick_behavior(time::MissedTickBehavior::Delay);
   let mut run_num = 0;
@@ -170,7 +184,12 @@ async fn run_interval(pool: SqlitePool, api_key: String, interval_info: Interval
     println!("{}ms task: {}", interval_info.ms, run_num);
     for channel in &interval_info.channels {
       match check_channel(&pool, &api_key, &channel).await {
-        Ok(()) => {}
+        Ok(did_insert) => {
+          if did_insert {
+            let mut count = update_counter.lock().await;
+            *count = count.clone() + 1;
+          }
+        }
         Err(e) => {
           println!("{}", e);
           todo!(); // show error to user
@@ -181,11 +200,12 @@ async fn run_interval(pool: SqlitePool, api_key: String, interval_info: Interval
   }
 }
 
+/// Returns the number of new videos saved
 async fn check_channel(
   pool: &SqlitePool,
   api_key: &str,
   channel: &ChannelInfo,
-) -> Result<(), String> {
+) -> Result<bool, String> {
   let url = "https://www.googleapis.com/youtube/v3/playlistItems".to_string()
     + "?part=contentDetails"
     + "&maxResults=50"
@@ -196,7 +216,7 @@ async fn check_channel(
     .map_err(|e| format!("Error checking channel \"{}\": {}", channel.name, e))?;
 
   if uploads.items.len() == 0 {
-    return Ok(()); // no channel videos returned
+    return Ok(false); // no channel videos returned
   }
 
   let existing_ids = db::get_ids(&uploads.items, pool).await?;
@@ -220,7 +240,7 @@ async fn check_channel(
   }
 
   if new_ids.len() == 0 {
-    return Ok(()); // no new videos
+    return Ok(false); // no new videos
   }
   println!("New IDs: {:?}", new_ids);
 
@@ -259,10 +279,11 @@ async fn check_channel(
     });
   }
 
+  let will_save_videos = videos_to_add.len() >= 1;
   for video in videos_to_add {
     db::insert_video(&video, pool).await?;
   }
-  Ok(())
+  Ok(will_save_videos)
 }
 
 pub fn parse_datetime(value: &str) -> Result<DateTime<FixedOffset>, String> {

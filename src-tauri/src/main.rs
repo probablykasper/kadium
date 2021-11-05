@@ -53,7 +53,7 @@ type ImportedNote = Option<(String, String)>;
 
 /// This can display dialogs, which needs to happen before tauri runs to not panic
 async fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
-  let db_pool_future = db::init(&paths.db);
+  let db_pool_future = db::init(&paths);
   if paths.settings_file.exists() {
     return match settings::VersionedSettings::load(&paths) {
       Ok(mut settings) => {
@@ -63,6 +63,7 @@ async fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
           db_pool: pool,
           versioned_settings: settings,
           paths: paths.clone(),
+          window_handle: None,
         };
         return Ok((data, None));
       }
@@ -95,6 +96,7 @@ async fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
       db_pool: pool,
       versioned_settings,
       paths: paths.clone(),
+      window_handle: None,
     };
     let import_note = Some(("Import note".to_string(), imported_stuff.update_note));
     return Ok((data, import_note));
@@ -107,6 +109,7 @@ async fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
     db_pool: pool,
     versioned_settings: default_settings,
     paths: paths.clone(),
+    window_handle: None,
   };
   Ok((data, None))
 }
@@ -135,12 +138,6 @@ fn main() {
     Ok(v) => v,
     Err(e) => {
       error_popup_main_thread(&e);
-      rfd::MessageDialog::new()
-        .set_title("Error")
-        .set_description(&e)
-        .set_buttons(rfd::MessageButtons::Ok)
-        .set_level(rfd::MessageLevel::Info)
-        .show();
       panic!("{}", e);
     }
   };
@@ -149,6 +146,7 @@ fn main() {
     .invoke_handler(tauri::generate_handler![
       error_popup,
       data::get_videos,
+      data::video_update_counter,
       data::get_settings,
       data::set_channels,
       data::set_general_settings,

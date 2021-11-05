@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte'
   import { runCmd } from '../lib/general'
 
   type Video = {
@@ -13,11 +14,24 @@
     channelName: string
     unread: boolean
   }
-
   let videos: Video[] = []
   async function getVideos() {
     videos = await runCmd('get_videos')
   }
+  getVideos()
+
+  let updateCounter = 0
+  const updateInterval = setInterval(async () => {
+    const newCount = await runCmd('video_update_counter')
+    console.log('newCount', newCount)
+    if (newCount > updateCounter) {
+      getVideos()
+    }
+  }, 2000)
+  onDestroy(() => {
+    clearInterval(updateInterval)
+  })
+
   const months = [
     'Jan',
     'Feb',
@@ -36,7 +50,6 @@
     let ts = new Date(timestamp)
     return ts.getDay() + ' ' + months[ts.getMonth()] + ' ' + ts.getFullYear()
   }
-  getVideos()
 </script>
 
 <main class="selectable">
@@ -69,7 +82,6 @@
     box-sizing: border-box
     display: grid
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr))
-    flex-wrap: wrap
     grid-gap: 15px
     padding: 20px
   .box

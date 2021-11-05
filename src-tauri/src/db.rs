@@ -1,27 +1,32 @@
 use crate::api::playlist_items;
+use crate::data::AppPaths;
 use crate::throw;
 use log;
 use serde::Serialize;
 use sqlx::migrate::MigrateDatabase;
+use sqlx::sqlite::{SqliteConnectOptions, SqliteRow};
 use sqlx::{ConnectOptions, Row, Sqlite, SqlitePool};
 
-pub async fn init(path: &str) -> Result<SqlitePool, String> {
-  let exists = match Sqlite::database_exists(&path).await {
+pub async fn init(app_paths: &AppPaths) -> Result<SqlitePool, String> {
+  let exists = match Sqlite::database_exists(&app_paths.db).await {
     Ok(exists) => exists,
     Err(e) => throw!("Could not check if database exists: {}", e),
   };
   if !exists {
-    match Sqlite::create_database(&path).await {
+    if let Err(e) = std::fs::create_dir_all(&app_paths.app_dir) {
+      throw!("Error creating parent folder: {}", e.to_string());
+    }
+    match Sqlite::create_database(&app_paths.db).await {
       Ok(_) => {}
       Err(e) => throw!("Could not create database: {}", e),
     }
   }
 
-  let mut connect_options = sqlx::sqlite::SqliteConnectOptions::new().filename(&path);
+  let mut connect_options = SqliteConnectOptions::new().filename(&app_paths.db);
   connect_options.log_statements(log::LevelFilter::Info);
   let pool = match SqlitePool::connect_with(connect_options).await {
     Ok(pool) => pool,
-    Err(e) => throw!("Could not create database: {}", e),
+    Err(e) => throw!("Could not open database: {}", e),
   };
 
   match sqlx::migrate!("./migrations").run(&pool).await {
@@ -77,8 +82,8 @@ pub struct Video {
   pub channelName: String,
   pub unread: bool,
 }
-impl sqlx::FromRow<'_, sqlx::sqlite::SqliteRow> for Video {
-  fn from_row(row: &sqlx::sqlite::SqliteRow) -> sqlx::Result<Self> {
+impl sqlx::FromRow<'_, SqliteRow> for Video {
+  fn from_row(row: &SqliteRow) -> sqlx::Result<Self> {
     Ok(Video {
       id: row.try_get("id")?,
       title: row.try_get("title")?,

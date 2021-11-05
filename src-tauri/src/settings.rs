@@ -1,10 +1,8 @@
-use crate::data::AppPaths;
+use crate::data::{write_atomically, AppPaths};
 use crate::throw;
-use atomicwrites::{AllowOverwrite, AtomicFile};
 use serde::{Deserialize, Serialize};
 use std::fs::File;
-use std::io::{Read, Write};
-use std::path::PathBuf;
+use std::io::Read;
 
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "version")]
@@ -85,19 +83,6 @@ pub struct Settings {
 impl Settings {
   pub fn wrap(self) -> VersionedSettings {
     VersionedSettings::V1(self)
-  }
-}
-
-pub fn write_atomically(file_path: &PathBuf, buf: &[u8]) -> Result<(), String> {
-  if let Some(parent) = file_path.parent() {
-    if let Err(e) = std::fs::create_dir_all(parent) {
-      throw!("Error creating parent folder: {}", e.to_string());
-    }
-  }
-  let af = AtomicFile::new(&file_path, AllowOverwrite);
-  match af.write(|f| f.write_all(&buf)) {
-    Ok(_) => Ok(()),
-    Err(e) => Err(e.to_string()),
   }
 }
 

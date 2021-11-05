@@ -1,8 +1,10 @@
 use crate::settings::{Channel, Settings, VersionedSettings};
 use crate::{background, db, throw};
+use atomicwrites::{AtomicFile, OverwriteBehavior};
 use serde::Serialize;
 use serde_json::Value;
 use sqlx::SqlitePool;
+use std::io::Write;
 use std::path::PathBuf;
 use std::sync::Arc;
 use tauri::{command, Config, State};
@@ -30,6 +32,7 @@ pub struct Data {
   pub db_pool: SqlitePool,
   pub versioned_settings: VersionedSettings,
   pub paths: AppPaths,
+  pub window_handle: Option<tauri::Window>,
 }
 impl Data {
   pub fn settings(&mut self) -> &mut Settings {
@@ -56,11 +59,41 @@ pub fn to_json<T: Serialize>(data: &T) -> Result<Value, String> {
   }
 }
 
+pub fn ensure_parent_exists(file_path: &PathBuf) -> Result<(), String> {
+  if let Some(parent) = file_path.parent() {
+    if let Err(e) = std::fs::create_dir_all(parent) {
+      throw!("Error creating parent folder: {}", e.to_string());
+    }
+  }
+  Ok(())
+}
+
+pub fn write_atomically(file_path: &PathBuf, buf: &[u8]) -> Result<(), String> {
+  ensure_parent_exists(&file_path)?;
+  let af = AtomicFile::new(&file_path, OverwriteBehavior::AllowOverwrite);
+  match af.write(|f| f.write_all(&buf)) {
+    Ok(_) => Ok(()),
+    Err(e) => Err(e.to_string()),
+  }
+}
+
 #[command]
 pub async fn get_videos(data: State<'_, ArcData>) -> Result<Value, String> {
   let data = data.0.lock().await;
   let videos = db::get_videos(&data.db_pool).await?;
   to_json(&videos)
+}
+
+#[command]
+pub async fn video_update_counter(data: State<'_, ArcData>) -> Result<u64, String> {
+  let data = data.0.lock().await;
+  match &data.fetcher_handle {
+    Some(fetcher_handle) => {
+      let count = fetcher_handle.update_counter.lock().await;
+      Ok(count.clone())
+    }
+    None => Ok(0),
+  }
 }
 
 #[command]

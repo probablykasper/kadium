@@ -1,6 +1,5 @@
-use crate::db::Options;
 use crate::settings::{Channel, Settings, VersionedSettings};
-use crate::{background, db, throw};
+use crate::{background, throw};
 use atomicwrites::{AtomicFile, OverwriteBehavior};
 use serde::Serialize;
 use serde_json::Value;
@@ -79,13 +78,6 @@ pub fn write_atomically(file_path: &PathBuf, buf: &[u8]) -> Result<(), String> {
 }
 
 #[command]
-pub async fn get_videos(view_options: Options, data: DataState<'_>) -> Result<Value, String> {
-  let data = data.0.lock().await;
-  let videos = db::get_videos(&data.db_pool, view_options).await?;
-  to_json(&videos)
-}
-
-#[command]
 pub async fn video_update_counter(data: DataState<'_>) -> Result<u64, String> {
   let data = data.0.lock().await;
   match &data.fetcher_handle {
@@ -124,7 +116,7 @@ pub async fn set_general_settings(
   Ok(())
 }
 
-type DataState<'a> = State<'a, ArcData>;
+pub type DataState<'a> = State<'a, ArcData>;
 pub struct ArcData(pub Arc<Mutex<Data>>);
 impl ArcData {
   pub fn new(data: Data) -> Self {

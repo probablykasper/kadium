@@ -2,7 +2,7 @@
   import ChannelsPage from './routes/Channels.svelte'
   import SettingsPage from './routes/Settings.svelte'
   import { checkShortcut } from './lib/general'
-  import { loadSettings, settings, useSampleSettings } from './lib/data'
+  import { loadSettings, settings, enableSampleData } from './lib/data'
   import { Route } from 'tinro'
   import VideosPage from './routes/Videos.svelte'
   import Nav from './lib/Nav.svelte'
@@ -27,7 +27,7 @@
 {#if $settings === null}
   Error loading.
 
-  <button on:click={useSampleSettings}>Check out sample data?</button>
+  <button on:click={enableSampleData}>Check out sample data?</button>
 {:else}
   <Nav />
   <main>
@@ -42,9 +42,10 @@
 
 <style lang="sass">
   :root
-    --options-bar-height: 28px
+    --options-bar-height: 36px
     --nav-height: 56px
     --header-height: (var(--options-bar-height) + var(--nav-height))
+    --page-padding: 15px
   :global(html)
     overflow: hidden
     height: 100%
@@ -57,7 +58,10 @@
   :global(body)
     height: 100%
     margin: 0px
+    color-scheme: dark
   main
     overflow: auto
     height: calc(100% - var(--header-height))
+    background-color: #0F1115 // so scrollbars are light
+    margin-right: 1px
 </style>

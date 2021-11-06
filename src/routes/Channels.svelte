@@ -36,7 +36,7 @@
     -webkit-user-select: text
   .channels
     flex-wrap: wrap
-    margin: 15px
+    margin: 0px var(--page-padding)
   .channel
     display: flex
     flex-grow: 1
@@ -45,7 +45,7 @@
     transition: border 120ms cubic-bezier(0.4, 0.0, 0.2, 1)
     padding: 15px 5px
     border: 1px solid transparent
-    @media screen and (min-width: 800px)
+    @media screen and (min-width: 600px)
       padding: 15px
       margin: 15px 0px
       background-color: hsla(223, 33%, 64%, 0.05)

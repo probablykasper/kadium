@@ -46,9 +46,9 @@
 </nav>
 <div class="options-bar">
   <button class="group" on:keydown={showGroupKeydown}>
-    <div class="item" class:selected={show === 0} on:click={() => (show = 0)}>New</div>
-    <div class="item" class:selected={show === 1} on:click={() => (show = 1)}>Archived</div>
-    <div class="item" class:selected={show === 2} on:click={() => (show = 2)}>All</div>
+    <div class="item" class:selected={show === 0} on:mousedown={() => (show = 0)}>New</div>
+    <div class="item" class:selected={show === 1} on:mousedown={() => (show = 1)}>Archived</div>
+    <div class="item" class:selected={show === 2} on:mousedown={() => (show = 2)}>All</div>
   </button>
 </div>
 
@@ -78,7 +78,9 @@
       padding: 6px 0px
   .options-bar
     height: var(--options-bar-height)
+    box-sizing: border-box
     padding: 0px 20px
+    padding-bottom: 10px
     align-items: center
     display: flex
   button.group

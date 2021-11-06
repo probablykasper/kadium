@@ -276,6 +276,7 @@ async fn check_channel(
       channelId: video.snippet.channelId,
       channelName: video.snippet.channelTitle,
       unread: true,
+      archived: false,
     });
   }
 

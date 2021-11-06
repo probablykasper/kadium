@@ -145,11 +145,13 @@ fn main() {
   let app = tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
       error_popup,
-      data::get_videos,
       data::video_update_counter,
       data::get_settings,
       data::set_channels,
       data::set_general_settings,
+      db::get_videos,
+      db::archive,
+      db::unarchive,
     ])
     .setup(move |_app| {
       #[cfg(target_os = "macos")]

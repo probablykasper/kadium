@@ -19,6 +19,20 @@ export type Settings = {
   channels: Channel[]
 }
 
+export type Video = {
+  id: string
+  title: string
+  description: string
+  publishTimeMs: number
+  durationMs: number
+  thumbnailStandard: boolean
+  thumbnailMaxres: boolean
+  channelId: string
+  channelName: string
+  unread: boolean
+  archived: boolean
+}
+
 export const settings: Writable<null | Settings> = writable(null)
 export function loadSettings() {
   runCmd('get_settings').then(async (settingsResponse: Settings) => {
@@ -26,7 +40,31 @@ export function loadSettings() {
   })
 }
 
-export function useSampleSettings() {
+export const useSampleData = writable(false)
+export const sampleVideos: Writable<Video[]> = writable([])
+export function enableSampleData() {
+  useSampleData.set(true)
+  sampleVideos.set(
+    (() => {
+      const videos = []
+      for (let i = 0; i < 100; i++) {
+        videos.push({
+          archived: false,
+          channelId: 'UC9RM-iSvTu1uPJb8X5yp3EQ',
+          channelName: 'Wendover Productions ' + i,
+          description: '',
+          durationMs: 1093000,
+          id: 'aH4b3sAs-l8',
+          publishTimeMs: 1623861277000,
+          thumbnailMaxres: true,
+          thumbnailStandard: true,
+          title: 'Why Electric Planes are Inevitably Coming',
+          unread: true,
+        })
+      }
+      return videos
+    })()
+  )
   settings.set({
     api_key: 'example key',
     max_concurrent_requests: 5,

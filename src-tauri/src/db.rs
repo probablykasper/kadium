@@ -1,11 +1,13 @@
 use crate::api::playlist_items;
-use crate::data::AppPaths;
+use crate::data::{to_json, AppPaths, DataState};
 use crate::throw;
 use log;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use sqlx::migrate::MigrateDatabase;
 use sqlx::sqlite::{SqliteConnectOptions, SqliteRow};
 use sqlx::{ConnectOptions, Row, Sqlite, SqlitePool};
+use tauri::command;
 
 pub async fn init(app_paths: &AppPaths) -> Result<SqlitePool, String> {
   let exists = match Sqlite::database_exists(&app_paths.db).await {
@@ -81,6 +83,7 @@ pub struct Video {
   pub channelId: String,
   pub channelName: String,
   pub unread: bool,
+  pub archived: bool,
 }
 impl sqlx::FromRow<'_, SqliteRow> for Video {
   fn from_row(row: &SqliteRow) -> sqlx::Result<Self> {
@@ -96,6 +99,7 @@ impl sqlx::FromRow<'_, SqliteRow> for Video {
       channelId: row.try_get("channelId")?,
       channelName: row.try_get("channelName")?,
       unread: row.try_get("unread")?,
+      archived: row.try_get("archived")?,
     })
   }
 }
@@ -131,18 +135,52 @@ pub struct Options {
   show_archived: bool,
 }
 
-pub async fn get_videos(pool: &SqlitePool, options: Options) -> Result<Vec<Video>, String> {
+#[command]
+pub async fn get_videos(options: Options, data: DataState<'_>) -> Result<Value, String> {
+  let data = data.0.lock().await;
   let query_str = if options.show_all {
     "SELECT * FROM videos"
   } else if options.show_archived {
-    "SELECT * FROM videos WHERE archived = true"
+    "SELECT * FROM videos WHERE archived = 1"
   } else {
-    "SELECT * FROM videos WHERE archived = false"
+    "SELECT * FROM videos WHERE archived = 0"
   };
   let query = sqlx::query_as(query_str);
-  let videos: Vec<Video> = match query.fetch_all(pool).await {
+  let videos: Vec<Video> = match query.fetch_all(&data.db_pool).await {
     Ok(videos) => videos,
     Err(e) => throw!("Error getting videos: {}", e),
   };
-  Ok(videos)
+  to_json(&videos)
+}
+
+async fn set_archived(pool: &SqlitePool, id: &str, value: bool) -> Result<(), String> {
+  let query = sqlx::query("UPDATE videos SET archived = ? WHERE id = ?")
+    .bind(&value)
+    .bind(&id);
+  let rows_affected = match query.execute(pool).await {
+    Ok(result_rows) => result_rows.rows_affected(),
+    Err(e) => throw!("{}", e),
+  };
+  if rows_affected != 1 {
+    throw!("{} rows affected", rows_affected);
+  }
+  Ok(())
+}
+
+#[command]
+pub async fn archive(id: String, data: DataState<'_>) -> Result<(), String> {
+  let data = data.0.lock().await;
+  match set_archived(&data.db_pool, &id, true).await {
+    Ok(()) => Ok(()),
+    Err(e) => throw!("Error archiving video: {}", e),
+  }
+}
+
+#[command]
+pub async fn unarchive(id: String, data: DataState<'_>) -> Result<(), String> {
+  let data = data.0.lock().await;
+  match set_archived(&data.db_pool, &id, false).await {
+    Ok(()) => Ok(()),
+    Err(e) => throw!("Error unarchiving video: {}", e),
+  }
 }

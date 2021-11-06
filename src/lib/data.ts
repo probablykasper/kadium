@@ -89,8 +89,10 @@ export function enableSampleData() {
 export type ViewOptions = {
   show_all: boolean
   show_archived: boolean
+  channel_filter: string
 }
 export const viewOptions: Writable<ViewOptions> = writable({
   show_all: false,
   show_archived: false,
+  channel_filter: '',
 })

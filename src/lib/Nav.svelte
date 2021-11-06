@@ -45,11 +45,16 @@
   <a on:mousedown={go} use:active href="/settings"><button>Settings</button></a>
 </nav>
 <div class="options-bar">
-  <button class="group" on:keydown={showGroupKeydown}>
+  <div class="form-item group" on:keydown={showGroupKeydown} tabindex="0">
     <div class="item" class:selected={show === 0} on:mousedown={() => (show = 0)}>New</div>
     <div class="item" class:selected={show === 1} on:mousedown={() => (show = 1)}>Archived</div>
     <div class="item" class:selected={show === 2} on:mousedown={() => (show = 2)}>All</div>
-  </button>
+  </div>
+  <input
+    class="form-item"
+    type="text"
+    placeholder="Channel"
+    bind:value={$viewOptions.channel_filter} />
 </div>
 
 <style lang="sass">
@@ -83,15 +88,23 @@
     padding-bottom: 10px
     align-items: center
     display: flex
-  button.group
+  .form-item
+    border-radius: 3px
+    border: 1px solid hsl(233, 7%, 22%)
+    background-color: hsla(223, 33%, 64%, 0.12)
+    outline: none
+    margin: 0px
+    margin-right: 12px
+    font-size: 13px
+  .group
     display: flex
     color: inherit
-    border: 1px solid hsl(233, 7%, 22%)
-    border-radius: 3px
-    background-color: hsla(223, 33%, 64%, 0.12)
     padding: 0px
-    margin: 0px
     outline: none
+    cursor: default
+    height: 26px
+    line-height: 26px
+    box-sizing: border-box
     &:focus
       border-color: hsla(220, 100%, 50%, 1)
       box-shadow: 0px 0px 0px 3px hsla(220, 100%, 50%, 0.5)
@@ -100,9 +113,15 @@
     .item
       background-color: transparent
       border: none
-      font-size: 13px
       margin: 0px
-      padding: 4px 12px
+      padding: 0px 12px
       &.selected
         background-color: hsl(225, 14%, 28%)
+  input
+    height: 26px
+    box-sizing: border-box
+    padding: 0px 6px
+    &:focus
+      border-color: hsla(220, 100%, 50%, 1)
+      box-shadow: 0px 0px 0px 3px hsla(220, 100%, 50%, 0.5)
 </style>

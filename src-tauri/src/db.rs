@@ -133,19 +133,36 @@ pub async fn insert_video(video: &Video, pool: &SqlitePool) -> Result<(), String
 pub struct Options {
   show_all: bool,
   show_archived: bool,
+  channel_filter: String,
 }
 
 #[command]
 pub async fn get_videos(options: Options, data: DataState<'_>) -> Result<Value, String> {
   let data = data.0.lock().await;
-  let query_str = if options.show_all {
-    "SELECT * FROM videos"
-  } else if options.show_archived {
-    "SELECT * FROM videos WHERE archived = 1"
-  } else {
-    "SELECT * FROM videos WHERE archived = 0"
-  };
-  let query = sqlx::query_as(query_str);
+  let mut selects = vec!["*"];
+  let mut wheres = Vec::new();
+  if options.channel_filter != "" {
+    selects.push("INSTR(channelName, ?) channelFilter");
+    wheres.push("channelFilter > 0");
+  }
+  if !options.show_all {
+    if options.show_archived {
+      wheres.push("archived = 1");
+    } else {
+      wheres.push("archived = 0");
+    }
+  }
+
+  let mut query_str = "SELECT ".to_owned() + &selects.join(",") + " FROM videos";
+  if wheres.len() > 0 {
+    query_str.push_str(" WHERE ");
+    query_str.push_str(&wheres.join(" AND "));
+  }
+
+  let mut query = sqlx::query_as(&query_str);
+  if options.channel_filter != "" {
+    query = query.bind(&options.channel_filter);
+  }
   let videos: Vec<Video> = match query.fetch_all(&data.db_pool).await {
     Ok(videos) => videos,
     Err(e) => throw!("Error getting videos: {}", e),

@@ -134,6 +134,7 @@ pub struct Options {
   show_all: bool,
   show_archived: bool,
   channel_filter: String,
+  tag: Option<String>,
 }
 
 #[command]
@@ -153,6 +154,20 @@ pub async fn get_videos(options: Options, data: DataState<'_>) -> Result<Value, 
     }
   }
 
+  let mut channel_ids: Vec<&str> = Vec::new();
+  let q;
+  if let Some(tag) = &options.tag {
+    let mut question_marks: Vec<&str> = Vec::new();
+    for channel in &data.settings_ref().channels {
+      if channel.tags.contains(tag) {
+        channel_ids.push(&channel.id);
+        question_marks.push("?");
+      }
+    }
+    q = format!("channelId IN ({})", question_marks.join(","));
+    wheres.push(&q);
+  }
+
   let mut query_str = "SELECT ".to_owned() + &selects.join(",") + " FROM videos";
   if wheres.len() > 0 {
     query_str.push_str(" WHERE ");
@@ -162,6 +177,11 @@ pub async fn get_videos(options: Options, data: DataState<'_>) -> Result<Value, 
   let mut query = sqlx::query_as(&query_str);
   if options.channel_filter != "" {
     query = query.bind(&options.channel_filter);
+  }
+  if options.tag.is_some() {
+    for channel_id in channel_ids {
+      query = query.bind(channel_id);
+    }
   }
   let videos: Vec<Video> = match query.fetch_all(&data.db_pool).await {
     Ok(videos) => videos,

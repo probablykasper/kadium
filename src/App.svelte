@@ -42,7 +42,7 @@
 
 <style lang="sass">
   :root
-    --options-bar-height: 36px
+    --options-bar-height: 42px
     --nav-height: 56px
     --header-height: (var(--options-bar-height) + var(--nav-height))
     --page-padding: 15px

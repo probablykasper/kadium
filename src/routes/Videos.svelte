@@ -87,7 +87,8 @@
       <button
         class="archive"
         on:click={() => archiveToggle(video.id, video.archived)}
-        title="Archive">
+        title="Archive"
+        tabindex="-1">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -111,9 +112,11 @@
         </button>
       </a>
       <a target="_blank" href="https://www.youtube.com/channel/{video.channelId}">
-        <p class="sub">
-          <button class="selectable">{video.channelName}</button>
-        </p>
+        <button class="selectable">
+          <p class="sub">
+            {video.channelName}
+          </p>
+        </button>
       </a>
       <p class="sub selectable">{formatDate(video.publishTimeMs)}</p>
     </div>
@@ -169,7 +172,7 @@
     margin-top: 2px
   .box:hover button.archive
     opacity: 1
-  button.archive
+  .archive
     position: absolute
     cursor: pointer
     top: 0px

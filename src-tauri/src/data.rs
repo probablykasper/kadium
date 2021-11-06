@@ -4,6 +4,7 @@ use atomicwrites::{AtomicFile, OverwriteBehavior};
 use serde::Serialize;
 use serde_json::Value;
 use sqlx::SqlitePool;
+use std::collections::HashMap;
 use std::io::Write;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -28,7 +29,7 @@ impl AppPaths {
 }
 
 pub struct Data {
-  pub fetcher_handle: Option<background::FetcherHandle>,
+  pub bg_handle: Option<background::FetcherHandle>,
   pub db_pool: SqlitePool,
   pub versioned_settings: VersionedSettings,
   pub paths: AppPaths,
@@ -43,11 +44,11 @@ impl Data {
   }
   pub fn save_settings(&mut self) -> Result<(), String> {
     self.versioned_settings.save(&self.paths)?;
-    if let Some(fetcher_handle) = self.fetcher_handle.take() {
-      fetcher_handle.stop();
-      fetcher_handle.wait_until_stopped()?;
+    if let Some(bg_handle) = self.bg_handle.take() {
+      bg_handle.stop();
+      bg_handle.wait_until_stopped()?;
     }
-    self.fetcher_handle = background::spawn(self.settings_ref(), &self.db_pool);
+    self.bg_handle = background::spawn(self.settings_ref(), &self.db_pool);
     Ok(())
   }
 }
@@ -80,9 +81,9 @@ pub fn write_atomically(file_path: &PathBuf, buf: &[u8]) -> Result<(), String> {
 #[command]
 pub async fn video_update_counter(data: DataState<'_>) -> Result<u64, String> {
   let data = data.0.lock().await;
-  match &data.fetcher_handle {
-    Some(fetcher_handle) => {
-      let count = fetcher_handle.update_counter.lock().await;
+  match &data.bg_handle {
+    Some(bg_handle) => {
+      let count = bg_handle.update_counter.lock().await;
       Ok(count.clone())
     }
     None => Ok(0),
@@ -93,6 +94,19 @@ pub async fn video_update_counter(data: DataState<'_>) -> Result<u64, String> {
 pub async fn get_settings(data: DataState<'_>) -> Result<Value, String> {
   let mut data = data.0.lock().await;
   to_json(&data.settings())
+}
+
+#[command]
+pub async fn tags(data: DataState<'_>) -> Result<Value, String> {
+  let data = data.0.lock().await;
+  let mut tags_map: HashMap<&str, ()> = HashMap::new();
+  for channel in &data.settings_ref().channels {
+    for tag in &channel.tags {
+      tags_map.entry(&tag).or_insert(());
+    }
+  }
+  let tags: Vec<_> = tags_map.keys().collect();
+  to_json(&tags)
 }
 
 #[command]

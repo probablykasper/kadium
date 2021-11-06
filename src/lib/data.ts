@@ -34,9 +34,14 @@ export type Video = {
 }
 
 export const settings: Writable<null | Settings> = writable(null)
+export const tags = writable([] as string[])
 export function loadSettings() {
-  runCmd('get_settings').then(async (settingsResponse: Settings) => {
+  runCmd('get_settings').then((settingsResponse: Settings) => {
     settings.set(settingsResponse)
+  })
+  runCmd('tags').then((tagsResponse) => {
+    tags.set(tagsResponse)
+    console.log(tagsResponse)
   })
 }
 
@@ -90,9 +95,11 @@ export type ViewOptions = {
   show_all: boolean
   show_archived: boolean
   channel_filter: string
+  tag: string | null
 }
 export const viewOptions: Writable<ViewOptions> = writable({
   show_all: false,
   show_archived: false,
   channel_filter: '',
+  tag: null,
 })

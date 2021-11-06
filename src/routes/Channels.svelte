@@ -1,13 +1,15 @@
 <script lang="ts">
   import Link from '../lib/Link.svelte'
-  import type { Channel } from '../lib/data'
+  import { Channel, loadSettings } from '../lib/data'
   import Tags from '../lib/Tags.svelte'
   import { runCmd } from '../lib/general'
 
   export let channels: Channel[]
 
-  function saveChannels() {
-    runCmd('set_channels', { channels })
+  async function saveChannels() {
+    runCmd('set_channels', { channels }).then(() => {
+      loadSettings()
+    })
   }
 </script>
 

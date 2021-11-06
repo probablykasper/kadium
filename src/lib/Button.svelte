@@ -13,6 +13,7 @@
     background-color: transparent
     position: relative
     outline: none
+    z-index: 1
     &::before
       content: ''
       position: absolute

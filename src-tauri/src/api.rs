@@ -56,7 +56,7 @@ pub mod videos {
   #[derive(Deserialize, Debug)]
   #[allow(non_snake_case)]
   pub struct LiveStreamingDetails {
-    pub scheduledStartTime: String,
+    pub actualStartTime: Option<String>,
   }
 
   #[derive(Deserialize, Debug)]

@@ -182,6 +182,7 @@ async fn check_channel(
   api_key: &str,
   channel: &ChannelInfo,
 ) -> Result<bool, String> {
+  println!("Checking {} {}", channel.uploads_playlist_id, channel.name);
   let url = "https://www.googleapis.com/youtube/v3/playlistItems".to_string()
     + "?part=contentDetails"
     + "&maxResults=50"
@@ -196,7 +197,6 @@ async fn check_channel(
   }
 
   let existing_ids = db::get_ids(&uploads.items, pool).await?;
-  println!("{} existing IDs: {:?}", existing_ids.len(), existing_ids);
 
   // check which videos are new
   let mut new_ids: Vec<String> = Vec::new();
@@ -218,9 +218,12 @@ async fn check_channel(
   if new_ids.len() == 0 {
     return Ok(false); // no new videos
   }
-  println!("New IDs: {:?}", new_ids);
 
   // get info about the videos
+  println!(
+    "Checking videos from {} {}",
+    channel.uploads_playlist_id, channel.name
+  );
   let url = "https://www.googleapis.com/youtube/v3/videos".to_string()
     + "?part=contentDetails,liveStreamingDetails,snippet"
     + "&id="
@@ -231,12 +234,10 @@ async fn check_channel(
 
   let mut videos_to_add: Vec<db::Video> = Vec::new();
   for video in videos.items {
-    // skip future livestreams
     if let Some(live_streaming_details) = &video.liveStreamingDetails {
-      let start_time = &live_streaming_details.scheduledStartTime;
-      let start_timestamp = parse_datetime(&start_time)?;
-      if start_timestamp > chrono::Utc::now() {
-        continue; // skip future livestreams
+      // skip future livestreams. actualStartTime doesn't exist for future streams
+      if live_streaming_details.actualStartTime == None {
+        continue;
       }
     }
     let publish_time = parse_datetime(&video.snippet.publishedAt)?;

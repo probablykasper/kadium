@@ -1550,7 +1550,6 @@ dependencies = [
  "atomicwrites",
  "chrono",
  "iso8601-duration",
- "log",
  "macos-app-nap",
  "reqwest",
  "rfd",

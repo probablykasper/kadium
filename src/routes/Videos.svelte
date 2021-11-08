@@ -1,43 +1,66 @@
 <script lang="ts">
-  import { sampleVideos, useSampleData, ViewOptions, viewOptions } from '../lib/data'
+  import { videos, totalVideos, ViewOptions, viewOptions } from '../lib/data'
   import { listen } from '@tauri-apps/api/event'
-  import { onDestroy } from 'svelte'
+  import { onDestroy, tick } from 'svelte'
   import { runCmd } from '../lib/general'
 
-  type Video = {
-    id: string
-    title: string
-    description: string
-    publishTimeMs: number
-    durationMs: number
-    thumbnailStandard: boolean
-    thumbnailMaxres: boolean
-    channelId: string
-    channelName: string
-    unread: boolean
-    archived: boolean
-  }
-  let videos: Video[] = []
-
-  if (useSampleData) videos = $sampleVideos
-  async function getVideos(options: ViewOptions) {
-    videos = await runCmd('get_videos', { options })
-  }
   $: getVideos($viewOptions)
+  let loading = false
+  async function getVideos(options: ViewOptions) {
+    loading = true
+
+    $videos = await runCmd('get_videos', { options })
+    if ($videos.length < $viewOptions.limit) {
+      $totalVideos = $videos.length
+    } else {
+      $totalVideos = null
+    }
+
+    loading = false
+
+    await tick()
+    await autoloadHandler()
+  }
+  async function getMoreVideos() {
+    loading = true
+
+    const newVideos = await runCmd('get_videos', {
+      options: $viewOptions,
+      after: {
+        publishTimeMs: $videos[$videos.length - 1].publishTimeMs,
+        id: $videos[$videos.length - 1].id,
+      },
+    })
+    $videos = $videos.concat(newVideos)
+    if (newVideos.length < $viewOptions.limit) {
+      $totalVideos = $videos.length
+    } else {
+      $totalVideos = null
+    }
+
+    loading = false
+    await tick()
+    await autoloadHandler()
+  }
+  async function autoloadHandler() {
+    console.log($totalVideos === null, isScrolledToBottom(), !loading)
+    if ($totalVideos === null && isScrolledToBottom() && !loading) {
+      await getMoreVideos()
+    }
+  }
 
   let updateCounter = 0
-  async function getCount() {
+  async function getUpdateCount() {
     const newCount = await runCmd('video_update_counter')
-    console.log('newCount', newCount)
     if (newCount > updateCounter) {
       getVideos($viewOptions)
     }
   }
-  let updateInterval = setInterval(getCount, 2000)
+  let updateInterval = setInterval(getUpdateCount, 2000)
   const focusUnlistener = listen('tauri://focus', () => {
     clearInterval(updateInterval)
-    getCount()
-    updateInterval = setInterval(getCount, 2000)
+    getUpdateCount()
+    updateInterval = setInterval(getUpdateCount, 2000)
   })
   const blurUnlistener = listen('tauri://blur', () => {
     clearInterval(updateInterval)
@@ -74,15 +97,28 @@
     }
     getVideos($viewOptions)
   }
+
+  let main: HTMLElement | null = null
+  const loadThreshold = 0
+  function isScrolledToBottom() {
+    if (main) {
+      const offset = main.scrollHeight - (main.clientHeight + main.scrollTop)
+      if (offset <= loadThreshold) {
+        return true
+      }
+    }
+    return false
+  }
 </script>
 
-<main class="selectable">
-  {#each videos as video}
+<svelte:window on:resize={autoloadHandler} />
+<main bind:this={main} class="selectable" on:scroll={autoloadHandler}>
+  {#each $videos as video}
     <div class="box">
       <!-- <img src="https://i.ytimg.com/vi/{video.id}/hqdefault.jpg" alt="" /> -->
       <!-- <img src="https://i.ytimg.com/vi/{video.id}/sddefault.jpg" alt="" /> -->
       <a target="_blank" href="https://youtube.com/watch?v={video.id}">
-        <img src="https://i.ytimg.com/vi/{video.id}/maxresdefault.jpg" alt="" />
+        <img src="https://i.ytimg.com/vi/{video.id}/mqdefault.jpg" alt="" />
       </a>
       <button
         class="archive"
@@ -129,6 +165,8 @@
     -webkit-user-select: text
   main
     max-width: 100%
+    max-height: 100%
+    overflow-y: auto
     box-sizing: border-box
     display: grid
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr))

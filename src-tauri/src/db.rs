@@ -1,12 +1,11 @@
 use crate::api::playlist_items;
 use crate::data::{to_json, AppPaths, DataState};
 use crate::throw;
-use log;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::migrate::MigrateDatabase;
 use sqlx::sqlite::{SqliteConnectOptions, SqliteRow};
-use sqlx::{ConnectOptions, Row, Sqlite, SqlitePool};
+use sqlx::{Row, Sqlite, SqlitePool};
 use tauri::command;
 
 pub async fn init(app_paths: &AppPaths) -> Result<SqlitePool, String> {
@@ -24,8 +23,7 @@ pub async fn init(app_paths: &AppPaths) -> Result<SqlitePool, String> {
     }
   }
 
-  let mut connect_options = SqliteConnectOptions::new().filename(&app_paths.db);
-  connect_options.log_statements(log::LevelFilter::Info);
+  let connect_options = SqliteConnectOptions::new().filename(&app_paths.db);
   let pool = match SqlitePool::connect_with(connect_options).await {
     Ok(pool) => pool,
     Err(e) => throw!("Could not open database: {}", e),
@@ -129,22 +127,35 @@ pub async fn insert_video(video: &Video, pool: &SqlitePool) -> Result<(), String
   Ok(())
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Options {
   show_all: bool,
   show_archived: bool,
   channel_filter: String,
   tag: Option<String>,
+  limit: u16,
+}
+#[derive(Debug, Serialize, Deserialize)]
+#[allow(non_snake_case)]
+pub struct After {
+  publishTimeMs: i64,
+  id: String,
 }
 
 #[command]
-pub async fn get_videos(options: Options, data: DataState<'_>) -> Result<Value, String> {
+pub async fn get_videos(
+  options: Options,
+  after: Option<After>,
+  data: DataState<'_>,
+) -> Result<Value, String> {
   let data = data.0.lock().await;
-  let mut selects = vec!["*"];
-  let mut wheres = Vec::new();
+  let mut selects: Vec<&str> = vec!["*"];
+  let mut wheres: Vec<&str> = Vec::new();
+  let mut bindings: Vec<&str> = Vec::new();
   if options.channel_filter != "" {
     selects.push("INSTR(channelName, ?) channelFilter");
     wheres.push("channelFilter > 0");
+    bindings.push(&options.channel_filter);
   }
   if !options.show_all {
     if options.show_archived {
@@ -153,14 +164,20 @@ pub async fn get_videos(options: Options, data: DataState<'_>) -> Result<Value, 
       wheres.push("archived = 0");
     }
   }
+  let after_publish_time_ms;
+  if let Some(after) = &after {
+    wheres.push("(publishTimeMs,id) > (?,?)");
+    after_publish_time_ms = after.publishTimeMs.to_string();
+    bindings.push(&after_publish_time_ms);
+    bindings.push(&after.id);
+  }
 
-  let mut channel_ids: Vec<&str> = Vec::new();
   let q;
   if let Some(tag) = &options.tag {
     let mut question_marks: Vec<&str> = Vec::new();
     for channel in &data.settings_ref().channels {
       if channel.tags.contains(tag) {
-        channel_ids.push(&channel.id);
+        bindings.push(&channel.id);
         question_marks.push("?");
       }
     }
@@ -168,20 +185,18 @@ pub async fn get_videos(options: Options, data: DataState<'_>) -> Result<Value, 
     wheres.push(&q);
   }
 
-  let mut query_str = "SELECT ".to_owned() + &selects.join(",") + " FROM videos";
+  let mut query_str = "SELECT ".to_owned() + &selects.join(",");
+  query_str.push_str(" FROM videos");
   if wheres.len() > 0 {
     query_str.push_str(" WHERE ");
     query_str.push_str(&wheres.join(" AND "));
   }
+  query_str.push_str(" ORDER BY publishTimeMs, id DESC");
+  query_str.push_str(&format!(" LIMIT {}", options.limit.to_string()));
 
   let mut query = sqlx::query_as(&query_str);
-  if options.channel_filter != "" {
-    query = query.bind(&options.channel_filter);
-  }
-  if options.tag.is_some() {
-    for channel_id in channel_ids {
-      query = query.bind(channel_id);
-    }
+  for binding in bindings {
+    query = query.bind(binding);
   }
   let videos: Vec<Video> = match query.fetch_all(&data.db_pool).await {
     Ok(videos) => videos,

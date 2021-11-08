@@ -1,6 +1,6 @@
 <script lang="ts">
   import { active, router } from 'tinro'
-  import { tags, viewOptions } from './data'
+  import { tags, totalVideos, videos, viewOptions } from './data'
   import { checkShortcut } from './general'
 
   function go(e: MouseEvent) {
@@ -51,23 +51,32 @@
   <a on:mousedown={go} use:active href="/channels"><button>Channels</button></a>
   <a on:mousedown={go} use:active href="/settings"><button>Settings</button></a>
 </nav>
-<div class="options-bar">
-  <button class="bar-item group" on:keydown={showGroupKeydown} tabindex="0">
-    <div class="item" class:selected={show === 0} on:mousedown={() => (show = 0)}>New</div>
-    <div class="item" class:selected={show === 1} on:mousedown={() => (show = 1)}>Archived</div>
-    <div class="item" class:selected={show === 2} on:mousedown={() => (show = 2)}>All</div>
-  </button>
-  <input
-    class="bar-item"
-    type="text"
-    placeholder="Channel Filter"
-    bind:value={$viewOptions.channel_filter} />
-  {#each $tags as tag}
-    <button
-      class="bar-item tag"
-      class:enabled={$viewOptions.tag === tag}
-      on:click={() => toggleTag(tag)}>{tag}</button>
-  {/each}
+<div class="sub-bar">
+  <div class="options-bar">
+    <button class="bar-item control-style group" on:keydown={showGroupKeydown} tabindex="0">
+      <div class="item" class:selected={show === 0} on:mousedown={() => (show = 0)}>New</div>
+      <div class="item" class:selected={show === 1} on:mousedown={() => (show = 1)}>Archived</div>
+      <div class="item" class:selected={show === 2} on:mousedown={() => (show = 2)}>All</div>
+    </button>
+    <input
+      class="bar-item control-style"
+      type="text"
+      placeholder="Channel Filter"
+      bind:value={$viewOptions.channel_filter} />
+    {#each $tags as tag}
+      <button
+        class="bar-item control-style tag"
+        class:enabled={$viewOptions.tag === tag}
+        on:click={() => toggleTag(tag)}>{tag}</button>
+    {/each}
+  </div>
+  <div class="bar-item page-info">
+    {#if $totalVideos === null}
+      {$videos.length} of ?
+    {:else}
+      {$videos.length} of {$totalVideos}
+    {/if}
+  </div>
 </div>
 
 <style lang="sass">
@@ -94,24 +103,33 @@
       color: inherit
       margin: 0px
       padding: 6px 0px
-  .options-bar
-    height: var(--options-bar-height)
+  .sub-bar
+    display: flex
+    align-items: center
+    width: 100%
     box-sizing: border-box
     padding: 0px 20px
-    padding-bottom: 10px
+    justify-content: space-between
+  .bar-item
+    margin-bottom: 5px
+  .page-info
+    flex-shrink: 0
+    margin-left: 5px
+    font-size: 13px
+    opacity: 0.7
+  .options-bar
+    box-sizing: border-box
     align-items: center
     display: flex
-    overflow-y: scroll
-    overscroll-behavior-y: none
-    overscroll-behavior-x: none
-    -webkit-overflow-scrolling: touch
-  .bar-item
+    flex-wrap: wrap
+  .control-style
     border-radius: 3px
     border: 1px solid hsl(233, 7%, 22%)
     background-color: hsla(223, 33%, 64%, 0.12)
     outline: none
-    margin: 0px
-    margin-right: 12px
+    margin-top: 0px
+    margin-left: 0px
+    margin-right: 10px
     font-size: 13px
     color: inherit
   .group
@@ -143,6 +161,8 @@
     border-radius: 10px
     margin-right: 5px
     transition: all 120ms cubic-bezier(0.4, 0.0, 0.2, 1)
+    &:hover
+      border: 1px solid hsl(220, 10%, 40%)
     &:focus
       border-color: hsla(220, 100%, 50%, 1)
       box-shadow: 0px 0px 0px 3px hsla(220, 100%, 50%, 0.5)

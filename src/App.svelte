@@ -59,9 +59,11 @@
     height: 100%
     margin: 0px
     color-scheme: dark
+    display: flex
+    flex-direction: column
   main
-    overflow: auto
-    height: calc(100% - var(--header-height))
+    height: 0px
+    flex-grow: 1
     background-color: #0F1115 // so scrollbars are light
     margin-right: 1px
 </style>

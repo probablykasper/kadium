@@ -33,6 +33,24 @@ export type Video = {
   archived: boolean
 }
 
+export type ViewOptions = {
+  show_all: boolean
+  show_archived: boolean
+  channel_filter: string
+  tag: string | null
+  limit: number
+}
+export const viewOptions: Writable<ViewOptions> = writable({
+  show_all: false,
+  show_archived: false,
+  channel_filter: '',
+  tag: null,
+  limit: 5,
+})
+
+export const videos = writable([] as Video[])
+export const totalVideos = writable(null as number | null)
+
 export const settings: Writable<null | Settings> = writable(null)
 export const tags = writable([] as string[])
 export function loadSettings() {
@@ -41,15 +59,11 @@ export function loadSettings() {
   })
   runCmd('tags').then((tagsResponse) => {
     tags.set(tagsResponse)
-    console.log(tagsResponse)
   })
 }
 
-export const useSampleData = writable(false)
-export const sampleVideos: Writable<Video[]> = writable([])
 export function enableSampleData() {
-  useSampleData.set(true)
-  sampleVideos.set(
+  videos.set(
     (() => {
       const videos = []
       for (let i = 0; i < 100; i++) {
@@ -90,16 +104,3 @@ export function enableSampleData() {
     })(),
   })
 }
-
-export type ViewOptions = {
-  show_all: boolean
-  show_archived: boolean
-  channel_filter: string
-  tag: string | null
-}
-export const viewOptions: Writable<ViewOptions> = writable({
-  show_all: false,
-  show_archived: false,
-  channel_filter: '',
-  tag: null,
-})

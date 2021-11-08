@@ -118,7 +118,9 @@
       <!-- <img src="https://i.ytimg.com/vi/{video.id}/hqdefault.jpg" alt="" /> -->
       <!-- <img src="https://i.ytimg.com/vi/{video.id}/sddefault.jpg" alt="" /> -->
       <a target="_blank" href="https://youtube.com/watch?v={video.id}">
-        <img src="https://i.ytimg.com/vi/{video.id}/mqdefault.jpg" alt="" />
+        <div class="img-box">
+          <img src="https://i.ytimg.com/vi/{video.id}/mqdefault.jpg" alt="" />
+        </div>
       </a>
       <button
         class="archive"
@@ -183,7 +185,13 @@
     user-select: none
     -webkit-user-select: none
     position: relative
+  .img-box
+    width: 100%
+    padding-top: 56.25%
   img
+    position: absolute
+    top: 0px
+    left: 0px
     width: 100%
   p
     margin: 0px

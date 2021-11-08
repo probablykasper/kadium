@@ -1498,9 +1498,9 @@ checksum = "b71991ff56294aa922b450139ee08b3bfc70982c6b2c7562771375cf73542dd4"
 
 [[package]]
 name = "javascriptcore-rs"
-version = "0.15.1"
+version = "0.15.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a9644bfae308588f4e57616bd8402b982dbcd68d1934c0848e2869ffcc03b562"
+checksum = "e207780c1d1cd3c36056695e44010a19dd481574a2106cd2540edda4128a9794"
 dependencies = [
  "bitflags",
  "glib",
@@ -1509,9 +1509,9 @@ dependencies = [
 
 [[package]]
 name = "javascriptcore-rs-sys"
-version = "0.3.0"
+version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c75261f65a87f3903856651c1c0a847e06e1fc55a2d78879f3fb570c4bacaf2"
+checksum = "2adf2de824b178d76c6017da59f4e7e95de49a766b584c59d47821a6c3dce9e2"
 dependencies = [
  "glib-sys 0.14.0",
  "gobject-sys 0.14.0",
@@ -3139,7 +3139,7 @@ dependencies = [
 [[package]]
 name = "tao"
 version = "0.5.2"
-source = "git+https://github.com/tauri-apps/tao?branch=next#97cd0497ae827903f7d67aa1c991a77a397c9cb8"
+source = "git+https://github.com/tauri-apps/tao?branch=next#2294e312b7c0d422968be3b1406eaa4fe83bc96d"
 dependencies = [
  "bitflags",
  "cairo-rs",
@@ -3816,9 +3816,9 @@ dependencies = [
 
 [[package]]
 name = "webkit2gtk"
-version = "0.15.1"
+version = "0.15.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "525fc0e0f81e567293e9d2469a0cf1124c7a757437b934c2f9514cfd0264f676"
+checksum = "d5725e8ede878b7c00419066868085b83fb7d01eea904c1a0bd0159ad3ce0ba3"
 dependencies = [
  "bitflags",
  "cairo-rs",
@@ -3839,9 +3839,9 @@ dependencies = [
 
 [[package]]
 name = "webkit2gtk-sys"
-version = "0.15.0"
+version = "0.15.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bfd518519f30f8596be1c3c26cd2032111641fd6f7c1f5ac5af0a0730a4d3f60"
+checksum = "b34314407e381b88a72610d0f4eeff1552cbf8ee5420dbe84749fa26aa11b4e3"
 dependencies = [
  "atk-sys",
  "bitflags",

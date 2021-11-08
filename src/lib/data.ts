@@ -45,7 +45,7 @@ export const viewOptions: Writable<ViewOptions> = writable({
   show_archived: false,
   channel_filter: '',
   tag: null,
-  limit: 5,
+  limit: 50,
 })
 
 export const videos = writable([] as Video[])

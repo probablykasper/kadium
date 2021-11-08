@@ -38,7 +38,9 @@
     -webkit-user-select: text
   .channels
     flex-wrap: wrap
-    margin: 0px var(--page-padding)
+    padding: 0px var(--page-padding)
+    height: 100%
+    overflow-y: auto
   .channel
     display: flex
     flex-grow: 1

@@ -177,7 +177,7 @@
         margin: 0px auto
     grid-gap: 15px
     padding: var(--page-padding)
-    padding-top: 5px
+    padding-top: 10px
   .box
     max-width: 280px
     user-select: none

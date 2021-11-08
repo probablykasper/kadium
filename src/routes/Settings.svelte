@@ -18,19 +18,24 @@
   }
 </script>
 
-<form class="page" on:submit|preventDefault={setGeneralSettings}>
-  <p>API Key</p>
-  <input type="text" bind:value={apiKey} />
-  <p>Max Concurrent Requests</p>
-  <input type="number" bind:value={maxConcurrentRequests} />
-  <div>
-    <Button>Save</Button>
-  </div>
-</form>
+<div class="scroll">
+  <form class="page" on:submit|preventDefault={setGeneralSettings}>
+    <p>API Key</p>
+    <input type="text" bind:value={apiKey} />
+    <p>Max Concurrent Requests</p>
+    <input type="number" bind:value={maxConcurrentRequests} />
+    <div>
+      <Button>Save</Button>
+    </div>
+  </form>
+</div>
 
 <style lang="sass">
+  .scroll
+    height: 100%
+    overflow-y: auto
   .page
-    padding: 0px 20px
+    padding: 10px 20px
     max-width: 550px
     margin: auto
     display: flex

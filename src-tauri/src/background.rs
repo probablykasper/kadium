@@ -7,6 +7,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
+use tauri::api::notification::Notification;
 use tauri::async_runtime::Mutex;
 use tokio::runtime::Runtime;
 use tokio::sync::broadcast;
@@ -168,8 +169,10 @@ async fn run_interval(
           }
         }
         Err(e) => {
-          println!("{}", e);
-          todo!(); // show error to user
+          let title = format!("Error checking {}", channel.name);
+          eprintln!("Error checking {}: {}", title, e);
+          let _ = Notification::new("error").title(title).body(e).show();
+          break;
         }
       }
     }
@@ -191,7 +194,7 @@ async fn check_channel(
     + &channel.uploads_playlist_id;
   let uploads = yt_request::<playlist_items::Response>(&url, api_key)
     .await
-    .map_err(|e| format!("Error checking channel \"{}\": {}", channel.name, e))?;
+    .map_err(|e| format!("Failed to get channel: {}", e))?;
 
   if uploads.items.len() == 0 {
     return Ok(false); // no channel videos returned
@@ -231,7 +234,7 @@ async fn check_channel(
     + &new_ids.join(",");
   let videos = yt_request::<videos::Response>(&url, api_key)
     .await
-    .map_err(|e| format!("Error checking channel \"{}\": {}", channel.name, e))?;
+    .map_err(|e| format!("Failed to get videos: {}", e))?;
 
   let mut videos_to_add: Vec<db::Video> = Vec::new();
   for video in videos.items {

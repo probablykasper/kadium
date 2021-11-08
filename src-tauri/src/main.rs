@@ -38,7 +38,7 @@ macro_rules! throw {
 
 #[command]
 fn error_popup(msg: String, win: Window) {
-  println!("Error: {}", msg);
+  eprintln!("Error: {}", msg);
   thread::spawn(move || {
     dialog::message(Some(&win), "Error", msg);
   });

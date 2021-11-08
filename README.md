@@ -8,13 +8,6 @@
   <a href="https://github.com/probablykasper/kadium/releases"><b>Download for Mac, Windows or Linux</b></a>
 </p>
 
-<!-- hide this section inside the app, where the readme shows as a help section-->
-<p align="center" class="hide-in-app">
-  <img src="./assets/menubar-screenshot.jpg" width="150">
-  <br>
-  <img src="./assets/settings-screenshot.jpg" width="500">
-</p>
-
 ## Dev instructions
 
 ### Get started

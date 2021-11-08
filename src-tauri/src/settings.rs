@@ -93,6 +93,7 @@ pub mod v1 {
 pub mod yt_email_notifier {
   use crate::settings::v1;
   use crate::throw;
+  use chrono::Utc;
   use serde::{Deserialize, Serialize};
   use std::fs::File;
   use std::io::Read;
@@ -154,7 +155,7 @@ pub mod yt_email_notifier {
               name: v1_channel.name.clone(),
               icon: v1_channel.icon.clone(),
               uploads_playlist_id: v1_channel.uploadsPlaylistId.clone(),
-              from_time: v1_channel.fromTime,
+              from_time: Utc::now().timestamp_millis(),
               refresh_rate_ms: refresh_rate_mins as u64 * 60 * 1000,
               tags: vec![v1_instance.email.clone()],
             });

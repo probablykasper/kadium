@@ -69,8 +69,7 @@ pub struct Channel {
   pub icon: String,
   pub uploads_playlist_id: String,
   pub from_time: i64,
-  /// Milliseconds between refreshes
-  pub refresh_rate: u64,
+  pub refresh_rate_ms: u64,
   pub tags: Vec<String>,
 }
 
@@ -149,13 +148,14 @@ pub mod yt_email_notifier {
         let mut channels = Vec::new();
         for v1_instance in settings.instances.iter() {
           for v1_channel in v1_instance.channels.iter() {
+            let refresh_rate_mins = v1_instance.minutesBetweenRefreshes.parse().unwrap_or(60.0);
             channels.push(v1::Channel {
               id: v1_channel.id.clone(),
               name: v1_channel.name.clone(),
               icon: v1_channel.icon.clone(),
               uploads_playlist_id: v1_channel.uploadsPlaylistId.clone(),
               from_time: v1_channel.fromTime,
-              refresh_rate: v1_instance.minutesBetweenRefreshes.parse().unwrap_or(60),
+              refresh_rate_ms: refresh_rate_mins as u64 * 60 * 1000,
               tags: vec![v1_instance.email.clone()],
             });
           }

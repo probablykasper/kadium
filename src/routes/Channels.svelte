@@ -23,7 +23,7 @@
         <div class="content">
           <!-- <span>{channel.id}</span> -->
           <span>Check for videos after {new Date(channel.from_time).toLocaleString()}</span>
-          <span>Minutes between refreshes: {channel.refresh_rate}</span>
+          <span>Minutes between refreshes: {channel.refresh_rate_ms / 1000 / 60}</span>
         </div>
         <Tags bind:value={channel.tags} on:update={saveChannels} />
       </div>

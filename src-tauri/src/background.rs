@@ -91,10 +91,12 @@ fn new_intervals_map(channels: &Vec<settings::Channel>) -> IntervalMap {
   let mut intervals_map: IntervalMap = HashMap::new();
   for channel in channels.iter() {
     let default = IntervalInfo {
-      ms: channel.refresh_rate,
+      ms: channel.refresh_rate_ms,
       channels: Vec::new(),
     };
-    let interval_info = intervals_map.entry(channel.refresh_rate).or_insert(default);
+    let interval_info = intervals_map
+      .entry(channel.refresh_rate_ms)
+      .or_insert(default);
     interval_info.channels.push(ChannelInfo {
       name: channel.name.to_string(),
       uploads_playlist_id: channel.uploads_playlist_id.clone(),
@@ -154,10 +156,9 @@ async fn run_interval(
 ) {
   let mut interval = time::interval(Duration::from_millis(interval_info.ms));
   interval.set_missed_tick_behavior(time::MissedTickBehavior::Delay);
-  let mut run_num = 0;
   loop {
     interval.tick().await;
-    println!("{}ms task: {}", interval_info.ms, run_num);
+    println!("Start checking {}ms task", interval_info.ms);
     for channel in &interval_info.channels {
       match check_channel(&pool, &api_key, &channel).await {
         Ok(did_insert) => {
@@ -172,7 +173,7 @@ async fn run_interval(
         }
       }
     }
-    run_num += 1;
+    println!("Done checking {}ms task", interval_info.ms);
   }
 }
 

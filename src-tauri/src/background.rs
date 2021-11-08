@@ -31,6 +31,7 @@ pub struct FetcherHandle {
 
 impl FetcherHandle {
   pub fn stop(&self) {
+    println!("Stopping tasks");
     // Error can only occur when channel is already closed
     let _ = self.stop_sender.send(());
   }

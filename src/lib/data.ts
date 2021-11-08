@@ -11,6 +11,17 @@ export type Channel = {
   refresh_rate_ms: number
   tags: string[]
 }
+export function defaultChannel(): Channel {
+  return {
+    id: '',
+    name: '',
+    icon: '',
+    uploads_playlist_id: '',
+    from_time: Date.now(),
+    refresh_rate_ms: 1000 * 60 * 30,
+    tags: [],
+  }
+}
 
 export type Settings = {
   api_key: string
@@ -52,11 +63,11 @@ export const totalVideos = writable(null as number | null)
 
 export const settings: Writable<null | Settings> = writable(null)
 export const tags = writable([] as string[])
-export function loadSettings() {
-  runCmd('get_settings').then((settingsResponse: Settings) => {
+export async function loadSettings() {
+  await runCmd('get_settings').then((settingsResponse: Settings) => {
     settings.set(settingsResponse)
   })
-  runCmd('tags').then((tagsResponse) => {
+  await runCmd('tags').then((tagsResponse) => {
     tags.set(tagsResponse)
   })
 }

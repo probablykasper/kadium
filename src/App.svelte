@@ -7,7 +7,10 @@
   import VideosPage from './routes/Videos.svelte'
   import Nav from './lib/Nav.svelte'
 
-  loadSettings()
+  let error = false
+  loadSettings().catch(() => {
+    error = true
+  })
 
   function keydown(e: KeyboardEvent) {
     if (
@@ -24,11 +27,7 @@
 
 <svelte:window on:keydown={keydown} />
 
-{#if $settings === null}
-  Error loading.
-
-  <button on:click={enableSampleData}>Check out sample data?</button>
-{:else}
+{#if $settings !== null}
   <Nav />
   <main>
     <Route path="/"><VideosPage /></Route>
@@ -38,6 +37,10 @@
         apiKey={$settings.api_key}
         maxConcurrentRequests={$settings.max_concurrent_requests} /></Route>
   </main>
+{:else if error}
+  Error loading.
+
+  <button on:click={enableSampleData}>Check out sample data?</button>}
 {/if}
 
 <style lang="sass">

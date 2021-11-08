@@ -43,7 +43,6 @@
     await autoloadHandler()
   }
   async function autoloadHandler() {
-    console.log($totalVideos === null, isScrolledToBottom(), !loading)
     if ($totalVideos === null && isScrolledToBottom() && !loading) {
       await getMoreVideos()
     }

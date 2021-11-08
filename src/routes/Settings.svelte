@@ -7,14 +7,13 @@
   export let apiKey: string
   export let maxConcurrentRequests: number
 
-  function setGeneralSettings() {
-    runCmd('set_general_settings', {
+  async function setGeneralSettings() {
+    await runCmd('set_general_settings', {
       apiKey,
       maxConcurrentRequests,
-    }).then(() => {
-      loadSettings()
-      router.goto('/')
     })
+    await loadSettings()
+    router.goto('/')
   }
 </script>
 
@@ -41,15 +40,19 @@
     display: flex
     flex-direction: column
   p
-    margin: 0px 2px
+    margin: 0px
     font-size: 14px
     font-weight: 500
     margin-top: 5px
-    margin-bottom: 0.5em
+    margin-bottom: 7px
+    cursor: default
   input
     display: block
-    padding: 8px 12px
-    margin: 2px
+    font-size: 12px
+    height: 31px
+    padding: 0px 12px
+    box-sizing: border-box
+    margin: 0px
     background-color: hsla(223, 33%, 64%, 0.1)
     border: 1px solid hsla(0, 0%, 50%, 0.2)
     border-radius: 3px

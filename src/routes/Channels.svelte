@@ -1,20 +1,31 @@
 <script lang="ts">
   import Link from '../lib/Link.svelte'
-  import { Channel, loadSettings } from '../lib/data'
+  import { Channel, defaultChannel, loadSettings } from '../lib/data'
   import Tags from '../lib/Tags.svelte'
   import { runCmd } from '../lib/general'
+  import ChannelModal from '../modals/Channel.svelte'
 
   export let channels: Channel[]
 
   async function saveChannels() {
-    runCmd('set_channels', { channels }).then(() => {
-      loadSettings()
-    })
+    await runCmd('set_channels', { channels })
+    await loadSettings()
+  }
+
+  let editIndex: null | number = null
+  let editVisible = false
+  function openEditModal(index: number) {
+    editIndex = index
+    editVisible = true
   }
 </script>
 
+{#if editIndex !== null}
+  <ChannelModal {channels} index={editIndex} bind:visible={editVisible} />
+{/if}
+
 <div class="channels">
-  {#each channels as channel}
+  {#each channels as channel, i}
     <div class="channel selectable">
       <img src={channel.icon} alt="" />
       <div class="details">
@@ -23,11 +34,13 @@
         <div class="content">
           <!-- <span>{channel.id}</span> -->
           <span>Check for videos after {new Date(channel.from_time).toLocaleString()}</span>
-          <span>Minutes between refreshes: {channel.refresh_rate_ms / 1000 / 60}</span>
+          <span>Refresh rate: {channel.refresh_rate_ms / 1000 / 60} minutes</span>
         </div>
         <Tags bind:value={channel.tags} on:update={saveChannels} />
       </div>
-      <Link>Edit</Link>
+      <Link on:click={() => openEditModal(i)}>
+        <div class="edit">Edit</div>
+      </Link>
     </div>
   {/each}
 </div>
@@ -74,4 +87,6 @@
       span
         display: block
         color: hsla(231, 20%, 100%, 0.5)
+  .edit
+    padding: 10px 0px
 </style>

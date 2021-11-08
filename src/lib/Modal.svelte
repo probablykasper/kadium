@@ -3,6 +3,10 @@
   let modalBg: HTMLDivElement
   $: if (visible && modalBg) {
     modalBg.focus()
+    const firstInput = modalBg.querySelector('input, textarea')
+    if (firstInput instanceof HTMLElement) {
+      firstInput.focus()
+    }
   }
   function close() {
     visible = false
@@ -44,4 +48,5 @@
     overflow: auto
   .spacer
     margin: 18px
+    position: relative
 </style>

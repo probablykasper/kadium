@@ -7,7 +7,7 @@ use crate::data::{AppPaths, ArcData, Data};
 use crate::menu::Item as MenuItem;
 use crate::settings::yt_email_notifier;
 use crate::settings::VersionedSettings;
-use std::thread;
+use std::{env, thread};
 use tauri::api::{dialog, shell};
 use tauri::{command, CustomMenuItem, Submenu, Window, WindowBuilder, WindowUrl};
 use tokio::runtime::Runtime;
@@ -117,6 +117,14 @@ async fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
 const MAIN_WIN: &str = "main";
 
 fn main() {
+  if cfg!(debug_assertions) && env::var("DEVELOPMENT").is_err() {
+    eprintln!(
+      "Detected debug mode without the DEVELOPMENT environment \
+      variable set. Set it using DEVELOPMENT=1. This is explicitly required \
+      so you won't forget if you decide to run in release mode"
+    );
+    panic!();
+  }
   let ctx = tauri::generate_context!();
 
   // macOS "App Nap" periodically pauses our app when it's in the background.

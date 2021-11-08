@@ -47,29 +47,6 @@ impl FetcherHandle {
   }
 }
 
-fn interval_info_test() -> HashMap<u64, IntervalInfo> {
-  let mut map = HashMap::new();
-  map.insert(
-    2000 * 60 * 60,
-    IntervalInfo {
-      ms: 2000 * 60 * 60,
-      channels: vec![],
-    },
-  );
-  map.insert(
-    1000 * 60 * 60,
-    IntervalInfo {
-      ms: 1000 * 60 * 60,
-      channels: vec![ChannelInfo {
-        name: "Bendover Productions".to_string(),
-        uploads_playlist_id: "UU9RM-iSvTu1uPJb8X5yp3EQ".to_string(),
-        from_time: 1623715200000,
-      }],
-    },
-  );
-  map
-}
-
 pub fn spawn(settings: &settings::Settings, pool: &SqlitePool) -> Option<FetcherHandle> {
   if settings.channels.len() == 0 {
     return None;
@@ -78,8 +55,7 @@ pub fn spawn(settings: &settings::Settings, pool: &SqlitePool) -> Option<Fetcher
   let api_key = settings.api_key.clone();
   let pool = pool.clone();
 
-  let _interval_map = new_intervals_map(&settings.channels);
-  let interval_map = interval_info_test();
+  let interval_map = new_intervals_map(&settings.channels);
   let interval_infos = to_interval_info_vector(interval_map);
 
   let (stop_sender, _stop_receiver) = broadcast::channel(1);

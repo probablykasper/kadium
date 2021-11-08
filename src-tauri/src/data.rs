@@ -5,6 +5,7 @@ use serde::Serialize;
 use serde_json::Value;
 use sqlx::SqlitePool;
 use std::collections::HashMap;
+use std::env;
 use std::io::Write;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -19,7 +20,10 @@ pub struct AppPaths {
 }
 impl AppPaths {
   pub fn from_tauri_config(config: &Config) -> Self {
-    let app_dir = tauri::api::path::app_dir(config).unwrap();
+    let app_dir = match env::var("DEVELOPMENT").is_ok() {
+      true => env::current_dir().unwrap().join("appdata"),
+      false => tauri::api::path::app_dir(config).unwrap(),
+    };
     AppPaths {
       app_dir: app_dir.clone(),
       settings_file: app_dir.join("Settings.json"),

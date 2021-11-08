@@ -26,7 +26,7 @@
 
 ### Commands
 
-- `npm run dev`: Start in dev mode
+- `DEVELOPMENT=1 npm run dev`: Start in dev mode. `DEVELOPMENT=1` tells Kadium to use `./src-tauri/appdata` for app data.
 - `npm run build`: Build
 - `npm run lint`: Lint
 - `npm run check`: Run svelte-check

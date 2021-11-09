@@ -11,30 +11,51 @@
   }
 
   export let channels: Channel[]
-  export let index: number
   export let visible = false
 
-  let editMode = true
-
+  let url = ''
   let fromTime: Date
   let refreshRateMinutes = 60
 
+  export let editIndex: null | number
   function get(channels: Channel[], index: number) {
     fromTime = new Date(channels[index].from_time)
     refreshRateMinutes = channels[index].refresh_rate_ms / 1000 / 60
   }
-  $: get(channels, index)
-
-  async function onDelete() {
-    channels.splice(index, 1)
-    await saveChannels()
-    visible = false
+  $: if (editIndex === null) {
+    fromTime = new Date()
+    refreshRateMinutes = 60
   }
-  async function onSave() {
-    channels[index].from_time = fromTime.getTime()
-    channels[index].refresh_rate_ms = refreshRateMinutes * 60 * 1000
-    await saveChannels()
-    visible = false
+  $: if (editIndex !== null) {
+    get(channels, editIndex)
+  }
+
+  async function submit() {
+    if (editIndex === null) {
+      await runCmd('add_channel', {
+        options: {
+          url,
+          from_time: fromTime.getTime(),
+          refresh_rate_ms: refreshRateMinutes * 60 * 1000,
+          tags: [],
+        },
+      })
+      await loadSettings()
+      visible = false
+    } else {
+      channels[editIndex].from_time = fromTime.getTime()
+      channels[editIndex].refresh_rate_ms = refreshRateMinutes * 60 * 1000
+      await saveChannels()
+      visible = false
+    }
+  }
+  async function onDelete() {
+    if (editIndex !== null) {
+      channels.splice(editIndex, 1)
+      editIndex = null
+      await saveChannels()
+      visible = false
+    }
   }
 
   let datePopupVisible = false
@@ -53,32 +74,45 @@
 </script>
 
 <Modal bind:visible on:keydown={keydown}>
-  <div class="content">
-    <h3>Edit Channel</h3>
+  <form class="content" on:submit|preventDefault={submit}>
+    {#if editIndex === null}
+      <h3>Add Channel</h3>
+    {:else}
+      <h3>Edit Channel</h3>
+    {/if}
+
+    <p>Channel or Video URL</p>
+    <input
+      type="text"
+      placeholder="https://www.youtube.com/channel/UCeTncCK57upn3lPn6PX18Ng"
+      bind:value={url} />
+
     <p>Refresh rate (minutes)</p>
     <p class="sub"
       >Channels with identical refresh rates are grouped together in batches, so it's recommended to
       use only a few different refresh rates</p>
     <input type="number" bind:value={refreshRateMinutes} />
+
     <p>Check for videos after</p>
     <div class="date-picker">
       <DateInput bind:value={fromTime} bind:visible={datePopupVisible} />
     </div>
+
     <div class="buttons">
-      {#if editMode}
+      {#if editIndex !== null}
         <Button danger on:click={onDelete}>Delete</Button>
       {/if}
       <div class="max-spacer" />
       <Button secondary on:click={() => (visible = false)}>Cancel</Button>
       <div class="spacer" />
-      <Button on:click={onSave}>Save</Button>
+      <Button type="submit">{editIndex === null ? 'Add' : 'Save'}</Button>
     </div>
-  </div>
+  </form>
 </Modal>
 
 <style lang="sass">
   .content
-    max-width: 400px
+    max-width: 440px
   .date-picker
     --date-picker-background: hsla(223, 33%, 64%, 0.1)
     --date-picker-foreground: #f7f7f7

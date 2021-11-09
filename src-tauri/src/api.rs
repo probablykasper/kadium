@@ -18,7 +18,8 @@ pub async fn yt_request<T: DeserializeOwned>(url: &str, key: &str) -> Result<T, 
       let code = error_obj.get("code").map(|v| v.as_i64()).flatten();
       let code_str = code.map(|n| n.to_string()).unwrap_or_default();
       let message = error_obj.get("message").map(|v| v.as_str()).flatten();
-      throw!("API error: {} {}", code_str, message.unwrap_or_default());
+      println!("{:?}", json);
+      throw!("{} {}", code_str, message.unwrap_or_default());
     }
     _ => {}
   }
@@ -27,6 +28,61 @@ pub async fn yt_request<T: DeserializeOwned>(url: &str, key: &str) -> Result<T, 
     Err(e) => {
       throw!("Unexpected API response: {}", e);
     }
+  }
+}
+
+pub async fn channel_id_from_video_id(id: &str, key: &str) -> Result<String, String> {
+  let url =
+    "https://youtube.googleapis.com/youtube/v3/videos".to_string() + "?part=snippet" + "&id=" + id;
+  let videos = yt_request::<videos::Response>(&url, key)
+    .await
+    .map_err(|e| format!("Failed to get video: {}", e))?;
+  for video in videos.items {
+    return Ok(video.snippet.channelId);
+  }
+  Err("No video returned".to_string())
+}
+
+pub mod channels {
+  use serde::Deserialize;
+
+  /// Lists the fields we use only. Documentation:
+  /// https://developers.google.com/youtube/v3/docs/channels/list#properties
+  #[derive(Deserialize, Debug)]
+  pub struct Response {
+    pub items: Vec<Channel>,
+  }
+  #[derive(Deserialize, Debug)]
+  #[allow(non_snake_case)]
+  pub struct Channel {
+    pub id: String,
+    pub contentDetails: ContentDetails,
+    pub snippet: Snippet,
+  }
+
+  #[derive(Deserialize, Debug)]
+  #[allow(non_snake_case)]
+  pub struct ContentDetails {
+    pub relatedPlaylists: RelatedPlaylists,
+  }
+  #[derive(Deserialize, Debug)]
+  pub struct RelatedPlaylists {
+    pub uploads: String,
+  }
+
+  #[derive(Deserialize, Debug)]
+  pub struct Snippet {
+    pub title: String,
+    pub thumbnails: Thumbnails,
+  }
+  /// default 88x88, medium 240x240, high 800x800
+  #[derive(Deserialize, Debug)]
+  pub struct Thumbnails {
+    pub medium: Thumbnail,
+  }
+  #[derive(Deserialize, Debug)]
+  pub struct Thumbnail {
+    pub url: String,
   }
 }
 
@@ -39,13 +95,11 @@ pub mod videos {
   pub struct Response {
     pub items: Vec<Video>,
   }
-  /// Lists the fields we use only. Documentation:
-  /// https://developers.google.com/youtube/v3/docs/videos#properties
   #[derive(Deserialize, Debug)]
   #[allow(non_snake_case)]
   pub struct Video {
     pub id: String,
-    pub contentDetails: ContentDetails,
+    pub contentDetails: Option<ContentDetails>,
     pub liveStreamingDetails: Option<LiveStreamingDetails>,
     pub snippet: Snippet,
   }
@@ -95,8 +149,6 @@ pub mod playlist_items {
   pub struct Response {
     pub items: Vec<Playlist>,
   }
-  /// Lists the fields we use only. Documentation:
-  /// https://developers.google.com/youtube/v3/docs/playlistItems#properties
   /// weird date situation:
   ///  `snippet.publishedAt` is when the video was added to the uploads playlist.
   ///  `contentDetails.videoPublishedAt` is when the video was published

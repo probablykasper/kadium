@@ -1,6 +1,6 @@
 <script lang="ts">
   import Link from '../lib/Link.svelte'
-  import { Channel, defaultChannel, loadSettings } from '../lib/data'
+  import { Channel, loadSettings } from '../lib/data'
   import Tags from '../lib/Tags.svelte'
   import { runCmd } from '../lib/general'
   import ChannelModal from '../modals/Channel.svelte'
@@ -18,13 +18,16 @@
     editIndex = index
     editVisible = true
   }
+  function openAddModal() {
+    editIndex = null
+    editVisible = true
+  }
 </script>
 
-{#if editIndex !== null}
-  <ChannelModal {channels} index={editIndex} bind:visible={editVisible} />
-{/if}
+<ChannelModal {channels} bind:editIndex bind:visible={editVisible} />
 
 <div class="channels">
+  <button on:click={openAddModal}>Add</button>
   {#each channels as channel, i}
     <div class="channel selectable">
       <img src={channel.icon} alt="" />

@@ -246,7 +246,8 @@ async fn check_channel(
       }
     }
     let publish_time = parse_datetime(&video.snippet.publishedAt)?;
-    let duration_ms = parse_absolute_duration(&video.contentDetails.duration)?;
+    let content_details = video.contentDetails.ok_or("No contentDetails")?;
+    let duration_ms = parse_absolute_duration(&content_details.duration)?;
     videos_to_add.push(db::Video {
       id: video.id,
       title: video.snippet.title,

@@ -157,6 +157,7 @@ fn main() {
       data::get_settings,
       data::tags,
       data::set_channels,
+      data::add_channel,
       data::set_general_settings,
       db::get_videos,
       db::archive,

@@ -1,11 +1,12 @@
 <script lang="ts">
   export let secondary = false
   export let danger = false
+  export let type = 'button'
   let normal = false
   $: normal = !danger && !secondary
 </script>
 
-<button on:click on:mousedown class:normal class:secondary class:danger><slot /></button>
+<button on:click on:mousedown class:normal class:secondary class:danger {type}><slot /></button>
 
 <style lang="sass">
   button
@@ -50,10 +51,10 @@
       box-shadow: 0px 0px 0px 3px hsla(220, 30%, 50%, 0.5)
   button.danger
     &::before
-      background-color: hsl(0, 100%, 43%)
+      background-color: hsl(0, 100%, 40%)
       border: 1px solid hsla(0, 0%, 100%, 0.25)
     &:hover::before
-      background-color: hsl(0, 100%, 49%)
+      background-color: hsl(0, 100%, 45%)
       transform: scale(1.04, 1)
     &:focus::before
       border-color: hsla(0, 100%, 70%, 1)

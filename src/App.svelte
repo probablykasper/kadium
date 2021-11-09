@@ -40,7 +40,7 @@
 {:else if error}
   Error loading.
 
-  <button on:click={enableSampleData}>Check out sample data?</button>}
+  <button on:click={enableSampleData}>Check out sample data?</button>
 {/if}
 
 <style lang="sass">

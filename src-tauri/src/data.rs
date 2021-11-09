@@ -1,7 +1,8 @@
+use crate::api::{channels, yt_request};
 use crate::settings::{Channel, Settings, VersionedSettings};
-use crate::{background, throw};
+use crate::{api, background, throw};
 use atomicwrites::{AtomicFile, OverwriteBehavior};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::SqlitePool;
 use std::collections::HashMap;
@@ -11,6 +12,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use tauri::{command, Config, State};
 use tokio::sync::Mutex;
+use url::Url;
 
 #[derive(Clone)]
 pub struct AppPaths {
@@ -118,6 +120,86 @@ pub async fn set_channels(channels: Vec<Channel>, data: DataState<'_>) -> Result
   let mut data = data.0.lock().await;
   data.settings().channels = channels;
   data.save_settings()?;
+  Ok(())
+}
+
+#[derive(Deserialize)]
+pub struct AddChannelOptions {
+  pub url: String,
+  pub from_time: i64,
+  pub refresh_rate_ms: u64,
+  pub tags: Vec<String>,
+}
+
+fn url_parse_video_id(value: &str) -> Option<String> {
+  let url = Url::parse(value).ok()?;
+  let host = url.host_str()?;
+  if host.ends_with("youtube.com") && url.path().starts_with("/watch") {
+    for (key, value) in url.query_pairs() {
+      if key == "v" {
+        return Some(value.to_string());
+      }
+    }
+  } else if host.ends_with("youtu.be") {
+    let first_seg = url.path_segments()?.next()?;
+    return Some(first_seg.to_string());
+  }
+  None
+}
+fn url_parse_channel_id(value: &str) -> Option<String> {
+  let url = Url::parse(value).ok()?;
+  let host = url.host_str()?;
+  if !host.ends_with("youtube.com") {
+    return None;
+  }
+  let mut path_segments = url.path_segments()?;
+  if path_segments.next()? != "channel" {
+    return None;
+  }
+  return Some(path_segments.next()?.to_string());
+}
+
+#[command]
+pub async fn add_channel(options: AddChannelOptions, data: DataState<'_>) -> Result<(), String> {
+  let mut data = data.0.lock().await;
+  let settings = data.settings();
+  let invalid = "Invalid URL. You could put in a video URL from the channel".to_string();
+
+  let id = if let Some(video_id) = url_parse_video_id(&options.url) {
+    api::channel_id_from_video_id(&video_id, &settings.api_key).await?
+  } else if let Some(id) = url_parse_channel_id(&options.url) {
+    id
+  } else {
+    return Err(invalid);
+  };
+
+  for channel in &settings.channels {
+    if channel.id == id {
+      throw!("Channel already exists");
+    }
+  }
+
+  let url = "https://www.googleapis.com/youtube/v3/channels".to_owned()
+    + "?part=contentDetails,id,snippet"
+    + "&id="
+    + &id;
+  let channels = yt_request::<channels::Response>(&url, &settings.api_key)
+    .await
+    .map_err(|e| format!("Failed to get channel: {}", e))?;
+  let channel = match channels.items.into_iter().next() {
+    Some(channel) => channel,
+    None => throw!("No channel found"),
+  };
+
+  settings.channels.push(Channel {
+    id: channel.id,
+    name: channel.snippet.title,
+    icon: channel.snippet.thumbnails.medium.url,
+    uploads_playlist_id: channel.contentDetails.relatedPlaylists.uploads,
+    from_time: options.from_time,
+    refresh_rate_ms: options.refresh_rate_ms,
+    tags: options.tags,
+  });
   Ok(())
 }
 

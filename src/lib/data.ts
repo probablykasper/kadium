@@ -11,17 +11,6 @@ export type Channel = {
   refresh_rate_ms: number
   tags: string[]
 }
-export function defaultChannel(): Channel {
-  return {
-    id: '',
-    name: '',
-    icon: '',
-    uploads_playlist_id: '',
-    from_time: Date.now(),
-    refresh_rate_ms: 1000 * 60 * 30,
-    tags: [],
-  }
-}
 
 export type Settings = {
   api_key: string

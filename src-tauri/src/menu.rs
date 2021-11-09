@@ -66,17 +66,18 @@ pub fn new(items: Vec<Item>) -> Menu {
 pub fn default_app_submenu(app_name: &str) -> Item {
   #[cfg(target_os = "macos")]
   return Item::Submenu(Submenu::new(
-    app_name.to_string(),
-    Menu::new()
-      .add_native_item(MenuItem::About(app_name.to_string()))
-      .add_native_item(MenuItem::Separator)
-      .add_native_item(MenuItem::Services)
-      .add_native_item(MenuItem::Separator)
-      .add_native_item(MenuItem::Hide)
-      .add_native_item(MenuItem::HideOthers)
-      .add_native_item(MenuItem::ShowAll)
-      .add_native_item(MenuItem::Separator)
-      .add_native_item(MenuItem::Quit),
+    "Window",
+    new(vec![
+      Item::About(app_name.to_string()),
+      Item::Separator,
+      Item::Services,
+      Item::Separator,
+      Item::Hide,
+      Item::HideOthers,
+      Item::ShowAll,
+      Item::Separator,
+      Item::Quit,
+    ]),
   ));
   #[cfg(not(target_os = "macos"))]
   return Item::None;
@@ -90,35 +91,29 @@ pub fn default_file_submenu() -> Item {
 }
 
 pub fn default_edit_submenu() -> Item {
-  Item::Submenu(Submenu::new("Edit", {
-    let mut menu = Menu::new()
-      .add_native_item(MenuItem::Undo)
-      .add_native_item(MenuItem::Redo)
-      .add_native_item(MenuItem::Separator)
-      .add_native_item(MenuItem::Cut)
-      .add_native_item(MenuItem::Copy)
-      .add_native_item(MenuItem::Paste);
-    #[cfg(not(target_os = "macos"))]
-    {
-      menu = menu.add_native_item(MenuItem::Separator);
-    }
-    menu = menu.add_native_item(MenuItem::SelectAll);
-    menu
-  }))
+  Item::Submenu(Submenu::new(
+    "Edit",
+    new(vec![
+      Item::Undo,
+      Item::Redo,
+      Item::Separator,
+      Item::Cut,
+      Item::Copy,
+      Item::Paste,
+      #[cfg(not(target_os = "macos"))]
+      Item::Separator,
+      Item::SelectAll,
+    ]),
+  ))
 }
 
 pub fn default_view_submenu() -> Item {
-  Item::Submenu(Submenu::new(
-    "View",
-    Menu::new().add_native_item(MenuItem::EnterFullScreen),
-  ))
+  Item::Submenu(Submenu::new("View", new(vec![Item::EnterFullScreen])))
 }
 
 pub fn default_window_submenu() -> Item {
   Item::Submenu(Submenu::new(
     "Window",
-    Menu::new()
-      .add_native_item(MenuItem::Minimize)
-      .add_native_item(MenuItem::Zoom),
+    new(vec![Item::Minimize, Item::Zoom]),
   ))
 }

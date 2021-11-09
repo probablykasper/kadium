@@ -4,7 +4,6 @@
   import Tags from '../lib/Tags.svelte'
   import { runCmd } from '../lib/general'
   import ChannelModal from '../modals/Channel.svelte'
-  import Button from '../lib/Button.svelte'
 
   export let channels: Channel[]
 
@@ -30,6 +29,13 @@
 <main>
   <header>
     <button class="control-style" on:click={openAddModal}>Add</button>
+    <div class="page-info">
+      {#if channels.length === 1}
+        {channels.length} channel
+      {:else}
+        {channels.length} channels
+      {/if}
+    </div>
   </header>
   <div class="channels">
     {#each channels as channel, i}
@@ -66,6 +72,11 @@
     padding: 0px 20px
     justify-content: space-between
     flex-shrink: 0
+  .page-info
+    flex-shrink: 0
+    margin-left: 5px
+    font-size: 13px
+    opacity: 0.7
   .control-style
     border-radius: 3px
     border: 1px solid hsl(233, 7%, 22%)

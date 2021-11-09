@@ -1,20 +1,30 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte'
   import { tags, totalVideos, videos, viewOptions } from '../lib/data'
   import { checkShortcut } from '../lib/general'
+  import { event } from '@tauri-apps/api'
 
   let show = 0
   $: {
-    if (show === 0) {
-      $viewOptions.show_all = false
-      $viewOptions.show_archived = false
-    } else if (show === 1) {
-      $viewOptions.show_all = false
-      $viewOptions.show_archived = true
+    if ($viewOptions.show_all) {
+      show = 2
+    } else if ($viewOptions.show_archived) {
+      show = 1
     } else {
-      $viewOptions.show_all = true
-      $viewOptions.show_archived = false
+      show = 0
     }
-    $viewOptions = $viewOptions
+  }
+  function show0() {
+    $viewOptions.show_all = false
+    $viewOptions.show_archived = false
+  }
+  function show1() {
+    $viewOptions.show_all = false
+    $viewOptions.show_archived = true
+  }
+  function show2() {
+    $viewOptions.show_all = true
+    $viewOptions.show_archived = false
   }
 
   function showGroupKeydown(e: KeyboardEvent) {
@@ -34,16 +44,28 @@
       $viewOptions.tag = tag
     }
   }
+
+  let filterInput: HTMLInputElement
+  const unlistenFuture = event.listen('menu', ({ payload }) => {
+    if (payload === 'Find') {
+      filterInput.focus()
+    }
+  })
+  onDestroy(async () => {
+    const unlisten = await unlistenFuture
+    unlisten()
+  })
 </script>
 
 <header>
   <div class="options-bar">
     <button class="bar-item control-style group" on:keydown={showGroupKeydown} tabindex="0">
-      <div class="item" class:selected={show === 0} on:mousedown={() => (show = 0)}>New</div>
-      <div class="item" class:selected={show === 1} on:mousedown={() => (show = 1)}>Archived</div>
-      <div class="item" class:selected={show === 2} on:mousedown={() => (show = 2)}>All</div>
+      <div class="item" class:selected={show === 0} on:mousedown={show0}>New</div>
+      <div class="item" class:selected={show === 1} on:mousedown={show1}>Archived</div>
+      <div class="item" class:selected={show === 2} on:mousedown={show2}>All</div>
     </button>
     <input
+      bind:this={filterInput}
       class="bar-item control-style"
       type="text"
       placeholder="Channel Filter"

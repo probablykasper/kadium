@@ -13,7 +13,7 @@
       maxConcurrentRequests,
     })
     await loadSettings()
-    router.goto('/')
+    router.goto('/', true)
   }
 </script>
 

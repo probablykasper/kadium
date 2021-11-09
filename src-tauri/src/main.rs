@@ -204,19 +204,57 @@ fn main() {
         ]),
       )),
       menu::default_file_submenu(),
-      menu::default_edit_submenu(),
-      menu::default_view_submenu(),
-      menu::default_window_submenu(),
+      MenuItem::Submenu(Submenu::new(
+        "Edit",
+        menu::new(vec![
+          MenuItem::Undo,
+          MenuItem::Redo,
+          MenuItem::Separator,
+          MenuItem::Cut,
+          MenuItem::Copy,
+          MenuItem::Paste,
+          #[cfg(not(target_os = "macos"))]
+          MenuItem::Separator,
+          MenuItem::SelectAll,
+          MenuItem::Separator,
+          MenuItem::Custom(custom_item("Find").accelerator("CmdOrCtrl+F")),
+        ]),
+      )),
+      MenuItem::Submenu(Submenu::new(
+        "View",
+        menu::new(vec![
+          MenuItem::Custom(custom_item("Show New").accelerator("Alt+CmdOrCtrl+N")),
+          MenuItem::Custom(custom_item("Show Archived").accelerator("Alt+CmdOrCtrl+A")),
+          MenuItem::Custom(custom_item("Show All").accelerator("Alt+CmdOrCtrl+E")),
+          MenuItem::Separator,
+          MenuItem::EnterFullScreen,
+        ]),
+      )),
+      MenuItem::Submenu(Submenu::new(
+        "Window",
+        menu::new(vec![
+          MenuItem::Minimize,
+          MenuItem::Zoom,
+          MenuItem::Separator,
+          MenuItem::Custom(custom_item("Videos").accelerator("Alt+CmdOrCtrl+1")),
+          MenuItem::Custom(custom_item("Channels").accelerator("Alt+CmdOrCtrl+2")),
+          MenuItem::Custom(custom_item("Settings").accelerator("Alt+CmdOrCtrl+3")),
+        ]),
+      )),
       MenuItem::Submenu(Submenu::new(
         "Help",
         menu::new(vec![MenuItem::Custom(custom_item("Learn More"))]),
       )),
     ]))
-    .on_menu_event(|event| match event.menu_item_id() {
-      "Learn More" => {
-        shell::open("https://github.com/probablykasper/kadium".to_string(), None).unwrap();
+    .on_menu_event(|event| {
+      let event_name = event.menu_item_id();
+      let _ = event.window().emit("menu", event_name);
+      match event.menu_item_id() {
+        "Learn More" => {
+          shell::open("https://github.com/probablykasper/kadium".to_string(), None).unwrap();
+        }
+        _ => {}
       }
-      _ => {}
     })
     .build(ctx)
     .expect("Error running tauri app");

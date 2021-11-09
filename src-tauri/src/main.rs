@@ -224,8 +224,8 @@ fn main() {
         "View",
         menu::new(vec![
           MenuItem::Custom(custom_item("Show New").accelerator("Alt+CmdOrCtrl+N")),
-          MenuItem::Custom(custom_item("Show Archived").accelerator("Alt+CmdOrCtrl+A")),
-          MenuItem::Custom(custom_item("Show All").accelerator("Alt+CmdOrCtrl+E")),
+          MenuItem::Custom(custom_item("Show Archived").accelerator("Alt+CmdOrCtrl+E")),
+          MenuItem::Custom(custom_item("Show All").accelerator("Alt+CmdOrCtrl+A")),
           MenuItem::Separator,
           MenuItem::EnterFullScreen,
         ]),

@@ -8,7 +8,7 @@
   import VideosPage from './routes/Videos.svelte'
   import VideosBar from './routes/_VideoBar.svelte'
   import Nav from './lib/Nav.svelte'
-  import { onDestroy, tick } from 'svelte'
+  import { onDestroy } from 'svelte'
 
   let error = false
   loadSettings().catch(() => {
@@ -44,6 +44,8 @@
     } else if (payload === 'Channels') {
       router.goto('/channels', true)
     } else if (payload === 'Settings') {
+      router.goto('/settings', true)
+    } else if (payload === 'Preferences') {
       router.goto('/settings', true)
     } else if (payload === 'Show New') {
       router.goto('/', true)

@@ -60,7 +60,7 @@
     margin-bottom: 15px
     outline: none
     &:hover
-      border: 1px solid hsla(0, 0%, 50%, 0.3)
+      border-color: hsla(0, 0%, 50%, 0.3)
     &:focus
       border-color: hsla(220, 100%, 50%, 1)
       box-shadow: 0px 0px 0px 3px hsla(220, 100%, 50%, 0.5)

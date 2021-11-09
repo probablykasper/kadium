@@ -5,6 +5,7 @@
   import { loadSettings, settings, enableSampleData } from './lib/data'
   import { Route } from 'tinro'
   import VideosPage from './routes/Videos.svelte'
+  import VideosBar from './routes/_VideoBar.svelte'
   import Nav from './lib/Nav.svelte'
 
   let error = false
@@ -29,14 +30,18 @@
 
 {#if $settings !== null}
   <Nav />
-  <main>
-    <Route path="/"><VideosPage /></Route>
-    <Route path="/channels"><ChannelsPage channels={$settings.channels} /></Route>
-    <Route path="/settings"
-      ><SettingsPage
-        apiKey={$settings.api_key}
-        maxConcurrentRequests={$settings.max_concurrent_requests} /></Route>
-  </main>
+  <Route path="/">
+    <VideosBar />
+    <VideosPage />
+  </Route>
+  <Route path="/channels">
+    <ChannelsPage channels={$settings.channels} />
+  </Route>
+  <Route path="/settings">
+    <SettingsPage
+      apiKey={$settings.api_key}
+      maxConcurrentRequests={$settings.max_concurrent_requests} />
+  </Route>
 {:else if error}
   Error loading.
 
@@ -64,9 +69,6 @@
     color-scheme: dark
     display: flex
     flex-direction: column
-  main
-    height: 0px
-    flex-grow: 1
     background-color: #0F1115 // so scrollbars are light
     margin-right: 1px
 </style>

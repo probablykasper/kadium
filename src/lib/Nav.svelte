@@ -1,7 +1,5 @@
 <script lang="ts">
   import { active, router } from 'tinro'
-  import { tags, totalVideos, videos, viewOptions } from './data'
-  import { checkShortcut } from './general'
 
   function go(e: MouseEvent) {
     if (e.target instanceof HTMLElement) {
@@ -14,36 +12,6 @@
       }
     }
   }
-  let show = 0
-  $: {
-    if (show === 0) {
-      $viewOptions.show_all = false
-      $viewOptions.show_archived = false
-    } else if (show === 1) {
-      $viewOptions.show_all = false
-      $viewOptions.show_archived = true
-    } else {
-      $viewOptions.show_all = true
-      $viewOptions.show_archived = false
-    }
-    $viewOptions = $viewOptions
-  }
-  function showGroupKeydown(e: KeyboardEvent) {
-    if (checkShortcut(e, 'ArrowLeft')) {
-      show = Math.max(0, show - 1)
-      e.preventDefault()
-    } else if (checkShortcut(e, 'ArrowRight')) {
-      show = Math.min(2, show + 1)
-      e.preventDefault()
-    }
-  }
-  function toggleTag(tag: string) {
-    if ($viewOptions.tag === tag) {
-      $viewOptions.tag = null
-    } else {
-      $viewOptions.tag = tag
-    }
-  }
 </script>
 
 <nav>
@@ -51,33 +19,6 @@
   <a on:mousedown={go} use:active href="/channels"><button>Channels</button></a>
   <a on:mousedown={go} use:active href="/settings"><button>Settings</button></a>
 </nav>
-<div class="sub-bar">
-  <div class="options-bar">
-    <button class="bar-item control-style group" on:keydown={showGroupKeydown} tabindex="0">
-      <div class="item" class:selected={show === 0} on:mousedown={() => (show = 0)}>New</div>
-      <div class="item" class:selected={show === 1} on:mousedown={() => (show = 1)}>Archived</div>
-      <div class="item" class:selected={show === 2} on:mousedown={() => (show = 2)}>All</div>
-    </button>
-    <input
-      class="bar-item control-style"
-      type="text"
-      placeholder="Channel Filter"
-      bind:value={$viewOptions.channel_filter} />
-    {#each $tags as tag}
-      <button
-        class="bar-item control-style tag"
-        class:enabled={$viewOptions.tag === tag}
-        on:click={() => toggleTag(tag)}>{tag}</button>
-    {/each}
-  </div>
-  <div class="bar-item page-info">
-    {#if $totalVideos === null}
-      {$videos.length} of ?
-    {:else}
-      {$videos.length} of {$totalVideos}
-    {/if}
-  </div>
-</div>
 
 <style lang="sass">
   nav
@@ -85,6 +26,7 @@
     display: flex
     align-items: center
     height: var(--nav-height)
+    flex-shrink: 0
   a
     background-color: transparent
     border: none
@@ -103,82 +45,4 @@
       color: inherit
       margin: 0px
       padding: 6px 0px
-  .sub-bar
-    display: flex
-    align-items: center
-    width: 100%
-    box-sizing: border-box
-    padding: 0px 20px
-    justify-content: space-between
-  .bar-item
-    margin-bottom: 5px
-  .page-info
-    flex-shrink: 0
-    margin-left: 5px
-    font-size: 13px
-    opacity: 0.7
-  .options-bar
-    box-sizing: border-box
-    align-items: center
-    display: flex
-    flex-wrap: wrap
-  .control-style
-    border-radius: 3px
-    border: 1px solid hsl(233, 7%, 22%)
-    background-color: hsla(223, 33%, 64%, 0.12)
-    outline: none
-    margin-top: 0px
-    margin-left: 0px
-    margin-right: 10px
-    font-size: 13px
-    color: inherit
-  .group
-    display: flex
-    padding: 0px
-    cursor: default
-    height: 26px
-    line-height: 26px
-    box-sizing: border-box
-    transition: all 120ms cubic-bezier(0.4, 0.0, 0.2, 1)
-    &:focus
-      border-color: hsla(220, 100%, 50%, 1)
-      box-shadow: 0px 0px 0px 3px hsla(220, 100%, 50%, 0.5)
-      .item.selected
-        background-color: hsla(220, 100%, 50%, 1)
-    .item
-      background-color: transparent
-      border: none
-      margin: 0px
-      padding: 0px 12px
-      transition: all 120ms cubic-bezier(0.4, 0.0, 0.2, 1)
-      &.selected
-        background-color: hsl(225, 14%, 28%)
-  button.tag
-    height: 23px
-    font-size: 12px
-    box-sizing: border-box
-    padding: 0px 8px
-    border-radius: 10px
-    margin-right: 5px
-    transition: all 120ms cubic-bezier(0.4, 0.0, 0.2, 1)
-    &:hover
-      border: 1px solid hsl(220, 10%, 40%)
-    &:focus
-      border-color: hsla(220, 100%, 50%, 1)
-      box-shadow: 0px 0px 0px 3px hsla(220, 100%, 50%, 0.5)
-    &.enabled
-      background-color: hsl(220, 14%, 28%)
-      border: 1px solid hsl(220, 10%, 50%)
-      color: #ffffff
-    &.enabled:focus
-      background-color: hsla(220, 100%, 50%, 1)
-      border-color: hsla(220, 100%, 60%, 1)
-  input
-    height: 26px
-    box-sizing: border-box
-    padding: 0px 6px
-    transition: all 120ms cubic-bezier(0.4, 0.0, 0.2, 1)
-    &:focus
-      border-color: hsla(220, 100%, 50%, 1)
-      box-shadow: 0px 0px 0px 3px hsla(220, 100%, 50%, 0.5)
 </style>

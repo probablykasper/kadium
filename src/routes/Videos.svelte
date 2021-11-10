@@ -175,14 +175,13 @@
     box-sizing: border-box
     display: grid
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr))
-    @media screen and (max-width: 430px)
-      grid-template-columns: 1fr
-      grid-gap: 15px
-      .box
-        margin: 0px auto
     grid-gap: 15px
     padding: var(--page-padding)
-    padding-top: 10px
+    padding-top: 0px
+    @media screen and (max-width: 430px)
+      grid-template-columns: 1fr
+      .box
+        margin: 0px auto
   .box
     max-width: 280px
     width: 100%

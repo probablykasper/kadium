@@ -48,13 +48,17 @@ impl Data {
   pub fn settings_ref(&self) -> &Settings {
     self.versioned_settings.unwrap_ref()
   }
-  pub fn save_settings(&mut self) -> Result<(), String> {
-    self.versioned_settings.save(&self.paths)?;
+  pub fn restart_background(&mut self) -> Result<(), String> {
     if let Some(bg_handle) = self.bg_handle.take() {
       bg_handle.stop();
       bg_handle.wait_until_stopped()?;
     }
     self.bg_handle = background::spawn(self.settings_ref(), &self.db_pool);
+    Ok(())
+  }
+  pub fn save_settings(&mut self) -> Result<(), String> {
+    self.versioned_settings.save(&self.paths)?;
+    self.restart_background()?;
     Ok(())
   }
 }
@@ -120,6 +124,13 @@ pub async fn set_channels(channels: Vec<Channel>, data: DataState<'_>) -> Result
   let mut data = data.0.lock().await;
   data.settings().channels = channels;
   data.save_settings()?;
+  Ok(())
+}
+
+#[command]
+pub async fn restart_background(data: DataState<'_>) -> Result<(), String> {
+  let mut data = data.0.lock().await;
+  data.restart_background()?;
   Ok(())
 }
 

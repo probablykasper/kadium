@@ -91,14 +91,13 @@
 <style lang="sass">
   :root
     --options-bar-height: 42px
-    --nav-height: 56px
-    --header-height: (var(--options-bar-height) + var(--nav-height))
-    --page-padding: 15px
+    --page-padding: 16px
+  :global(html), :global(body)
+    background-color: hsl(220, 17%, 7%)
   :global(html)
     overflow: hidden
     height: 100%
     font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji
-    background-color: #0F1115
     color: #f2f2f2
     color-scheme: dark
     user-select: none
@@ -109,6 +108,5 @@
     color-scheme: dark
     display: flex
     flex-direction: column
-    background-color: #0F1115 // so scrollbars are light
     margin-right: 1px
 </style>

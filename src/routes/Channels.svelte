@@ -111,15 +111,13 @@
     border: 1px solid hsl(233, 7%, 22%)
     background-color: hsla(223, 33%, 64%, 0.12)
     outline: none
-    margin-top: 0px
-    margin-left: 0px
-    margin-right: 10px
+    margin: 10px 0px
+    margin-right: 8px
     font-size: 13px
     color: inherit
   button.control-style
     height: 28px
-    line-height: 28px
-    padding: 0px 10px
+    padding: 0px 11px
     box-sizing: border-box
     border: 1px solid hsla(0, 0%, 50%, 0.2)
     background-color: hsl(225, 14%, 20%)
@@ -150,11 +148,10 @@
       display: flex
     @media screen and (min-width: 600px)
       padding: 15px
-      margin: 15px 0px
+      margin-bottom: 15px
       background-color: hsla(223, 33%, 64%, 0.05)
       box-shadow: 0px 4px 8px 0px hsla(0, 0%, 0%, 0.1)
       border: 1px solid hsla(0, 0%, 50%, 0.04)
-      // border: 1px solid transparent
       &:hover
         border: 1px solid hsla(0, 0%, 50%, 0.2)
   img

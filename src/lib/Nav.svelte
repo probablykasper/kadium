@@ -1,5 +1,6 @@
 <script lang="ts">
   import { active, router } from 'tinro'
+  import { runCmd } from './general'
 
   function go(e: MouseEvent) {
     if (e.target instanceof HTMLElement) {
@@ -12,12 +13,17 @@
       }
     }
   }
+  async function checkNow() {
+    await runCmd('restart_background')
+  }
 </script>
 
 <nav>
   <a on:mousedown={go} use:active data-exact href="/"><button>Videos</button></a>
   <a on:mousedown={go} use:active href="/channels"><button>Channels</button></a>
   <a on:mousedown={go} use:active href="/settings"><button>Settings</button></a>
+  <div class="spacer" />
+  <button class="control-style" on:click={checkNow}>Check Now</button>
 </nav>
 
 <style lang="sass">
@@ -25,8 +31,12 @@
     padding: 0px 20px
     display: flex
     align-items: center
-    height: var(--nav-height)
+    height: 54px
     flex-shrink: 0
+    background-color: hsl(220, 17%, 9%)
+    border-bottom: 1px solid hsla(0, 0%, 50%, 0.07)
+  .spacer
+    margin-left: auto
   a
     background-color: transparent
     border: none
@@ -45,4 +55,26 @@
       color: inherit
       margin: 0px
       padding: 6px 0px
+  .control-style
+    border-radius: 3px
+    border: 1px solid hsl(233, 7%, 22%)
+    background-color: hsla(223, 33%, 64%, 0.12)
+    outline: none
+    margin-top: 0px
+    margin-left: 10px
+    margin-right: 0px
+    font-size: 13px
+    color: inherit
+  button.control-style
+    height: 28px
+    padding: 0px 11px
+    box-sizing: border-box
+    border: 1px solid hsla(0, 0%, 50%, 0.2)
+    background-color: hsl(225, 14%, 20%)
+    transition: all 120ms cubic-bezier(0.4, 0.0, 0.2, 1)
+    &:hover
+      border-color: hsla(0, 0%, 50%, 0.5)
+    &:focus
+      border-color: hsla(220, 100%, 50%, 1)
+      box-shadow: 0px 0px 0px 3px hsla(220, 100%, 50%, 0.5)
 </style>

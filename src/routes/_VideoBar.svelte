@@ -59,25 +59,25 @@
 
 <header>
   <div class="options-bar">
-    <button class="bar-item control-style group" on:keydown={showGroupKeydown} tabindex="0">
+    <button class="control-style group" on:keydown={showGroupKeydown} tabindex="0">
       <div class="item" class:selected={show === 0} on:mousedown={show0}>New</div>
       <div class="item" class:selected={show === 1} on:mousedown={show1}>Archived</div>
       <div class="item" class:selected={show === 2} on:mousedown={show2}>All</div>
     </button>
     <input
       bind:this={filterInput}
-      class="bar-item control-style"
+      class="control-style"
       type="text"
       placeholder="Channel Filter"
       bind:value={$viewOptions.channel_filter} />
     {#each $tags as tag}
       <button
-        class="bar-item control-style tag"
+        class="control-style tag"
         class:enabled={$viewOptions.tag === tag}
         on:click={() => toggleTag(tag)}>{tag}</button>
     {/each}
   </div>
-  <div class="bar-item page-info">
+  <div class="page-info">
     {#if $totalVideos === null}
       {$videos.length} of ?
     {:else}
@@ -95,8 +95,6 @@
     padding: 0px 20px
     justify-content: space-between
     flex-shrink: 0
-  .bar-item
-    margin-bottom: 5px
   .page-info
     flex-shrink: 0
     margin-left: 5px
@@ -112,18 +110,13 @@
     border: 1px solid hsl(233, 7%, 22%)
     background-color: hsla(223, 33%, 64%, 0.12)
     outline: none
-    margin-top: 0px
-    margin-left: 0px
-    margin-right: 10px
+    margin: 10px 0px
+    margin-right: 8px
     font-size: 13px
     color: inherit
   .group
-    display: flex
     padding: 0px
-    cursor: default
     height: 28px
-    line-height: 28px
-    box-sizing: border-box
     transition: all 120ms cubic-bezier(0.4, 0.0, 0.2, 1)
     &:focus
       border-color: hsla(220, 100%, 50%, 1)
@@ -131,11 +124,12 @@
       .item.selected
         background-color: hsla(220, 100%, 50%, 1)
     .item
-      background-color: transparent
-      border: none
-      margin: 0px
-      padding: 0px 12px
-      transition: all 120ms cubic-bezier(0.4, 0.0, 0.2, 1)
+      float: left
+      display: flex
+      align-items: center
+      height: 100%
+      padding: 0px 11px
+      transition: background-color 120ms cubic-bezier(0.4, 0.0, 0.2, 1)
       &.selected
         background-color: hsl(225, 14%, 28%)
   button.tag

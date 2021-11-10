@@ -4,6 +4,8 @@
   import Tags from '../lib/Tags.svelte'
   import { runCmd } from '../lib/general'
   import ChannelModal from '../modals/Channel.svelte'
+  import { event } from '@tauri-apps/api'
+  import { onDestroy } from 'svelte'
 
   export let channels: Channel[]
 
@@ -22,6 +24,18 @@
     editIndex = null
     editVisible = true
   }
+
+  let filter = ''
+  let filterInput: HTMLInputElement
+  const unlistenFuture = event.listen('menu', ({ payload }) => {
+    if (payload === 'Find') {
+      filterInput.focus()
+    }
+  })
+  onDestroy(async () => {
+    const unlisten = await unlistenFuture
+    unlisten()
+  })
 </script>
 
 <ChannelModal {channels} bind:editIndex bind:visible={editVisible} />
@@ -29,6 +43,12 @@
 <main>
   <header>
     <button class="control-style" on:click={openAddModal}>Add</button>
+    <input
+      bind:this={filterInput}
+      class="bar-item control-style"
+      type="text"
+      placeholder="Channel Filter"
+      bind:value={filter} />
     <div class="page-info">
       {#if channels.length === 1}
         {channels.length} channel
@@ -39,22 +59,24 @@
   </header>
   <div class="channels">
     {#each channels as channel, i}
-      <div class="channel selectable">
-        <img src={channel.icon} alt="" />
-        <div class="details">
-          <a href="https://youtube.com/channel/{channel.id}" target="_blank" class="title"
-            >{channel.name}</a>
-          <div class="content">
-            <!-- <span>{channel.id}</span> -->
-            <span>Check for videos after {new Date(channel.from_time).toLocaleString()}</span>
-            <span>Refresh rate: {channel.refresh_rate_ms / 1000 / 60} minutes</span>
+      {#if filter === '' || channel.name.includes(filter)}
+        <div class="channel selectable">
+          <img src={channel.icon} alt="" />
+          <div class="details">
+            <a href="https://youtube.com/channel/{channel.id}" target="_blank" class="title"
+              >{channel.name}</a>
+            <div class="content">
+              <!-- <span>{channel.id}</span> -->
+              <span>Check for videos after {new Date(channel.from_time).toLocaleString()}</span>
+              <span>Refresh rate: {channel.refresh_rate_ms / 1000 / 60} minutes</span>
+            </div>
+            <Tags bind:value={channel.tags} on:update={saveChannels} />
           </div>
-          <Tags bind:value={channel.tags} on:update={saveChannels} />
+          <Link on:click={() => openEditModal(i)}>
+            <div class="edit">Edit</div>
+          </Link>
         </div>
-        <Link on:click={() => openEditModal(i)}>
-          <div class="edit">Edit</div>
-        </Link>
-      </div>
+      {/if}
     {/each}
   </div>
 </main>
@@ -74,7 +96,7 @@
     flex-shrink: 0
   .page-info
     flex-shrink: 0
-    margin-left: 5px
+    margin-left: auto
     font-size: 13px
     opacity: 0.7
   .control-style
@@ -144,4 +166,12 @@
         color: hsla(231, 20%, 100%, 0.5)
   .edit
     padding: 10px 0px
+  input
+    height: 28px
+    box-sizing: border-box
+    padding: 0px 6px
+    transition: all 120ms cubic-bezier(0.4, 0.0, 0.2, 1)
+    &:focus
+      border-color: hsla(220, 100%, 50%, 1)
+      box-shadow: 0px 0px 0px 3px hsla(220, 100%, 50%, 0.5)
 </style>

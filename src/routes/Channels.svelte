@@ -9,6 +9,19 @@
 
   export let channels: Channel[]
 
+  $: visibleIndexes = getVisibleIndexes(channels, filter)
+  function getVisibleIndexes(channels: Channel[], filter: string) {
+    let indexes = []
+    let i = 0
+    for (const channel of channels) {
+      if (filter === '' || channel.name.includes(filter)) {
+        indexes.push(i)
+      }
+      i++
+    }
+    return indexes
+  }
+
   async function saveChannels() {
     await runCmd('set_channels', { channels })
     await loadSettings()
@@ -50,33 +63,27 @@
       placeholder="Channel Filter"
       bind:value={filter} />
     <div class="page-info">
-      {#if channels.length === 1}
-        {channels.length} channel
-      {:else}
-        {channels.length} channels
-      {/if}
+      {visibleIndexes.length} of {channels.length}
     </div>
   </header>
   <div class="channels">
     {#each channels as channel, i}
-      {#if filter === '' || channel.name.includes(filter)}
-        <div class="channel selectable">
-          <img src={channel.icon} alt="" />
-          <div class="details">
-            <a href="https://youtube.com/channel/{channel.id}" target="_blank" class="title"
-              >{channel.name}</a>
-            <div class="content">
-              <!-- <span>{channel.id}</span> -->
-              <span>Check for videos after {new Date(channel.from_time).toLocaleString()}</span>
-              <span>Refresh rate: {channel.refresh_rate_ms / 1000 / 60} minutes</span>
-            </div>
-            <Tags bind:value={channel.tags} on:update={saveChannels} />
+      <div class="channel selectable" class:show={filter === '' || channel.name.includes(filter)}>
+        <img src={channel.icon} alt="" />
+        <div class="details">
+          <a href="https://youtube.com/channel/{channel.id}" target="_blank" class="title"
+            >{channel.name}</a>
+          <div class="content">
+            <!-- <span>{channel.id}</span> -->
+            <span>Check for videos after {new Date(channel.from_time).toLocaleString()}</span>
+            <span>Refresh rate: {channel.refresh_rate_ms / 1000 / 60} minutes</span>
           </div>
-          <Link on:click={() => openEditModal(i)}>
-            <div class="edit">Edit</div>
-          </Link>
+          <Tags bind:value={channel.tags} on:update={saveChannels} />
         </div>
-      {/if}
+        <Link on:click={() => openEditModal(i)}>
+          <div class="edit">Edit</div>
+        </Link>
+      </div>
     {/each}
   </div>
 </main>
@@ -132,13 +139,15 @@
     flex-grow: 1
     overflow-y: auto
   .channel
-    display: flex
     flex-grow: 1
     align-items: center
     border-radius: 7px
     transition: border 120ms cubic-bezier(0.4, 0.0, 0.2, 1)
     padding: 15px 5px
     border: 1px solid transparent
+    display: none
+    &.show
+      display: flex
     @media screen and (min-width: 600px)
       padding: 15px
       margin: 15px 0px

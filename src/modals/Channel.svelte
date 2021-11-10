@@ -81,11 +81,13 @@
       <h3>Edit Channel</h3>
     {/if}
 
-    <p>Channel or Video URL</p>
-    <input
-      type="text"
-      placeholder="https://www.youtube.com/channel/UCeTncCK57upn3lPn6PX18Ng"
-      bind:value={url} />
+    {#if editIndex === null}
+      <p>Channel or Video URL</p>
+      <input
+        type="text"
+        placeholder="https://www.youtube.com/channel/UCeTncCK57upn3lPn6PX18Ng"
+        bind:value={url} />
+    {/if}
 
     <p>Refresh rate (minutes)</p>
     <p class="sub"

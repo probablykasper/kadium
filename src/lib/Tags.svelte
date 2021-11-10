@@ -124,12 +124,12 @@
   .tags
     color: hsla(231, 20%, 100%, 0.5)
     font-size: 14px
-    margin-top: 2px
     display: flex
     flex-wrap: wrap
     align-items: center
     .label, .tag, input
       margin-right: 4px
+      margin-top: 4px
       height: 20px
       line-height: 20px
     .tag
@@ -157,7 +157,6 @@
           border-color: hsl(210, 100%, 55%)
     input
       width: 70px
-      margin: 0px
       background-color: transparent
       font-size: inherit
       color: hsl(210, 100%, 45%)

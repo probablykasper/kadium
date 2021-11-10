@@ -112,52 +112,54 @@
 
 <svelte:window on:resize={autoloadHandler} />
 <main bind:this={main} class="selectable" on:scroll={autoloadHandler}>
-  {#each $videos as video}
-    <div class="box">
-      <!-- <img src="https://i.ytimg.com/vi/{video.id}/hqdefault.jpg" alt="" /> -->
-      <!-- <img src="https://i.ytimg.com/vi/{video.id}/sddefault.jpg" alt="" /> -->
-      <a target="_blank" href="https://youtube.com/watch?v={video.id}">
-        <div class="img-box">
-          <img src="https://i.ytimg.com/vi/{video.id}/mqdefault.jpg" alt="" />
-        </div>
-      </a>
-      <button
-        class="archive"
-        on:click={() => archiveToggle(video.id, video.archived)}
-        title="Archive"
-        tabindex="-1">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          class:archived={video.archived}>
-          <path
-            class="frame"
-            d="M24,3.382c0,-1.866 -1.516,-3.382 -3.382,-3.382l-17.236,0c-1.866,0 -3.382,1.516 -3.382,3.382l0,17.236c0,1.866
+  <div class="grid">
+    {#each $videos as video}
+      <div class="box">
+        <!-- <img src="https://i.ytimg.com/vi/{video.id}/hqdefault.jpg" alt="" /> -->
+        <!-- <img src="https://i.ytimg.com/vi/{video.id}/sddefault.jpg" alt="" /> -->
+        <a target="_blank" href="https://youtube.com/watch?v={video.id}">
+          <div class="img-box">
+            <img src="https://i.ytimg.com/vi/{video.id}/mqdefault.jpg" alt="" />
+          </div>
+        </a>
+        <button
+          class="archive"
+          on:click={() => archiveToggle(video.id, video.archived)}
+          title="Archive"
+          tabindex="-1">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            class:archived={video.archived}>
+            <path
+              class="frame"
+              d="M24,3.382c0,-1.866 -1.516,-3.382 -3.382,-3.382l-17.236,0c-1.866,0 -3.382,1.516 -3.382,3.382l0,17.236c0,1.866
           1.516,3.382 3.382,3.382l17.236,-0c1.866,-0 3.382,-1.516 3.382,-3.382l0,-17.236Zm-2.5,0l-0,17.236c-0,0.487
           -0.395,0.882 -0.882,0.882l-17.236,-0c-0.487,-0 -0.882,-0.395 -0.882,-0.882l0,-17.236c0,-0.487
           0.395,-0.882 0.882,-0.882l17.236,0c0.487,0 0.882,0.395 0.882,0.882Z" />
-          <path
-            class="checkmark"
-            d="M9.348,14.652l8.839,-8.839l1.768,1.768l-10.607,10.606l-5.303,-5.303l1.768,-1.768l3.535,3.536Z" />
-        </svg>
-      </button>
-      <a target="_blank" href="https://youtube.com/watch?v={video.id}">
-        <button>
-          <p class="title selectable">{video.title}</p>
+            <path
+              class="checkmark"
+              d="M9.348,14.652l8.839,-8.839l1.768,1.768l-10.607,10.606l-5.303,-5.303l1.768,-1.768l3.535,3.536Z" />
+          </svg>
         </button>
-      </a>
-      <a target="_blank" href="https://www.youtube.com/channel/{video.channelId}">
-        <button class="selectable">
-          <p class="sub">
-            {video.channelName}
-          </p>
-        </button>
-      </a>
-      <p class="sub selectable">{formatDate(video.publishTimeMs)}</p>
-    </div>
-  {/each}
+        <a target="_blank" href="https://youtube.com/watch?v={video.id}">
+          <button>
+            <p class="title selectable">{video.title}</p>
+          </button>
+        </a>
+        <a target="_blank" href="https://www.youtube.com/channel/{video.channelId}">
+          <button class="selectable">
+            <p class="sub">
+              {video.channelName}
+            </p>
+          </button>
+        </a>
+        <p class="sub selectable">{formatDate(video.publishTimeMs)}</p>
+      </div>
+    {/each}
+  </div>
 </main>
 
 <style lang="sass">
@@ -168,6 +170,8 @@
     max-width: 100%
     height: 100%
     overflow-y: auto
+  .grid
+    flex-grow: 0
     box-sizing: border-box
     display: grid
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr))
@@ -181,6 +185,7 @@
     padding-top: 10px
   .box
     max-width: 280px
+    width: 100%
     user-select: none
     -webkit-user-select: none
     position: relative

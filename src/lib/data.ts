@@ -51,6 +51,7 @@ export const viewOptions: Writable<ViewOptions> = writable({
 export const videos = writable([] as Video[])
 export const totalVideos = writable(null as number | null)
 
+export const settingsOpen = writable(false)
 export const settings: Writable<null | Settings> = writable(null)
 export const tags = writable([] as string[])
 export async function loadSettings() {

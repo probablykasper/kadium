@@ -1,9 +1,16 @@
 <script lang="ts">
   import { event } from '@tauri-apps/api'
   import ChannelsPage from './routes/Channels.svelte'
-  import SettingsPage from './routes/Settings.svelte'
   import { checkShortcut, checkModifiers } from './lib/general'
-  import { loadSettings, settings, enableSampleData, viewOptions, tags } from './lib/data'
+  import SettingsModal from './modals/Settings.svelte'
+  import {
+    loadSettings,
+    settings,
+    enableSampleData,
+    viewOptions,
+    tags,
+    settingsOpen,
+  } from './lib/data'
   import { Route, router } from 'tinro'
   import VideosPage from './routes/Videos.svelte'
   import VideosBar from './routes/_VideoBar.svelte'
@@ -43,10 +50,8 @@
       router.goto('/', true)
     } else if (payload === 'Channels') {
       router.goto('/channels', true)
-    } else if (payload === 'Settings') {
-      router.goto('/settings', true)
-    } else if (payload === 'Preferences') {
-      router.goto('/settings', true)
+    } else if (payload === 'Preferences...' || payload === 'Options...') {
+      $settingsOpen = true
     } else if (payload === 'Show New') {
       router.goto('/', true)
       $viewOptions.show_all = false
@@ -77,12 +82,12 @@
   <Route path="/channels">
     <ChannelsPage channels={$settings.channels} />
   </Route>
-  <Route path="/settings">
-    <SettingsPage
-      apiKey={$settings.api_key}
-      maxConcurrentRequests={$settings.max_concurrent_requests}
-      checkInBackground={$settings.check_in_background} />
-  </Route>
+
+  <SettingsModal
+    apiKey={$settings.api_key}
+    maxConcurrentRequests={$settings.max_concurrent_requests}
+    checkInBackground={$settings.check_in_background}
+    bind:visible={$settingsOpen} />
 {:else if error}
   Error loading.
 

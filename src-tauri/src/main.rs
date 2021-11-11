@@ -193,7 +193,7 @@ fn main() {
         menu::new(vec![
           MenuItem::About(ctx.package_info().name.clone()),
           MenuItem::Separator,
-          MenuItem::Custom(custom_item("Preferences").accelerator("CmdOrCtrl+,")),
+          MenuItem::Custom(custom_item("Preferences...").accelerator("CmdOrCtrl+,")),
           MenuItem::Separator,
           MenuItem::Services,
           MenuItem::Separator,
@@ -204,7 +204,20 @@ fn main() {
           MenuItem::Quit,
         ]),
       )),
-      menu::default_file_submenu(),
+      MenuItem::Submenu(Submenu::new(
+        "File",
+        menu::new(vec![
+          MenuItem::CloseWindow,
+          #[cfg(not(target_os = "macos"))]
+          MenuItem::Separator,
+          #[cfg(not(target_os = "macos"))]
+          MenuItem::Custom(custom_item("Options...").accelerator("CmdOrCtrl+,")),
+          #[cfg(not(target_os = "macos"))]
+          MenuItem::Separator,
+          #[cfg(not(target_os = "macos"))]
+          MenuItem::Quit,
+        ]),
+      )),
       MenuItem::Submenu(Submenu::new(
         "Edit",
         menu::new(vec![
@@ -239,7 +252,6 @@ fn main() {
           MenuItem::Separator,
           MenuItem::Custom(custom_item("Videos").accelerator("Alt+CmdOrCtrl+1")),
           MenuItem::Custom(custom_item("Channels").accelerator("Alt+CmdOrCtrl+2")),
-          MenuItem::Custom(custom_item("Settings").accelerator("Alt+CmdOrCtrl+3")),
         ]),
       )),
       MenuItem::Submenu(Submenu::new(

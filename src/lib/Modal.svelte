@@ -33,6 +33,7 @@
     display: flex
     align-items: center
     justify-content: center
+    z-index: 100
     padding: 20px
     box-sizing: border-box
     background-color: rgba(#000000, 0.5)

@@ -5,10 +5,6 @@
     "module": "es2020",
     "lib": ["es2020"],
 
-    // svelte-preprocess can't tell if you're importing a value or
-    // type, so require 'import type' instead of 'import' for types
-    "importsNotUsedAsValues": "error",
-
     // To have Svelte warnings/errors correct position
     "sourceMap": true,
 

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { active, router } from 'tinro'
+  import { settingsOpen } from './data'
   import { runCmd } from './general'
-
   function go(e: MouseEvent) {
     if (e.target instanceof HTMLElement) {
       const href = e.target.getAttribute('href')
@@ -16,14 +16,17 @@
   async function checkNow() {
     await runCmd('restart_background')
   }
+  function openSettings() {
+    $settingsOpen = true
+  }
 </script>
 
 <nav>
   <a on:mousedown={go} use:active data-exact href="/"><button>Videos</button></a>
   <a on:mousedown={go} use:active href="/channels"><button>Channels</button></a>
-  <a on:mousedown={go} use:active href="/settings"><button>Settings</button></a>
   <div class="spacer" />
   <button class="control-style" on:click={checkNow}>Check Now</button>
+  <button class="control-style" on:click={openSettings}>Settings</button>
 </nav>
 
 <style lang="sass">

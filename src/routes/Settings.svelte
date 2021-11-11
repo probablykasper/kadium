@@ -24,7 +24,7 @@
     <p>Max Concurrent Requests</p>
     <input type="number" bind:value={maxConcurrentRequests} />
     <div>
-      <Button>Save</Button>
+      <Button type="submit">Save</Button>
     </div>
   </form>
 </div>

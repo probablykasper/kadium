@@ -120,14 +120,6 @@ pub async fn tags(data: DataState<'_>) -> Result<Value, String> {
 }
 
 #[command]
-pub async fn set_channels(channels: Vec<Channel>, data: DataState<'_>) -> Result<(), String> {
-  let mut data = data.0.lock().await;
-  data.settings().channels = channels;
-  data.save_settings()?;
-  Ok(())
-}
-
-#[command]
 pub async fn restart_background(data: DataState<'_>) -> Result<(), String> {
   let mut data = data.0.lock().await;
   data.restart_background()?;
@@ -171,13 +163,22 @@ fn url_parse_channel_id(value: &str) -> Option<String> {
 }
 
 #[command]
+pub async fn set_channels(channels: Vec<Channel>, data: DataState<'_>) -> Result<(), String> {
+  let mut data = data.0.lock().await;
+  data.settings().channels = channels;
+  data.save_settings()?;
+  Ok(())
+}
+
+#[command]
 pub async fn add_channel(options: AddChannelOptions, data: DataState<'_>) -> Result<(), String> {
   let mut data = data.0.lock().await;
   let settings = data.settings();
   let invalid = "Invalid URL. You could put in a video URL from the channel".to_string();
 
   let id = if let Some(video_id) = url_parse_video_id(&options.url) {
-    api::channel_id_from_video_id(&video_id, &settings.api_key).await?
+    let key = &settings.api_key_or_default();
+    api::channel_id_from_video_id(&video_id, &key).await?
   } else if let Some(id) = url_parse_channel_id(&options.url) {
     id
   } else {
@@ -194,7 +195,7 @@ pub async fn add_channel(options: AddChannelOptions, data: DataState<'_>) -> Res
     + "?part=contentDetails,id,snippet"
     + "&id="
     + &id;
-  let channels = yt_request::<channels::Response>(&url, &settings.api_key)
+  let channels = yt_request::<channels::Response>(&url, &settings.api_key_or_default())
     .await
     .map_err(|e| format!("Failed to get channel: {}", e))?;
   let channel = match channels.items.into_iter().next() {
@@ -223,7 +224,7 @@ pub async fn set_general_settings(
   data: DataState<'_>,
 ) -> Result<(), String> {
   let mut data = data.0.lock().await;
-  data.settings().api_key = api_key;
+  data.settings().set_api_key(api_key);
   data.settings().max_concurrent_requests = max_concurrent_requests;
   data.settings().check_in_background = check_in_background;
   data.save_settings()?;

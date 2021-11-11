@@ -54,12 +54,7 @@ pub fn spawn(settings: &settings::Settings, pool: &SqlitePool) -> Option<Fetcher
     return None;
   }
 
-  let api_key;
-  if settings.api_key == "" {
-    api_key = settings::default_key();
-  } else {
-    api_key = settings.api_key.clone();
-  };
+  let api_key = settings.api_key_or_default();
   let pool = pool.clone();
 
   let interval_map = new_intervals_map(&settings.channels);

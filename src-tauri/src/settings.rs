@@ -9,7 +9,6 @@ pub fn default_key() -> String {
     65, 73, 122, 97, 83, 121, 68, 52, 50, 110, 65, 76, 52, 57, 118, 48, 108, 100, 121, 99, 110,
     100, 49, 78, 79, 113, 71, 111, 114, 54, 54, 95, 56, 107, 108, 83, 78, 102, 48,
   ];
-  println!("{:?}", key);
   String::from_utf8(key).unwrap()
 }
 
@@ -85,7 +84,7 @@ pub struct Channel {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Settings {
-  pub api_key: String,
+  api_key: String,
   pub max_concurrent_requests: u32,
   pub channels: Vec<Channel>,
   pub check_in_background: bool,
@@ -93,6 +92,16 @@ pub struct Settings {
 impl Settings {
   pub fn wrap(self) -> VersionedSettings {
     VersionedSettings::V1(self)
+  }
+  pub fn api_key_or_default(&self) -> String {
+    if self.api_key == "" {
+      default_key()
+    } else {
+      self.api_key.clone()
+    }
+  }
+  pub fn set_api_key(&mut self, key: String) {
+    self.api_key = key;
   }
 }
 

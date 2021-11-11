@@ -3,6 +3,7 @@
   import { runCmd } from '../lib/general'
   import { loadSettings } from '../lib/data'
   import Modal from '../lib/Modal.svelte'
+  import Link from '../lib/Link.svelte'
 
   export let apiKey: string
   export let maxConcurrentRequests: number
@@ -22,13 +23,23 @@
   function toggleCheckInBg() {
     checkInBackground = !checkInBackground
   }
+
+  let keyGuideVisible = false
+  $: console.log('keyGuideVisible', keyGuideVisible)
+  $: console.log('visible', visible)
 </script>
 
 <Modal bind:visible>
   <form class="page" on:submit|preventDefault={setGeneralSettings}>
     <h3>Settings</h3>
     <p>API Key</p>
-    <input class="textbox" type="text" bind:value={apiKey} />
+    <p class="sub">
+      Kadium has a default API key, but it's vulnerable to abuse and may run out of quota.
+      <Link on:click={() => (keyGuideVisible = true)}>
+        <div class="edit">Get your own key</div>
+      </Link>
+    </p>
+    <input class="textbox" type="text" bind:value={apiKey} placeholder="AIzaSyNq5Y9knL..." />
     <!-- <p>Max Concurrent Requests</p> -->
     <!-- <input class="textbox" type="number" bind:value={maxConcurrentRequests} /> -->
     <div class="checkbox-row" class:checked={checkInBackground} on:click={toggleCheckInBg}>
@@ -54,7 +65,51 @@
   </form>
 </Modal>
 
+<Modal bind:visible={keyGuideVisible}>
+  <form class="guide-page" on:submit|preventDefault={() => (keyGuideVisible = false)}>
+    <h3>Create an API key</h3>
+    <ol>
+      <li>
+        Go to the <Link href="https://console.cloud.google.com/apis/dashboard"
+          >Google APIs & Services
+        </Link> website.
+      </li>
+      <li>
+        <Link href="https://console.cloud.google.com/projectcreate">Create a new project</Link>. Set
+        the project name to <b>my-kadium</b> and click <b>CREATE</b>.</li>
+      <li
+        >Make sure you have the <b>my-kadium</b> project selected in the top-left project dropdown menu.</li>
+      <li
+        >Go to the <Link
+          href="https://console.cloud.google.com/apis/library/youtube.googleapis.com?project=mykadium"
+          >YouTube Data API v3</Link>
+        page and click <b>ENABLE</b>.</li>
+      <li
+        >On the <Link href="https://console.cloud.google.com/apis/credentials?project=mykadium"
+          >Credentials</Link>
+        page, click <b>CREATE CREDENTIALS</b>, then <b>API key</b>.</li>
+      <li>You should see your API key!</li>
+      <li>Optionally restrict the API key to the YouTube API:</li>
+      <ul>
+        <li
+          >Open your API key from the
+          <Link href="https://console.cloud.google.com/apis/credentials?project=mykadium"
+            >Credentials</Link> page.</li>
+        <li>Under <b>API restrictions</b>, select <b>Restrict key</b>.</li>
+        <li>In the dropdown, select <b>YouTube Data API v3</b>.</li>
+        <li>Press <b>SAVE</b>.</li>
+      </ul>
+    </ol>
+    <Button type="submit">Ok</Button>
+  </form>
+</Modal>
+
 <style lang="sass">
+  .guide-page
+    width: 600px
+    li
+      font-size: 15px
+      margin-bottom: 3px
   .page
     width: 400px
   h3
@@ -65,6 +120,12 @@
     margin-top: 5px
     margin-bottom: 7px
     cursor: default
+  p.sub
+    font-weight: 400
+    font-size: 12px
+    color: hsl(220, 5%, 65%)
+    margin-top: 5px
+    margin-bottom: 7px
   input.textbox
     display: block
     font-size: 12px

@@ -53,6 +53,8 @@
       router.goto('/channels', true)
     } else if (payload === 'Preferences...' || payload === 'Options...') {
       $settingsOpen = true
+    } else if (payload === 'Add Channel...') {
+      router.goto('/channels#add', true)
     } else if (payload === 'Show New') {
       router.goto('/', true)
       $viewOptions.show_all = false

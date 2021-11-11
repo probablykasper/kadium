@@ -6,6 +6,7 @@
   import ChannelModal from '../modals/Channel.svelte'
   import { event } from '@tauri-apps/api'
   import { onDestroy } from 'svelte'
+  import { router } from 'tinro'
 
   export let channels: Channel[]
 
@@ -36,6 +37,9 @@
   function openAddModal() {
     editIndex = null
     editVisible = true
+  }
+  $: if ($router.hash === 'add') {
+    openAddModal()
   }
 
   let filter = ''

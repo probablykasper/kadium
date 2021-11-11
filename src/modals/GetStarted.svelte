@@ -7,7 +7,7 @@
   export let visible = false
 
   function keydown(e: KeyboardEvent) {
-    if (e.key === 'Escape' && e.target) {
+    if (e.key === 'Escape' || (e.key === 'Enter' && e.target)) {
       visible = false
       e.preventDefault()
     }

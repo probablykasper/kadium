@@ -9,10 +9,6 @@
     "productName": "Kadium"
   },
   "tauri": {
-    "systemTray": {
-      "iconPath": "./icons/Menu bar icon.png",
-      "iconAsTemplate": true
-    },
     "bundle": {
       "active": true,
       "targets": [

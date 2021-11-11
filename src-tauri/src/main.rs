@@ -208,6 +208,8 @@ fn main() {
       MenuItem::Submenu(Submenu::new(
         "File",
         menu::new(vec![
+          MenuItem::Custom(custom_item("Add Channel...").accelerator("CmdOrCtrl+N")),
+          MenuItem::Separator,
           #[cfg(not(target_os = "macos"))]
           MenuItem::Custom(custom_item("Options...")), // cmd+, panics on Windows
           #[cfg(not(target_os = "macos"))]

@@ -129,6 +129,7 @@ fn main() {
 
   // macOS "App Nap" periodically pauses our app when it's in the background.
   // We need to prevent that so our intervals are not interrupted.
+  #[cfg(target_os = "macos")]
   macos_app_nap::prevent();
 
   let app_paths = AppPaths::from_tauri_config(&ctx.config());

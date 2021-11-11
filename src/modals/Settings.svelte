@@ -66,7 +66,7 @@
             d="M9.348,14.652l8.839,-8.839l1.768,1.768l-10.607,10.606l-5.303,-5.303l1.768,-1.768l3.535,3.536Z" />
         </svg>
       </button>
-      <p>Check in the background</p>
+      <p>Check for new videos automatically</p>
     </div>
     <div class="buttons">
       <Button secondary on:click={() => (visible = false)}>Cancel</Button>

@@ -14,7 +14,7 @@
     }
   }
   async function checkNow() {
-    await runCmd('restart_background')
+    await runCmd('check_now')
   }
   function openSettings() {
     $settingsOpen = true

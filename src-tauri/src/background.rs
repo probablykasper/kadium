@@ -9,7 +9,6 @@ use std::thread;
 use std::time::Duration;
 use tauri::api::notification::Notification;
 use tauri::async_runtime::Mutex;
-use tokio::runtime::Runtime;
 use tokio::sync::broadcast;
 use tokio::{task, time};
 
@@ -23,15 +22,15 @@ pub struct ChannelInfo {
   pub from_time: i64,
 }
 
-pub struct FetcherHandle {
+pub struct BgHandle {
   pub handle: thread::JoinHandle<Result<(), String>>,
   pub stop_sender: broadcast::Sender<()>,
   pub update_counter: Arc<Mutex<u64>>,
 }
 
-impl FetcherHandle {
+impl BgHandle {
   pub fn stop(&self) {
-    println!("Stopping tasks");
+    println!("Stopping tasks if running");
     // Error can only occur when channel is already closed
     let _ = self.stop_sender.send(());
   }
@@ -49,39 +48,48 @@ impl FetcherHandle {
   }
 }
 
-pub fn spawn(settings: &settings::Settings, pool: &SqlitePool) -> Option<FetcherHandle> {
-  if !settings.check_in_background || settings.channels.len() == 0 {
+pub fn spawn_bg(settings: &settings::Settings, pool: &SqlitePool) -> Option<BgHandle> {
+  if settings.check_in_background {
+    spawn(settings, pool, false)
+  } else {
+    None
+  }
+}
+pub fn spawn_bg_or_check_now(settings: &settings::Settings, pool: &SqlitePool) -> Option<BgHandle> {
+  if settings.check_in_background {
+    spawn(settings, pool, false)
+  } else {
+    spawn(settings, pool, true)
+  }
+}
+
+fn spawn(settings: &settings::Settings, pool: &SqlitePool, run_once: bool) -> Option<BgHandle> {
+  if settings.channels.len() == 0 {
     return None;
   }
-
-  let api_key = settings.api_key_or_default();
-  let pool = pool.clone();
 
   let interval_map = new_intervals_map(&settings.channels);
   let interval_infos = to_interval_info_vector(interval_map);
 
   let (stop_sender, _stop_receiver) = broadcast::channel(1);
-  let stop_sender2 = stop_sender.clone();
-
   let update_counter = Arc::new(Mutex::new(0));
-  let update_counter2 = update_counter.clone();
+
+  let options = IntervalOptions {
+    pool: pool.clone(),
+    key: settings.api_key_or_default(),
+    stop_sender: stop_sender.clone(),
+    update_counter: update_counter.clone(),
+    run_once,
+  };
 
   let tokio_thread = thread::spawn(move || {
-    let runtime = match Runtime::new() {
-      Ok(r) => r,
-      Err(e) => return Err(e.to_string()),
-    };
-
-    return runtime.block_on(async {
-      // start intervals inside tokio runtime
-      return start_intervals(pool, api_key, interval_infos, stop_sender2, update_counter2).await;
-    });
+    return start(options, interval_infos);
   });
 
-  Some(FetcherHandle {
+  Some(BgHandle {
     handle: tokio_thread,
-    stop_sender,
-    update_counter,
+    stop_sender: stop_sender,
+    update_counter: update_counter,
   })
 }
 
@@ -108,23 +116,25 @@ fn new_intervals_map(channels: &Vec<settings::Channel>) -> IntervalMap {
   intervals_map
 }
 
-async fn start_intervals(
+#[derive(Clone)]
+struct IntervalOptions {
   pool: SqlitePool,
-  api_key: String,
-  interval_infos: Vec<IntervalInfo>,
+  key: String,
   stop_sender: broadcast::Sender<()>,
   update_counter: Arc<Mutex<u64>>,
-) -> Result<(), String> {
+  run_once: bool,
+}
+
+#[tokio::main]
+async fn start(options: IntervalOptions, interval_infos: Vec<IntervalInfo>) -> Result<(), String> {
   let mut tasks = Vec::new();
   for interval_info in interval_infos {
-    let key = api_key.clone();
-    let pool = pool.clone();
-    let mut stop_receiver = stop_sender.subscribe();
-    let update_counter = update_counter.clone();
+    let options = options.clone();
+    let mut stop_receiver = options.stop_sender.subscribe();
     let handle = task::spawn(async move {
       tokio::select! {
-        _ = run_interval(pool, key, interval_info, update_counter) => {
-          throw!("Interval unexpectedly completed");
+        _ = run(options, interval_info) => {
+          return Ok(())
         }
         result = stop_receiver.recv() => {
           match result {
@@ -150,25 +160,41 @@ async fn start_intervals(
   Err("No intervals started".to_string())
 }
 
-async fn run_interval(
-  pool: SqlitePool,
-  api_key: String,
-  interval_info: IntervalInfo,
-  update_counter: Arc<Mutex<u64>>,
-) {
+async fn run(options: IntervalOptions, interval_info: IntervalInfo) {
+  if options.run_once {
+    println!("Start checking once");
+    run_interval_once(options, interval_info).await;
+    println!("Done checking once");
+  } else {
+    run_interval(options, interval_info).await;
+  }
+}
+
+async fn run_interval_once(options: IntervalOptions, interval_info: IntervalInfo) {
+  println!("Start checking {}ms task", interval_info.ms);
+  for channel in &interval_info.channels {
+    match check_channel(&options, &channel).await {
+      Ok(()) => {}
+      Err(e) => {
+        let title = format!("Error checking {}", channel.name);
+        eprintln!("Error checking {}: {}", title, e);
+        let _ = Notification::new("error").title(title).body(e).show();
+        break;
+      }
+    }
+  }
+  println!("Done checking {}ms task", interval_info.ms);
+}
+
+async fn run_interval(options: IntervalOptions, interval_info: IntervalInfo) {
   let mut interval = time::interval(Duration::from_millis(interval_info.ms));
   interval.set_missed_tick_behavior(time::MissedTickBehavior::Delay);
   loop {
     interval.tick().await;
     println!("Start checking {}ms task", interval_info.ms);
     for channel in &interval_info.channels {
-      match check_channel(&pool, &api_key, &channel).await {
-        Ok(did_insert) => {
-          if did_insert {
-            let mut count = update_counter.lock().await;
-            *count = count.clone() + 1;
-          }
-        }
+      match check_channel(&options, &channel).await {
+        Ok(()) => {}
         Err(e) => {
           let title = format!("Error checking {}", channel.name);
           eprintln!("Error checking {}: {}", title, e);
@@ -182,26 +208,22 @@ async fn run_interval(
 }
 
 /// Returns the number of new videos saved
-async fn check_channel(
-  pool: &SqlitePool,
-  api_key: &str,
-  channel: &ChannelInfo,
-) -> Result<bool, String> {
+async fn check_channel(options: &IntervalOptions, channel: &ChannelInfo) -> Result<(), String> {
   println!("Checking {} {}", channel.uploads_playlist_id, channel.name);
   let url = "https://www.googleapis.com/youtube/v3/playlistItems".to_string()
     + "?part=contentDetails"
     + "&maxResults=50"
     + "&playlistId="
     + &channel.uploads_playlist_id;
-  let uploads = yt_request::<playlist_items::Response>(&url, api_key)
+  let uploads = yt_request::<playlist_items::Response>(&url, &options.key)
     .await
     .map_err(|e| format!("Failed to get channel: {}", e))?;
 
   if uploads.items.len() == 0 {
-    return Ok(false); // no channel videos returned
+    return Ok(()); // no channel videos returned
   }
 
-  let existing_ids = db::get_ids(&uploads.items, pool).await?;
+  let existing_ids = db::get_ids(&uploads.items, &options.pool).await?;
 
   // check which videos are new
   let mut new_ids: Vec<String> = Vec::new();
@@ -221,7 +243,7 @@ async fn check_channel(
   }
 
   if new_ids.len() == 0 {
-    return Ok(false); // no new videos
+    return Ok(()); // no new videos
   }
 
   // get info about the videos
@@ -233,7 +255,7 @@ async fn check_channel(
     + "?part=contentDetails,liveStreamingDetails,snippet"
     + "&id="
     + &new_ids.join(",");
-  let videos = yt_request::<videos::Response>(&url, api_key)
+  let videos = yt_request::<videos::Response>(&url, &options.key)
     .await
     .map_err(|e| format!("Failed to get videos: {}", e))?;
 
@@ -263,11 +285,14 @@ async fn check_channel(
     });
   }
 
-  let will_save_videos = videos_to_add.len() >= 1;
-  for video in videos_to_add {
-    db::insert_video(&video, pool).await?;
+  for video in &videos_to_add {
+    db::insert_video(&video, &options.pool).await?;
   }
-  Ok(will_save_videos)
+  if videos_to_add.len() >= 1 {
+    let mut count = options.update_counter.lock().await;
+    *count = count.clone() + 1;
+  }
+  Ok(())
 }
 
 pub fn parse_datetime(value: &str) -> Result<DateTime<FixedOffset>, String> {

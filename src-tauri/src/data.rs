@@ -35,7 +35,7 @@ impl AppPaths {
 }
 
 pub struct Data {
-  pub bg_handle: Option<background::FetcherHandle>,
+  pub bg_handle: Option<background::BgHandle>,
   pub db_pool: SqlitePool,
   pub versioned_settings: VersionedSettings,
   pub paths: AppPaths,
@@ -53,7 +53,15 @@ impl Data {
       bg_handle.stop();
       bg_handle.wait_until_stopped()?;
     }
-    self.bg_handle = background::spawn(self.settings_ref(), &self.db_pool);
+    self.bg_handle = background::spawn_bg(self.settings_ref(), &self.db_pool);
+    Ok(())
+  }
+  pub fn check_now(&mut self) -> Result<(), String> {
+    if let Some(bg_handle) = self.bg_handle.take() {
+      bg_handle.stop();
+      bg_handle.wait_until_stopped()?;
+    }
+    self.bg_handle = background::spawn_bg_or_check_now(self.settings_ref(), &self.db_pool);
     Ok(())
   }
   pub fn save_settings(&mut self) -> Result<(), String> {
@@ -120,9 +128,9 @@ pub async fn tags(data: DataState<'_>) -> Result<Value, String> {
 }
 
 #[command]
-pub async fn restart_background(data: DataState<'_>) -> Result<(), String> {
+pub async fn check_now(data: DataState<'_>) -> Result<(), String> {
   let mut data = data.0.lock().await;
-  data.restart_background()?;
+  data.check_now()?;
   Ok(())
 }
 

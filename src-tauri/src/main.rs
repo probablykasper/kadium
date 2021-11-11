@@ -59,7 +59,7 @@ async fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
       Ok(mut settings) => {
         let pool = db_pool_future.await?;
         let data = Data {
-          bg_handle: background::spawn(&settings.unwrap(), &pool),
+          bg_handle: background::spawn_bg(&settings.unwrap(), &pool),
           db_pool: pool,
           versioned_settings: settings,
           paths: paths.clone(),
@@ -87,7 +87,7 @@ async fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
   if will_import {
     let imported_stuff = yt_email_notifier::import()?;
     let pool = db_pool_future.await?;
-    let rt = background::spawn(&imported_stuff.settings, &pool);
+    let rt = background::spawn_bg(&imported_stuff.settings, &pool);
     let versioned_settings = imported_stuff.settings.wrap();
     versioned_settings.save(&paths)?;
 
@@ -105,7 +105,7 @@ async fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
   let mut default_settings = VersionedSettings::default();
   let pool = db_pool_future.await?;
   let data = Data {
-    bg_handle: background::spawn(default_settings.unwrap(), &pool),
+    bg_handle: background::spawn_bg(default_settings.unwrap(), &pool),
     db_pool: pool,
     versioned_settings: default_settings,
     paths: paths.clone(),
@@ -160,7 +160,7 @@ fn main() {
       data::set_channels,
       data::add_channel,
       data::set_general_settings,
-      data::restart_background,
+      data::check_now,
       db::get_videos,
       db::archive,
       db::unarchive,

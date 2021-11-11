@@ -80,7 +80,8 @@
   <Route path="/settings">
     <SettingsPage
       apiKey={$settings.api_key}
-      maxConcurrentRequests={$settings.max_concurrent_requests} />
+      maxConcurrentRequests={$settings.max_concurrent_requests}
+      checkInBackground={$settings.check_in_background} />
   </Route>
 {:else if error}
   Error loading.

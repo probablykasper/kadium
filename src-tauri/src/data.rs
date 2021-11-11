@@ -218,11 +218,13 @@ pub async fn add_channel(options: AddChannelOptions, data: DataState<'_>) -> Res
 pub async fn set_general_settings(
   api_key: String,
   max_concurrent_requests: u32,
+  check_in_background: bool,
   data: DataState<'_>,
 ) -> Result<(), String> {
   let mut data = data.0.lock().await;
   data.settings().api_key = api_key;
   data.settings().max_concurrent_requests = max_concurrent_requests;
+  data.settings().check_in_background = check_in_background;
   data.save_settings()?;
   Ok(())
 }

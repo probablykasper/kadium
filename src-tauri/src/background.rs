@@ -50,7 +50,7 @@ impl FetcherHandle {
 }
 
 pub fn spawn(settings: &settings::Settings, pool: &SqlitePool) -> Option<FetcherHandle> {
-  if settings.channels.len() == 0 {
+  if !settings.check_in_background || settings.channels.len() == 0 {
     return None;
   }
 

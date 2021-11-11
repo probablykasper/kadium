@@ -16,6 +16,7 @@ export type Settings = {
   api_key: string
   max_concurrent_requests: number
   channels: Channel[]
+  check_in_background: boolean
 }
 
 export type Video = {
@@ -101,5 +102,6 @@ export function enableSampleData() {
       }
       return channels
     })(),
+    check_in_background: true,
   })
 }

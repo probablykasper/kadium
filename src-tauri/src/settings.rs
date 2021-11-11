@@ -15,6 +15,7 @@ impl Default for VersionedSettings {
       api_key: "".to_string(),
       max_concurrent_requests: 5,
       channels: Vec::new(),
+      check_in_background: true,
     })
   }
 }
@@ -78,6 +79,7 @@ pub struct Settings {
   pub api_key: String,
   pub max_concurrent_requests: u32,
   pub channels: Vec<Channel>,
+  pub check_in_background: bool,
 }
 impl Settings {
   pub fn wrap(self) -> VersionedSettings {
@@ -163,6 +165,7 @@ pub mod yt_email_notifier {
         }
         channels
       },
+      check_in_background: true,
     }
   }
   fn app_dir() -> PathBuf {

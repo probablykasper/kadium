@@ -143,7 +143,7 @@ fn main() {
     Err(e) => Err(e.to_string()),
   };
 
-  let (loaded_data, note) = match data_load_result {
+  let (loaded_data, _note) = match data_load_result {
     Ok(v) => v,
     Err(e) => {
       error_popup_main_thread(&e);
@@ -167,7 +167,7 @@ fn main() {
     ])
     .setup(move |_app| {
       #[cfg(target_os = "macos")]
-      if let Some(note) = note.clone() {
+      if let Some(note) = _note.clone() {
         thread::spawn(move || {
           dialog::message(Option::<&tauri::Window<tauri::Wry>>::None, note.0, note.1);
         });
@@ -208,15 +208,11 @@ fn main() {
       MenuItem::Submenu(Submenu::new(
         "File",
         menu::new(vec![
+          #[cfg(not(target_os = "macos"))]
+          MenuItem::Custom(custom_item("Options...")), // cmd+, panics on Windows
+          #[cfg(not(target_os = "macos"))]
+          MenuItem::Separator,
           MenuItem::CloseWindow,
-          #[cfg(not(target_os = "macos"))]
-          MenuItem::Separator,
-          #[cfg(not(target_os = "macos"))]
-          MenuItem::Custom(custom_item("Options...").accelerator("CmdOrCtrl+,")),
-          #[cfg(not(target_os = "macos"))]
-          MenuItem::Separator,
-          #[cfg(not(target_os = "macos"))]
-          MenuItem::Quit,
         ]),
       )),
       MenuItem::Submenu(Submenu::new(
@@ -272,11 +268,12 @@ fn main() {
     })
     .build(ctx)
     .expect("Error running tauri app");
-  app.run(|app_handle, e| match e {
+  app.run(|_app_handle, e| match e {
     tauri::Event::CloseRequested { label: _, api, .. } => {
       if cfg!(target_os = "macos") {
         api.prevent_close();
-        app_handle.hide().unwrap();
+        #[cfg(target_os = "macos")]
+        _app_handle.hide().unwrap();
       }
     }
     _ => {}

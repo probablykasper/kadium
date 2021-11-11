@@ -16,6 +16,7 @@
   import VideosBar from './routes/_VideoBar.svelte'
   import Nav from './lib/Nav.svelte'
   import { onDestroy } from 'svelte'
+  import GetStarted from './modals/GetStarted.svelte'
 
   let error = false
   loadSettings().catch(() => {
@@ -88,6 +89,10 @@
     maxConcurrentRequests={$settings.max_concurrent_requests}
     checkInBackground={$settings.check_in_background}
     bind:visible={$settingsOpen} />
+
+  {#if $settings && $settings.channels.length === 0}
+    <GetStarted visible={true} />
+  {/if}
 {:else if error}
   Error loading.
 

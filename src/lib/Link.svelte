@@ -12,7 +12,6 @@
   button
     font-size: 13px
     margin: 0px
-    vertical-align: middle
     color: hsl(210, 100%, 55%)
     background-color: transparent
     padding: 0px
@@ -25,5 +24,4 @@
     font-size: inherit
     button
       font-size: inherit
-      vertical-align: baseline
 </style>

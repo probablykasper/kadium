@@ -24,17 +24,28 @@
     checkInBackground = !checkInBackground
   }
 
+  function keydown(e: KeyboardEvent) {
+    if (e.key === 'Escape' && e.target) {
+      visible = false
+      e.preventDefault()
+    }
+  }
+
   let keyGuideVisible = false
-  $: console.log('keyGuideVisible', keyGuideVisible)
-  $: console.log('visible', visible)
+  function keyGuideKeydown(e: KeyboardEvent) {
+    if (e.key === 'Escape' || (e.key === 'Enter' && e.target)) {
+      keyGuideVisible = false
+      e.preventDefault()
+    }
+  }
 </script>
 
-<Modal bind:visible>
+<Modal bind:visible on:keydown={keydown}>
   <form class="page" on:submit|preventDefault={setGeneralSettings}>
     <h3>Settings</h3>
     <p>API Key</p>
     <p class="sub">
-      Kadium has a default API key, but it's vulnerable to abuse and may run out of quota.
+      Kadium has a default API key, but it's vulnerable to abuse and could run out of quota.
       <Link on:click={() => (keyGuideVisible = true)}>
         <div class="edit">Get your own key</div>
       </Link>
@@ -65,7 +76,7 @@
   </form>
 </Modal>
 
-<Modal bind:visible={keyGuideVisible}>
+<Modal bind:visible={keyGuideVisible} on:keydown={keyGuideKeydown}>
   <form class="guide-page" on:submit|preventDefault={() => (keyGuideVisible = false)}>
     <h3>Create an API key</h3>
     <ol>
@@ -100,16 +111,21 @@
         <li>Press <b>SAVE</b>.</li>
       </ul>
     </ol>
-    <Button type="submit">Ok</Button>
+    <div class="right">
+      <Button type="submit">Oh okay</Button>
+    </div>
   </form>
 </Modal>
 
 <style lang="sass">
   .guide-page
-    width: 600px
+    width: 520px
     li
       font-size: 15px
       margin-bottom: 3px
+    .right
+      display: flex
+      justify-content: flex-end
   .page
     width: 400px
   h3

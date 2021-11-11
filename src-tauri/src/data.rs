@@ -211,6 +211,7 @@ pub async fn add_channel(options: AddChannelOptions, data: DataState<'_>) -> Res
     refresh_rate_ms: options.refresh_rate_ms,
     tags: options.tags,
   });
+  data.save_settings()?;
   Ok(())
 }
 

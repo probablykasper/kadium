@@ -52,6 +52,7 @@
   async function getUpdateCount() {
     const newCount = await runCmd('video_update_counter')
     if (newCount > updateCounter) {
+      updateCounter = newCount
       getVideos($viewOptions)
     }
   }

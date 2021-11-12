@@ -28,11 +28,11 @@
 - `npm run check`: Run svelte-check
 
 ### Release new version
-1. Update `CHANGELOG.md`
-2. Manually bump the version number in `src-tauri/Cargo.toml`
-3. Check for errors and bump the `Cargo.lock` version number
+1. Manually bump the version number in `src-tauri/Cargo.toml`
+2. Check for errors and bump the `Cargo.lock` version number
     ```
     cargo check --manifest-path src-tauri/Cargo.toml
     ```
-4. Dispatch the GitHub Release workflow and wait
-5. Add release notes to the generated GitHub release and publish it
+3. Dispatch the GitHub Release workflow and wait
+4. Add release notes to the generated GitHub release and publish it
+5. Update `CHANGELOG.md`

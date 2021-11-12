@@ -3,10 +3,13 @@
 </p>
 <h3 align="center">Kadium</h3>
 <p align="center">
-  App for YouTube upload notifications
+  App for staying ontop of YouTube channel uploads
   <br/>
   <a href="https://github.com/probablykasper/kadium/releases"><b>Download for Mac, Windows or Linux</b></a>
 </p>
+
+![Screenshot 1](assets/screenshot-1.png)
+![Screenshot 2](assets/screenshot-2.png)
 
 ## Dev instructions
 

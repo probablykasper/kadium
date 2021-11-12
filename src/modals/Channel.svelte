@@ -19,14 +19,17 @@
 
   export let editIndex: null | number
   function get(channels: Channel[], index: number) {
+    url = ''
     fromTime = new Date(channels[index].from_time)
     refreshRateMinutes = channels[index].refresh_rate_ms / 1000 / 60
   }
-  $: if (editIndex === null) {
+  $: if (visible && editIndex === null) {
+    console.log('editIndex === null')
+    url = ''
     fromTime = new Date()
     refreshRateMinutes = 60
   }
-  $: if (editIndex !== null) {
+  $: if (visible && editIndex !== null) {
     get(channels, editIndex)
   }
 

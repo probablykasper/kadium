@@ -73,6 +73,15 @@
     const unlisten = await unlistenFuture
     unlisten()
   })
+  let getStartedWasSeen = false
+  $: if (
+    !getStartedWasSeen &&
+    $settings &&
+    $settings.channels.length === 0 &&
+    $settings.api_key === ''
+  ) {
+    getStartedWasSeen = true
+  }
 </script>
 
 <svelte:window on:keydown={keydown} />
@@ -92,7 +101,7 @@
     checkInBackground={$settings.check_in_background}
     bind:visible={$settingsOpen} />
 
-  {#if $settings && $settings.channels.length === 0}
+  {#if getStartedWasSeen}
     <GetStarted visible={true} />
   {/if}
 {:else if error}

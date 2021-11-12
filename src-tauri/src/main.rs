@@ -194,7 +194,7 @@ fn main() {
         menu::new(vec![
           MenuItem::About(ctx.package_info().name.clone()),
           MenuItem::Separator,
-          MenuItem::Custom(custom_item("Preferences...").accelerator("CmdOrCtrl+,")),
+          MenuItem::Custom(custom_item("Preferences...")), // cmdOrCtrl+, unsupported
           MenuItem::Separator,
           MenuItem::Services,
           MenuItem::Separator,
@@ -211,7 +211,7 @@ fn main() {
           MenuItem::Custom(custom_item("Add Channel...").accelerator("CmdOrCtrl+N")),
           MenuItem::Separator,
           #[cfg(not(target_os = "macos"))]
-          MenuItem::Custom(custom_item("Options...")), // cmd+, panics on Windows
+          MenuItem::Custom(custom_item("Options...")), // cmdOrCtrl+, panics on Windows
           #[cfg(not(target_os = "macos"))]
           MenuItem::Separator,
           MenuItem::CloseWindow,

@@ -87,7 +87,7 @@
   ]
   function formatDate(timestamp: number) {
     let ts = new Date(timestamp)
-    return ts.getDay() + ' ' + months[ts.getMonth()] + ' ' + ts.getFullYear()
+    return ts.getDate() + ' ' + months[ts.getMonth()] + ' ' + ts.getFullYear()
   }
   async function archiveToggle(id: string, isArchived: boolean) {
     if (isArchived) {

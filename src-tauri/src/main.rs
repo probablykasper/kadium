@@ -10,7 +10,6 @@ use crate::settings::VersionedSettings;
 use std::{env, thread};
 use tauri::api::{dialog, shell};
 use tauri::{command, CustomMenuItem, Submenu, Window, WindowBuilder, WindowUrl};
-use tokio::runtime::Runtime;
 
 mod api;
 mod background;
@@ -116,7 +115,8 @@ async fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
 
 const MAIN_WIN: &str = "main";
 
-fn main() {
+#[tokio::main]
+async fn main() {
   if cfg!(debug_assertions) && env::var("DEVELOPMENT").is_err() {
     eprintln!(
       "Detected debug mode without the DEVELOPMENT environment \
@@ -133,15 +133,7 @@ fn main() {
   macos_app_nap::prevent();
 
   let app_paths = AppPaths::from_tauri_config(&ctx.config());
-
-  let data_load_result = match Runtime::new() {
-    Ok(runtime) => runtime.block_on(async {
-      // load data in separate async thread
-      // workaround for https://github.com/tauri-apps/tauri/issues/2838
-      return load_data(&app_paths).await;
-    }),
-    Err(e) => Err(e.to_string()),
-  };
+  let data_load_result = load_data(&app_paths).await;
 
   let (loaded_data, _note) = match data_load_result {
     Ok(v) => v,

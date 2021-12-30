@@ -8,7 +8,7 @@
     "dev:web": "vite",
     "build:web": "vite build",
     "lint": "prettier --write --plugin-search-dir=. src *.js && eslint --fix src *.js",
-    "check": "svelte-check"
+    "check": "eslint src *.js && svelte-check && cargo check --manifest-path src-tauri/Cargo.toml"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "1.0.0-next.30",

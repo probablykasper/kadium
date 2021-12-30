@@ -66,7 +66,7 @@ pub fn new(items: Vec<Item>) -> Menu {
 pub fn default_app_submenu(_app_name: &str) -> Item {
   #[cfg(target_os = "macos")]
   return Item::Submenu(Submenu::new(
-    "Window",
+    _app_name,
     new(vec![
       Item::About(_app_name.to_string()),
       Item::Separator,

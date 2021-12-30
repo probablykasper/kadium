@@ -15,8 +15,8 @@
 
 ### Get started
 
-1. Install Node.js (v14 works)
-2. Install Rust (v1.50 works)
+1. Install Node.js
+2. Install Rust
 3. Follow the [Tauri setup guide](https://tauri.studio/en/docs/getting-started/intro)
 4. Run `npm install`
 
@@ -24,15 +24,12 @@
 
 - `DEVELOPMENT=1 npm run dev`: Start in dev mode. `DEVELOPMENT=1` tells Kadium to use `./src-tauri/appdata` for app data.
 - `npm run build`: Build
-- `npm run lint`: Lint
-- `npm run check`: Run svelte-check
+- `npm run format`: Format
+- `npm run check`: Check code
 
 ### Release new version
 1. Manually bump the version number in `src-tauri/Cargo.toml`
-2. Check for errors and bump the `Cargo.lock` version number
-    ```
-    cargo check --manifest-path src-tauri/Cargo.toml
-    ```
+2. Run `npm run check` to make sure `Cargo.lock` is up to date
 3. Dispatch the GitHub Release workflow and wait
 4. Add release notes to the generated GitHub release and publish it
 5. Update `CHANGELOG.md`

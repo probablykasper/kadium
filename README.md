@@ -28,8 +28,8 @@
 - `npm run check`: Check code
 
 ### Release new version
-1. Manually bump the version number in `src-tauri/Cargo.toml`
-2. Run `npm run check` to make sure `Cargo.lock` is up to date
-3. Dispatch the GitHub Release workflow and wait
-4. Add release notes to the generated GitHub release and publish it
-5. Update `CHANGELOG.md`
+1. Update `CHANGELOG.md`
+2. Manually bump the version number in `src-tauri/Cargo.toml`
+3. Run `npm run check` to make sure `Cargo.lock` is up to date
+4. Dispatch the GitHub Release workflow and wait
+5. Add release notes to the generated GitHub release and publish it

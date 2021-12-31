@@ -31,5 +31,5 @@
 1. Update `CHANGELOG.md`
 2. Manually bump the version number in `src-tauri/Cargo.toml`
 3. Run `npm run check` to make sure `Cargo.lock` is up to date
-4. Dispatch the GitHub Release workflow and wait
+4. Commit with a tag in the format `v#.#.#`
 5. Add release notes to the generated GitHub release and publish it

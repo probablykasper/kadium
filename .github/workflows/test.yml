@@ -48,15 +48,13 @@ jobs:
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-            target/
+            src-tauri/target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - run: npm install
 
       - run: npm run build:web
 
-      - run: npm run check
-
       - run: npm run test
 
-      - run: npm run build
+      - run: npm run check

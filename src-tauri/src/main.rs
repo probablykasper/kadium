@@ -9,7 +9,7 @@ use crate::settings::yt_email_notifier;
 use crate::settings::VersionedSettings;
 use std::{env, thread};
 use tauri::api::{dialog, shell};
-use tauri::{command, CustomMenuItem, Submenu, Window, WindowBuilder, WindowUrl};
+use tauri::{command, CustomMenuItem, Manager, Submenu, Window, WindowBuilder, WindowUrl};
 
 mod api;
 mod background;

@@ -53,6 +53,12 @@
       "active": false
     },
     "allowlist": {
+      "dialog": {
+        "message": true
+      },
+      "notification": {
+        "all": true
+      },
       "shell": {
         "open": true
       }

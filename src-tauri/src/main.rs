@@ -170,7 +170,6 @@ async fn main() {
       let win = win
         .title("Kadium")
         .resizable(true)
-        .transparent(false)
         .decorations(true)
         .always_on_top(false)
         .inner_size(900.0, 800.0)
@@ -255,7 +254,8 @@ async fn main() {
       let _ = event.window().emit("menu", event_name);
       match event.menu_item_id() {
         "Learn More" => {
-          shell::open("https://github.com/probablykasper/kadium".to_string(), None).unwrap();
+          let url = "https://github.com/probablykasper/kadium";
+          shell::open(&event.window().shell_scope(), url.to_string(), None).unwrap();
         }
         _ => {}
       }
@@ -263,7 +263,7 @@ async fn main() {
     .build(ctx)
     .expect("Error running tauri app");
   app.run(|_app_handle, e| match e {
-    tauri::Event::CloseRequested { label: _, api, .. } => {
+    tauri::RunEvent::CloseRequested { label: _, api, .. } => {
       if cfg!(target_os = "macos") {
         api.prevent_close();
         #[cfg(target_os = "macos")]

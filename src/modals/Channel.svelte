@@ -14,7 +14,7 @@
   export let visible = false
 
   let url = ''
-  let fromTime: Date
+  let fromTime: Date | null
   let refreshRateMinutes = 60
 
   export let editIndex: null | number
@@ -34,6 +34,9 @@
   }
 
   async function submit() {
+    if (fromTime === null) {
+      return
+    }
     if (editIndex === null) {
       await runCmd('add_channel', {
         options: {

@@ -1,5 +1,6 @@
 ## Next
 - Sort videos from new to old
+- Increase size of video thumbnails
 
 ## 1.0.2 - 2021 Nov 12
 - Fix weekday being displayed as date

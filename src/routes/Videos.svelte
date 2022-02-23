@@ -175,7 +175,7 @@
     flex-grow: 0
     box-sizing: border-box
     display: grid
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr))
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr))
     grid-gap: 15px
     padding: var(--page-padding)
     padding-top: 0px

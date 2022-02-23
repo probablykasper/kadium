@@ -185,7 +185,7 @@ async fn main() {
         menu::new(vec![
           MenuItem::About(ctx.package_info().name.clone()),
           MenuItem::Separator,
-          MenuItem::Custom(custom_item("Preferences...")), // cmdOrCtrl+, unsupported
+          MenuItem::Custom(custom_item("Preferences...").accelerator("CmdOrCtrl+,")),
           MenuItem::Separator,
           MenuItem::Services,
           MenuItem::Separator,

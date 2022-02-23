@@ -1,3 +1,8 @@
+# Changelog
+
+## Next
+- Add `Cmd/Ctrl+,` shortcut to open the settings
+
 ## 1.1.0 - 2022 Feb 23
 - Sort videos from new to old
 - Increase size of video thumbnails

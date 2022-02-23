@@ -7,7 +7,7 @@
     "build": "tauri build",
     "dev:web": "vite",
     "build:web": "vite build",
-    "test": "cargo test --manifest-path ./src-tauri/Cargo.toml",
+    "test": "echo 'No tests'",
     "format": "prettier --write --plugin-search-dir=. src *.js && eslint --fix src *.js",
     "check": "eslint src *.js && svelte-check && cargo check --manifest-path src-tauri/Cargo.toml"
   },

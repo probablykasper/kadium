@@ -42,11 +42,9 @@ jobs:
 
       - run: npm run build:web
 
-      - run: npm run test
-
       - run: npm run check
 
-      - run: npm run build
+      - run: npm run test
 
       - uses: tauri-apps/tauri-action@v0
         env:

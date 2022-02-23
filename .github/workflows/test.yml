@@ -6,8 +6,6 @@ on:
     tags-ignore:
       - '*'
   pull_request:
-    branches:
-      - '*'
   workflow_dispatch:
 
 env:
@@ -27,7 +25,7 @@ jobs:
       - name: Node.js setup
         uses: actions/setup-node@v1
         with:
-          node-version: 14
+          node-version: 16
 
       - name: Rust setup
         uses: actions-rs/toolchain@v1
@@ -40,21 +38,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y webkit2gtk-4.0
 
-      - name: Rust cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            src-tauri/target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
       - run: npm install
-
-      - run: npm run build:web
 
       - run: npm run test
 
       - run: npm run check
+
+      - run: npm run build
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

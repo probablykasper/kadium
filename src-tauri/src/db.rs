@@ -191,7 +191,7 @@ pub async fn get_videos(
     query_str.push_str(" WHERE ");
     query_str.push_str(&wheres.join(" AND "));
   }
-  query_str.push_str(" ORDER BY publishTimeMs, id DESC");
+  query_str.push_str(" ORDER BY publishTimeMs DESC, id DESC");
   query_str.push_str(&format!(" LIMIT {}", options.limit.to_string()));
 
   let mut query = sqlx::query_as(&query_str);

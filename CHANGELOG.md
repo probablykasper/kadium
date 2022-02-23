@@ -1,4 +1,4 @@
-## Next
+## 1.1.0 - 2022 Feb 23
 - Sort videos from new to old
 - Increase size of video thumbnails
 - Fix channel name sometimes appearing on the same line as the title

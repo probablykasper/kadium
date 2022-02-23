@@ -27,10 +27,17 @@ jobs:
         with:
           node-version: 16
 
+      - run: npm install
+
       - name: Rust setup
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v1.3.0
+        with:
+          working-directory: ./src-tauri
 
       - name: Install webkit2gtk (ubuntu only)
         if: matrix.platform == 'ubuntu-latest'
@@ -38,17 +45,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y webkit2gtk-4.0
 
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@v1.3.0
-
-      - run: npm install
-
       - run: npm run build:web
 
       - run: npm run check
 
       - run: npm run test
 
+      - name: Build
       - uses: tauri-apps/tauri-action@b3f03835ca527e9735b386f1b1302ca70714b1e6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

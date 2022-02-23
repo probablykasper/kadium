@@ -179,7 +179,7 @@
     grid-gap: 15px
     padding: var(--page-padding)
     padding-top: 0px
-    @media screen and (max-width: 430px)
+    @media screen and (max-width: 450px)
       grid-template-columns: 1fr
       .box
         margin: 0px auto

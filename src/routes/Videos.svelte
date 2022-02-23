@@ -145,19 +145,19 @@
               d="M9.348,14.652l8.839,-8.839l1.768,1.768l-10.607,10.606l-5.303,-5.303l1.768,-1.768l3.535,3.536Z" />
           </svg>
         </button>
-        <a target="_blank" href="https://youtube.com/watch?v={video.id}">
+        <a class="row" target="_blank" href="https://youtube.com/watch?v={video.id}">
           <button>
             <p class="title selectable">{video.title}</p>
           </button>
         </a>
-        <a target="_blank" href="https://www.youtube.com/channel/{video.channelId}">
+        <a class="row" target="_blank" href="https://www.youtube.com/channel/{video.channelId}">
           <button class="selectable">
             <p class="sub">
               {video.channelName}
             </p>
           </button>
         </a>
-        <p class="sub selectable">{formatDate(video.publishTimeMs)}</p>
+        <p class="row sub selectable">{formatDate(video.publishTimeMs)}</p>
       </div>
     {/each}
   </div>
@@ -189,6 +189,8 @@
     user-select: none
     -webkit-user-select: none
     position: relative
+  .row
+    width: 100%
   .img-box
     width: 100%
     padding-top: 56.25%

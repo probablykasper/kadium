@@ -1,6 +1,7 @@
 ## Next
 - Sort videos from new to old
 - Increase size of video thumbnails
+- Fix channel name sometimes appearing on the same line as the title
 
 ## 1.0.2 - 2021 Nov 12
 - Fix weekday being displayed as date

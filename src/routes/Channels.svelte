@@ -65,7 +65,8 @@
       class="bar-item control-style"
       type="text"
       placeholder="Channel Filter"
-      bind:value={filter} />
+      bind:value={filter}
+    />
     <div class="page-info">
       {visibleIndexes.length} of {channels.length}
     </div>
@@ -76,7 +77,8 @@
         <img src={channel.icon} alt="" />
         <div class="details">
           <a href="https://youtube.com/channel/{channel.id}" target="_blank" class="title"
-            >{channel.name}</a>
+            >{channel.name}</a
+          >
           <div class="content">
             <!-- <span>{channel.id}</span> -->
             <span>Check for videos after {new Date(channel.from_time).toLocaleString()}</span>

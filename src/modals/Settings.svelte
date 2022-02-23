@@ -60,10 +60,12 @@
             d="M24,3.382c0,-1.866 -1.516,-3.382 -3.382,-3.382l-17.236,0c-1.866,0 -3.382,1.516 -3.382,3.382l0,17.236c0,1.866
           1.516,3.382 3.382,3.382l17.236,-0c1.866,-0 3.382,-1.516 3.382,-3.382l0,-17.236Zm-2.5,0l-0,17.236c-0,0.487
           -0.395,0.882 -0.882,0.882l-17.236,-0c-0.487,-0 -0.882,-0.395 -0.882,-0.882l0,-17.236c0,-0.487
-          0.395,-0.882 0.882,-0.882l17.236,0c0.487,0 0.882,0.395 0.882,0.882Z" />
+          0.395,-0.882 0.882,-0.882l17.236,0c0.487,0 0.882,0.395 0.882,0.882Z"
+          />
           <path
             class="checkmark"
-            d="M9.348,14.652l8.839,-8.839l1.768,1.768l-10.607,10.606l-5.303,-5.303l1.768,-1.768l3.535,3.536Z" />
+            d="M9.348,14.652l8.839,-8.839l1.768,1.768l-10.607,10.606l-5.303,-5.303l1.768,-1.768l3.535,3.536Z"
+          />
         </svg>
       </button>
       <p>Check for new videos automatically</p>
@@ -87,25 +89,33 @@
       </li>
       <li>
         <Link href="https://console.cloud.google.com/projectcreate">Create a new project</Link>. Set
-        the project name to <b>my-kadium</b> and click <b>CREATE</b>.</li>
-      <li
-        >Make sure you have the <b>my-kadium</b> project selected in the top-left project dropdown menu.</li>
-      <li
-        >Go to the <Link
+        the project name to <b>my-kadium</b> and click <b>CREATE</b>.
+      </li>
+      <li>
+        Make sure you have the <b>my-kadium</b> project selected in the top-left project dropdown menu.
+      </li>
+      <li>
+        Go to the <Link
           href="https://console.cloud.google.com/apis/library/youtube.googleapis.com?project=mykadium"
-          >YouTube Data API v3</Link>
-        page and click <b>ENABLE</b>.</li>
-      <li
-        >On the <Link href="https://console.cloud.google.com/apis/credentials?project=mykadium"
-          >Credentials</Link>
-        page, click <b>CREATE CREDENTIALS</b>, then <b>API key</b>.</li>
+          >YouTube Data API v3</Link
+        >
+        page and click <b>ENABLE</b>.
+      </li>
+      <li>
+        On the <Link href="https://console.cloud.google.com/apis/credentials?project=mykadium"
+          >Credentials</Link
+        >
+        page, click <b>CREATE CREDENTIALS</b>, then <b>API key</b>.
+      </li>
       <li>You should see your API key!</li>
       <li>Optionally restrict the API key to the YouTube API:</li>
       <ul>
-        <li
-          >Open your API key from the
+        <li>
+          Open your API key from the
           <Link href="https://console.cloud.google.com/apis/credentials?project=mykadium"
-            >Credentials</Link> page.</li>
+            >Credentials</Link
+          > page.
+        </li>
         <li>Under <b>API restrictions</b>, select <b>Restrict key</b>.</li>
         <li>In the dropdown, select <b>YouTube Data API v3</b>.</li>
         <li>Press <b>SAVE</b>.</li>

@@ -69,12 +69,14 @@
       class="control-style"
       type="text"
       placeholder="Channel Filter"
-      bind:value={$viewOptions.channel_filter} />
+      bind:value={$viewOptions.channel_filter}
+    />
     {#each $tags as tag}
       <button
         class="control-style tag"
         class:enabled={$viewOptions.tag === tag}
-        on:click={() => toggleTag(tag)}>{tag}</button>
+        on:click={() => toggleTag(tag)}>{tag}</button
+      >
     {/each}
   </div>
   <div class="page-info">

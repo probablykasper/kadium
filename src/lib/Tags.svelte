@@ -101,13 +101,14 @@
     {#if i === value.length - 1 && editing}
       <!-- hide last element when editing -->
     {:else}
-      <div class="tag"
-        >{tag}<button
+      <div class="tag">
+        {tag}<button
           bind:this={tagXEls[i]}
           on:keydown={(e) => tagKeydown(e, i)}
           on:click={() => remove(i)}
           tabindex="0">×</button
-        ></div>
+        >
+      </div>
     {/if}
   {/each}
   <input
@@ -117,7 +118,8 @@
     on:focus={onFocus}
     on:blur={onBlur}
     on:keydown={keydown}
-    bind:value={text} />
+    bind:value={text}
+  />
 </div>
 
 <style lang="sass">

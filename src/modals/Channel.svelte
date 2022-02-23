@@ -92,13 +92,15 @@
       <input
         type="text"
         placeholder="https://www.youtube.com/channel/UCeTncCK57upn3lPn6PX18Ng"
-        bind:value={url} />
+        bind:value={url}
+      />
     {/if}
 
     <p>Refresh rate (minutes)</p>
-    <p class="sub"
-      >Channels with identical refresh rates are grouped together in batches, so it's recommended to
-      use only a few different refresh rates</p>
+    <p class="sub">
+      Channels with identical refresh rates are grouped together in batches, so it's recommended to
+      use only a few different refresh rates
+    </p>
     <input type="number" bind:value={refreshRateMinutes} />
 
     <p>Check for videos after</p>

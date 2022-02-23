@@ -116,11 +116,11 @@
   <div class="grid">
     {#each $videos as video}
       <div class="box">
-        <!-- <img src="https://i.ytimg.com/vi/{video.id}/hqdefault.jpg" alt="" /> -->
-        <!-- <img src="https://i.ytimg.com/vi/{video.id}/sddefault.jpg" alt="" /> -->
-        <a target="_blank" href="https://youtube.com/watch?v={video.id}">
+        <a class="img-box" target="_blank" href="https://youtube.com/watch?v={video.id}">
           <div class="img-box">
-            <img src="https://i.ytimg.com/vi/{video.id}/mqdefault.jpg" alt="" />
+            <div class="img-parent">
+              <img src="https://i.ytimg.com/vi/{video.id}/hqdefault.jpg" alt="" />
+            </div>
           </div>
         </a>
         <button
@@ -194,11 +194,20 @@
   .img-box
     width: 100%
     padding-top: 56.25%
-  img
+    position: relative
+  .img-parent
     position: absolute
     top: 0px
     left: 0px
     width: 100%
+    height: 100%
+    overflow: hidden
+    display: flex
+    align-items: center
+  img
+    width: 100%
+    top:-100%
+    bottom:-100%
   p
     margin: 0px
   a

@@ -38,6 +38,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y webkit2gtk-4.0
 
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v1.3.0
+
       - run: npm install
 
       - run: npm run build:web

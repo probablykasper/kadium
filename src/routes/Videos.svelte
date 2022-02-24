@@ -170,7 +170,6 @@
 <style lang="sass">
   .selectable
     user-select: text
-    -webkit-user-select: text
   main
     max-width: 100%
     height: 100%
@@ -191,7 +190,6 @@
     max-width: 280px
     width: 100%
     user-select: none
-    -webkit-user-select: none
     position: relative
   .row
     display: block
@@ -262,7 +260,6 @@
       padding-left: 2px
       vertical-align: middle
       filter: drop-shadow( 0px 0px 2px rgba(0, 0, 0, 0.4))
-      -webkit-filter: drop-shadow( 0px 0px 2px rgba(0, 0, 0, 0.4))
       path.frame
         transform: scale(1)
         transform-origin: center

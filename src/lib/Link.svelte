@@ -16,6 +16,8 @@
     background-color: transparent
     padding: 0px
     border: none
+    user-select: none
+    cursor: default
     &:hover
       color: hsl(210, 100%, 45%)
   a

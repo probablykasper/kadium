@@ -135,7 +135,6 @@
       box-shadow: 0px 0px 0px 3px hsla(220, 100%, 50%, 0.5)
   .selectable
     user-select: text
-    -webkit-user-select: text
   .channels
     flex-wrap: wrap
     padding: 0px var(--page-padding)

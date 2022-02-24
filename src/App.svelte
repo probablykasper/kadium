@@ -124,7 +124,11 @@
     color: #f2f2f2
     color-scheme: dark
     user-select: none
-    -webkit-user-select: none
+    pointer: default
+  :global(p), :global(h1), :global(h2), :global(h3)
+    user-select: text
+  :global(span)
+    pointer: inherit
   :global(body)
     height: 100%
     margin: 0px

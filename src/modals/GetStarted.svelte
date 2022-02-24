@@ -33,9 +33,6 @@
 <style lang="sass">
   main
     max-width: 400px
-  p, h3
-    user-select: text
-    -webkit-user-select: text
   p
     font-size: 14px
     margin-top: 5px

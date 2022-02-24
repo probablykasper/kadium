@@ -56,7 +56,7 @@
         toggledColor="hsl(220, 100%, 52%)"
         toggled={checkInBackground}
       >
-        <small>Check for new videos automatically</small>
+        <p>Check for new videos automatically</p>
       </Toggle>
     </div>
     <div class="buttons">
@@ -164,7 +164,9 @@
     align-items: center
     cursor: pointer
     margin-bottom: 15px
-    small
+    p
+      user-select: none
+      pointer: inherit
       margin-left: 8px
   .buttons
     margin-top: 20px

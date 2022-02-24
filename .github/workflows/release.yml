@@ -5,9 +5,6 @@ on:
       - 'v*'
   workflow_dispatch:
 
-env:
-  CARGO_TERM_COLOR: always
-
 jobs:
   release:
     strategy:
@@ -22,7 +19,7 @@ jobs:
       - name: Node.js setup
         uses: actions/setup-node@v1
         with:
-          node-version: 14
+          node-version: 16
 
       - name: Rust setup
         uses: actions-rs/toolchain@v1
@@ -37,11 +34,11 @@ jobs:
 
       - run: npm install
 
-      - uses: tauri-apps/tauri-action@v0
+      - name: Build and release
+        uses: tauri-apps/tauri-action@b3f03835ca527e9735b386f1b1302ca70714b1e6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: ${{ github.ref_name }}
+          tagName: v__VERSION__
+          releaseName: v__VERSION__
           releaseDraft: true
-          prerelease: false

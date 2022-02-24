@@ -51,10 +51,8 @@
       </Link>
     </p>
     <input class="textbox" type="text" bind:value={apiKey} placeholder="AIzaSyNq5Y9knL..." />
-    <!-- <p>Max Concurrent Requests</p> -->
-    <!-- <input class="textbox" type="number" bind:value={maxConcurrentRequests} /> -->
     <div class="checkbox-row" class:checked={checkInBackground} on:click={toggleCheckInBg}>
-      <button>
+      <button type="button">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
           <path
             d="M24,3.382c0,-1.866 -1.516,-3.382 -3.382,-3.382l-17.236,0c-1.866,0 -3.382,1.516 -3.382,3.382l0,17.236c0,1.866

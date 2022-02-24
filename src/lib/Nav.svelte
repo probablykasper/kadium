@@ -36,8 +36,6 @@
     align-items: center
     height: 54px
     flex-shrink: 0
-    background-color: hsl(220, 17%, 9%)
-    border-bottom: 1px solid hsla(0, 0%, 50%, 0.07)
   .spacer
     margin-left: auto
   a

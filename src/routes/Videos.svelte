@@ -182,7 +182,7 @@
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr))
     grid-gap: 15px
     padding: var(--page-padding)
-    padding-top: 0px
+    padding-top: 15px
     @media screen and (max-width: 450px)
       grid-template-columns: 1fr
       .box

@@ -194,6 +194,7 @@
     -webkit-user-select: none
     position: relative
   .row
+    display: block
     width: 100%
   .img-box
     width: 100%

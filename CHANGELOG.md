@@ -2,6 +2,7 @@
 
 ## Next
 - Add `Cmd/Ctrl+,` shortcut to open the settings
+- Fix incorrect video page loading
 - Fix missing Windows release
 - Fix channel title line wrapping
 

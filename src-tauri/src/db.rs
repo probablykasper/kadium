@@ -166,7 +166,7 @@ pub async fn get_videos(
   }
   let after_publish_time_ms;
   if let Some(after) = &after {
-    wheres.push("(publishTimeMs,id) > (?,?)");
+    wheres.push("(publishTimeMs,id) < (?,?)");
     after_publish_time_ms = after.publishTimeMs.to_string();
     bindings.push(&after_publish_time_ms);
     bindings.push(&after.id);

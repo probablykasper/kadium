@@ -97,9 +97,7 @@
     padding: 0px 20px
     justify-content: space-between
     flex-shrink: 0
-    background-color: hsl(220, 17%, 9%)
-    border-top: 1px solid hsla(0, 0%, 50%, 0.08)
-    border-bottom: 1px solid hsla(0, 0%, 50%, 0.08)
+    border-bottom: 1px solid hsla(0, 0%, 50%, 0.12)
   .page-info
     flex-shrink: 0
     margin-left: 5px

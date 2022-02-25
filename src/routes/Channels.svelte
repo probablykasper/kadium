@@ -107,6 +107,7 @@
     padding: 0px 20px
     justify-content: space-between
     flex-shrink: 0
+    border-bottom: 1px solid hsla(0, 0%, 50%, 0.12)
   .page-info
     flex-shrink: 0
     margin-left: auto
@@ -153,7 +154,7 @@
       display: flex
     @media screen and (min-width: 600px)
       padding: 15px
-      margin-bottom: 15px
+      margin: 15px 0px
       background-color: hsla(223, 33%, 64%, 0.05)
       box-shadow: 0px 4px 8px 0px hsla(0, 0%, 0%, 0.1)
       border: 1px solid hsla(0, 0%, 50%, 0.04)

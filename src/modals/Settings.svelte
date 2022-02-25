@@ -4,7 +4,7 @@
   import { loadSettings } from '../lib/data'
   import Modal from '../lib/Modal.svelte'
   import Link from '../lib/Link.svelte'
-  import Toggle from 'svelte-toggle'
+  import Switch from '../lib/Switch.svelte'
 
   export let apiKey: string
   export let maxConcurrentRequests: number
@@ -49,15 +49,11 @@
       </Link>
     </p>
     <input class="textbox" type="text" bind:value={apiKey} placeholder="AIzaSyNq5Y9knL..." />
-    <div class="toggle-row" on:click={() => (checkInBackground = !checkInBackground)}>
-      <Toggle
-        hideLabel
-        untoggledColor="hsl(220, 20%, 31%)"
-        toggledColor="hsl(220, 100%, 52%)"
-        toggled={checkInBackground}
-      >
-        <p>Check for new videos automatically</p>
-      </Toggle>
+    <div class="toggle-row">
+      <p on:click={() => (checkInBackground = !checkInBackground)}>
+        Check for new videos automatically
+      </p>
+      <Switch bind:checked={checkInBackground} />
     </div>
     <div class="buttons">
       <Button secondary on:click={() => (visible = false)}>Cancel</Button>
@@ -162,12 +158,11 @@
   .toggle-row
     display: flex
     align-items: center
-    cursor: pointer
+    justify-content: space-between
     margin-bottom: 15px
     p
       user-select: none
-      pointer: inherit
-      margin-left: 8px
+      cursor: default
   .buttons
     margin-top: 20px
     display: flex

@@ -15,6 +15,8 @@
 
     videos = await runCmd('get_videos', { options })
     allLoaded = videos.length < $viewOptions.limit
+    selectedIndex = 0
+    selectionVisible = false
 
     loading = false
 
@@ -85,13 +87,17 @@
     let ts = new Date(timestamp)
     return ts.getDate() + ' ' + months[ts.getMonth()] + ' ' + ts.getFullYear()
   }
-  async function archiveToggle(id: string, isArchived: boolean) {
-    if (isArchived) {
-      await runCmd('unarchive', { id })
-    } else {
-      await runCmd('archive', { id })
-    }
+  async function archive(id: string) {
+    await runCmd('archive', { id })
     getVideos($viewOptions)
+  }
+  async function unarchive(id: string) {
+    await runCmd('unarchive', { id })
+    getVideos($viewOptions)
+  }
+  async function archiveToggle(id: string, isArchived: boolean) {
+    if (isArchived) unarchive(id)
+    else archive(id)
   }
 
   let main: HTMLElement | null = null
@@ -158,11 +164,15 @@
     }
   }
 
-  const unlistenFuture = event.listen('tauri://menu', ({ payload }) => {
+  const unlistenFuture = event.listen('tauri://menu', async ({ payload }) => {
     if (payload === 'Open Selected Video' && selectionVisible) {
       openSelectedVideo()
     } else if (payload === 'Open Selected Channel' && selectionVisible) {
       openSelectedChannel()
+    } else if (payload === 'Archive') {
+      archive(videos[selectedIndex].id)
+    } else if (payload === 'Unarchive') {
+      unarchive(videos[selectedIndex].id)
     }
   })
   onDestroy(async () => {
@@ -244,6 +254,7 @@
     grid-gap: 15px
     padding: var(--page-padding)
     padding-top: 15px
+    outline: none
     @media screen and (max-width: 450px)
       grid-template-columns: 1fr
       .box

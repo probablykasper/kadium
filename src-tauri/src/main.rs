@@ -200,9 +200,10 @@ async fn main() {
         "File",
         menu::new(vec![
           MenuItem::Custom(custom_item("Add Channel...").accelerator("CmdOrCtrl+N")),
-          MenuItem::Separator,
-          MenuItem::Custom(custom_item("Open Selected Video")),
-          MenuItem::Custom(custom_item("Open Selected Channel")),
+          MenuItem::Custom(custom_item("Open")),
+          MenuItem::Custom(custom_item("Open Channel")),
+          MenuItem::Custom(custom_item("Archive").accelerator("CmdOrCtrl+Backspace")),
+          MenuItem::Custom(custom_item("Unarchive").accelerator("Shift+CmdOrCtrl+Backspace")),
           MenuItem::Separator,
           #[cfg(not(target_os = "macos"))]
           MenuItem::Custom(custom_item("Options...").accelerator("CmdOrCtrl+,")),

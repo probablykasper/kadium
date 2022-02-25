@@ -193,11 +193,16 @@
         class:selected={selectionVisible && i === selectedIndex}
         on:mousedown={() => select(i)}
       >
-        <div class="img-box">
+        <a
+          class="img-box"
+          href="https://youtube.com/watch?v={video.id}"
+          draggable="false"
+          on:click|preventDefault
+        >
           <div class="img-parent">
             <img src="https://i.ytimg.com/vi/{video.id}/hqdefault.jpg" alt="" />
           </div>
-        </div>
+        </a>
         <button
           class="archive"
           on:click={() => archiveToggle(video.id, video.archived)}
@@ -274,6 +279,7 @@
     display: block
     width: 100%
   .img-box
+    display: block
     width: 100%
     padding-top: 56.25%
     position: relative

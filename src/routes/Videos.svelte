@@ -204,6 +204,7 @@
         class="box"
         class:selected={selectionVisible && i === selectedIndex}
         on:mousedown={() => select(i)}
+        on:dblclick={() => shell.open('https://youtube.com/watch?v=' + videos[i].id)}
         on:click={(e) => videoClick(e, i)}
       >
         <a
@@ -249,6 +250,7 @@
             class="row"
             href="https://www.youtube.com/channel/{video.channelId}"
             on:click|preventDefault|stopPropagation={(e) => channelClick(e, i)}
+            on:dblclick|stopPropagation={() => openChannel(i)}
           >
             {video.channelName}
           </a>

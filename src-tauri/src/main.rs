@@ -201,8 +201,11 @@ async fn main() {
         menu::new(vec![
           MenuItem::Custom(custom_item("Add Channel...").accelerator("CmdOrCtrl+N")),
           MenuItem::Separator,
+          MenuItem::Custom(custom_item("Open Selected Video")),
+          MenuItem::Custom(custom_item("Open Selected Channel")),
+          MenuItem::Separator,
           #[cfg(not(target_os = "macos"))]
-          MenuItem::Custom(custom_item("Options...")), // cmdOrCtrl+, panics on Windows
+          MenuItem::Custom(custom_item("Options...").accelerator("CmdOrCtrl+,")),
           #[cfg(not(target_os = "macos"))]
           MenuItem::Separator,
           MenuItem::CloseWindow,

@@ -1,8 +1,9 @@
 <script lang="ts">
   import { ViewOptions, viewOptions, Video } from '../lib/data'
+  import { event, shell } from '@tauri-apps/api'
   import { listen } from '@tauri-apps/api/event'
   import { onDestroy, tick } from 'svelte'
-  import { runCmd } from '../lib/general'
+  import { checkShortcut, runCmd } from '../lib/general'
   import VideoBar from './_VideoBar.svelte'
 
   let videos: Video[] = []
@@ -104,28 +105,93 @@
     }
     return false
   }
+
+  let selectionVisible = false
+  let selectedIndex = 0
+  function select(index: number) {
+    selectedIndex = index
+    selectionVisible = true
+  }
+
+  function openSelectedVideo() {
+    shell.open('https://youtube.com/watch?v=' + videos[selectedIndex].id)
+  }
+  function openSelectedChannel() {
+    shell.open('https://www.youtube.com/channel/' + videos[selectedIndex].channelId)
+  }
+
+  function keydown(e: KeyboardEvent) {
+    let target = e.target as HTMLElement
+    if (target.nodeName === 'INPUT') {
+      return
+    }
+
+    if (selectionVisible) {
+      if (checkShortcut(e, 'ArrowLeft')) {
+        selectedIndex--
+        selectedIndex = Math.max(0, Math.min(selectedIndex, videos.length - 1))
+        e.preventDefault()
+      } else if (checkShortcut(e, 'ArrowRight')) {
+        selectedIndex++
+        selectedIndex = Math.max(0, Math.min(selectedIndex, videos.length - 1))
+        e.preventDefault()
+      } else if (checkShortcut(e, 'Escape')) {
+        selectionVisible = false
+        e.preventDefault()
+      } else if (checkShortcut(e, 'Enter')) {
+        openSelectedVideo()
+        e.preventDefault()
+      } else if (checkShortcut(e, 'Enter', { shift: true })) {
+        openSelectedChannel()
+        e.preventDefault()
+      }
+    } else {
+      if (
+        checkShortcut(e, 'ArrowLeft') ||
+        checkShortcut(e, 'ArrowRight') ||
+        checkShortcut(e, 'ArrowUp') ||
+        checkShortcut(e, 'ArrowDown')
+      ) {
+        selectionVisible = true
+        e.preventDefault()
+      }
+    }
+  }
+
+  const unlistenFuture = event.listen('tauri://menu', ({ payload }) => {
+    if (payload === 'Open Selected Video' && selectionVisible) {
+      openSelectedVideo()
+    } else if (payload === 'Open Selected Channel' && selectionVisible) {
+      openSelectedChannel()
+    }
+  })
+  onDestroy(async () => {
+    const unlisten = await unlistenFuture
+    unlisten()
+  })
 </script>
 
-<svelte:window on:resize={autoloadHandler} />
+<svelte:window on:resize={autoloadHandler} on:keydown={keydown} />
 
 <VideoBar loadedVideosCount={videos.length} {allLoaded} />
 
-<main bind:this={main} class="selectable" on:scroll={autoloadHandler}>
-  <div class="grid">
-    {#each videos as video}
-      <div class="box">
-        <a class="img-box" target="_blank" href="https://youtube.com/watch?v={video.id}">
-          <div class="img-box">
-            <div class="img-parent">
-              <img src="https://i.ytimg.com/vi/{video.id}/hqdefault.jpg" alt="" />
-            </div>
+<main bind:this={main} on:scroll={autoloadHandler} tabindex="0">
+  <div class="grid" tabindex="-1">
+    {#each videos as video, i}
+      <div
+        class="box"
+        class:selected={selectionVisible && i === selectedIndex}
+        on:mousedown={() => select(i)}
+      >
+        <div class="img-box">
+          <div class="img-parent">
+            <img src="https://i.ytimg.com/vi/{video.id}/hqdefault.jpg" alt="" />
           </div>
-        </a>
+        </div>
         <button
           class="archive"
           on:click={() => archiveToggle(video.id, video.archived)}
           title="Archive"
-          tabindex="-1"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -148,17 +214,13 @@
           </svg>
         </button>
         <a class="row" target="_blank" href="https://youtube.com/watch?v={video.id}">
-          <button>
-            <p class="title selectable">{video.title}</p>
-          </button>
+          <p class="title selectable">{video.title}</p>
         </a>
-        <a class="row" target="_blank" href="https://www.youtube.com/channel/{video.channelId}">
-          <button class="selectable">
-            <p class="sub">
-              {video.channelName}
-            </p>
-          </button>
-        </a>
+        <p class="channel sub">
+          <a class="row" target="_blank" href="https://www.youtube.com/channel/{video.channelId}">
+            {video.channelName}
+          </a>
+        </p>
         <p class="row sub selectable">{formatDate(video.publishTimeMs)}</p>
       </div>
     {/each}
@@ -166,12 +228,14 @@
 </main>
 
 <style lang="sass">
+  $ease-md: cubic-bezier(0.4, 0.0, 0.2, 1)
   .selectable
     user-select: text
   main
     max-width: 100%
     height: 100%
     overflow-y: auto
+    outline: none
   .grid
     flex-grow: 0
     box-sizing: border-box
@@ -189,6 +253,12 @@
     width: 100%
     user-select: none
     position: relative
+    padding: 3px
+    border: 1px solid transparent
+    border-radius: 3px
+  .selected
+    background-color: hsla(0deg, 0%, 100%, 0.05)
+    border-color: hsla(0deg, 0%, 100%, 0.1)
   .row
     display: block
     width: 100%
@@ -214,29 +284,32 @@
   a
     text-decoration: none
     color: inherit
+    cursor: default
     &:focus
       border-color: hsl(210, 100%, 55%)
-    button
-      background-color: transparent
-      border: none
-      margin: 0px
-      padding: 0px
-      text-align: left
-      cursor: pointer
-      color: inherit
   p.title
     font-size: 13px
     font-weight: 500
     color: #ffffff
+    opacity: 1
+    transition: 100ms opacity $ease-md
+    &:hover
+      opacity: 0.9
+  .channel
+    transition: 80ms opacity $ease-md
+    a
+      display: inline
+    a:hover
+      opacity: 0.9
   p.sub
     font-size: 12px
+    cursor: default
     color: hsl(210, 8%, 80%)
     margin-top: 2px
   .box:hover button.archive
     opacity: 1
   .archive
     position: absolute
-    cursor: pointer
     top: 0px
     right: 0px
     border-radius: 10px
@@ -247,7 +320,7 @@
     border: none
     transform: translate3d(0, 0, 0) // fix glitch after transform/opacity
     opacity: 0
-    transition: opacity 120ms cubic-bezier(0.4, 0.0, 0.2, 1)
+    transition: opacity 120ms $ease-md
     svg
       fill: #ffffff
       width: 16px
@@ -265,7 +338,7 @@
       path.checkmark
         transform: scale(1)
         transform-origin: 20% 80%
-        transition: all 120ms cubic-bezier(0.4, 0.0, 0.2, 1)
+        transition: all 120ms $ease-md
       &:active path.checkmark
         transform: scale(0.8)
         opacity: 0
@@ -273,7 +346,7 @@
       path.checkmark
         transform: scale(0.8)
         opacity: 0
-        transition: all 120ms cubic-bezier(0.4, 0.0, 0.2, 1)
+        transition: all 120ms $ease-md
       &:active path.checkmark
         opacity: 1
         transform: scale(1)

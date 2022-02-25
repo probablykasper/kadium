@@ -92,6 +92,7 @@
 </header>
 
 <style lang="sass">
+  $ease-md: cubic-bezier(0.4, 0.0, 0.2, 1)
   header
     display: flex
     align-items: center
@@ -123,7 +124,7 @@
   .group
     padding: 0px
     height: 28px
-    transition: all 120ms cubic-bezier(0.4, 0.0, 0.2, 1)
+    transition: all 120ms $ease-md
     &:focus
       border-color: hsla(220, 100%, 50%, 1)
       box-shadow: 0px 0px 0px 3px hsla(220, 100%, 50%, 0.5)
@@ -135,7 +136,7 @@
       align-items: center
       height: 100%
       padding: 0px 11px
-      transition: background-color 120ms cubic-bezier(0.4, 0.0, 0.2, 1)
+      transition: background-color 120ms $ease-md
       &.selected
         background-color: hsl(225, 14%, 28%)
   button.tag
@@ -145,7 +146,7 @@
     padding: 0px 8px
     border-radius: 10px
     margin-right: 5px
-    transition: all 120ms cubic-bezier(0.4, 0.0, 0.2, 1)
+    transition: all 120ms $ease-md
     &:hover
       border-color: hsla(0, 0%, 50%, 0.5)
     &:focus
@@ -162,7 +163,7 @@
     height: 28px
     box-sizing: border-box
     padding: 0px 6px
-    transition: all 120ms cubic-bezier(0.4, 0.0, 0.2, 1)
+    transition: all 120ms $ease-md
     &:focus
       border-color: hsla(220, 100%, 50%, 1)
       box-shadow: 0px 0px 0px 3px hsla(220, 100%, 50%, 0.5)

@@ -1,20 +1,19 @@
 <script lang="ts">
-  import { videos, totalVideos, ViewOptions, viewOptions } from '../lib/data'
+  import { ViewOptions, viewOptions, Video } from '../lib/data'
   import { listen } from '@tauri-apps/api/event'
   import { onDestroy, tick } from 'svelte'
   import { runCmd } from '../lib/general'
+  import VideoBar from './_VideoBar.svelte'
 
+  let videos: Video[] = []
+  let allLoaded = false
   $: getVideos($viewOptions)
   let loading = false
   async function getVideos(options: ViewOptions) {
     loading = true
 
-    $videos = await runCmd('get_videos', { options })
-    if ($videos.length < $viewOptions.limit) {
-      $totalVideos = $videos.length
-    } else {
-      $totalVideos = null
-    }
+    videos = await runCmd('get_videos', { options })
+    allLoaded = videos.length < $viewOptions.limit
 
     loading = false
 
@@ -27,23 +26,19 @@
     const newVideos = await runCmd('get_videos', {
       options: $viewOptions,
       after: {
-        publishTimeMs: $videos[$videos.length - 1].publishTimeMs,
-        id: $videos[$videos.length - 1].id,
+        publishTimeMs: videos[videos.length - 1].publishTimeMs,
+        id: videos[videos.length - 1].id,
       },
     })
-    $videos = $videos.concat(newVideos)
-    if (newVideos.length < $viewOptions.limit) {
-      $totalVideos = $videos.length
-    } else {
-      $totalVideos = null
-    }
+    videos = videos.concat(newVideos)
+    allLoaded = videos.length < $viewOptions.limit
 
     loading = false
     await tick()
     await autoloadHandler()
   }
   async function autoloadHandler() {
-    if ($totalVideos === null && isScrolledToBottom() && !loading) {
+    if (!allLoaded && isScrolledToBottom() && !loading) {
       await getMoreVideos()
     }
   }
@@ -99,7 +94,7 @@
   }
 
   let main: HTMLElement | null = null
-  const loadThreshold = 0
+  const loadThreshold = 200
   function isScrolledToBottom() {
     if (main) {
       const offset = main.scrollHeight - (main.clientHeight + main.scrollTop)
@@ -112,9 +107,12 @@
 </script>
 
 <svelte:window on:resize={autoloadHandler} />
+
+<VideoBar loadedVideosCount={videos.length} {allLoaded} />
+
 <main bind:this={main} class="selectable" on:scroll={autoloadHandler}>
   <div class="grid">
-    {#each $videos as video}
+    {#each videos as video}
       <div class="box">
         <a class="img-box" target="_blank" href="https://youtube.com/watch?v={video.id}">
           <div class="img-box">

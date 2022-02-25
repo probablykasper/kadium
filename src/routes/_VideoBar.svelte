@@ -1,8 +1,11 @@
 <script lang="ts">
   import { onDestroy } from 'svelte'
-  import { tags, totalVideos, videos, viewOptions } from '../lib/data'
+  import { tags, viewOptions } from '../lib/data'
   import { checkShortcut } from '../lib/general'
   import { event } from '@tauri-apps/api'
+
+  export let loadedVideosCount: number
+  export let allLoaded: boolean
 
   let show = 0
   $: {
@@ -80,10 +83,10 @@
     {/each}
   </div>
   <div class="page-info">
-    {#if $totalVideos === null}
-      {$videos.length} of ?
+    {#if allLoaded}
+      {loadedVideosCount} of {loadedVideosCount}
     {:else}
-      {$videos.length} of {$totalVideos}
+      {loadedVideosCount} of ?
     {/if}
   </div>
 </header>

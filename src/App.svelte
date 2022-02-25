@@ -13,7 +13,6 @@
   } from './lib/data'
   import { Route, router } from 'tinro'
   import VideosPage from './routes/Videos.svelte'
-  import VideosBar from './routes/_VideoBar.svelte'
   import Nav from './lib/Nav.svelte'
   import { onDestroy } from 'svelte'
   import GetStarted from './modals/GetStarted.svelte'
@@ -88,7 +87,6 @@
 {#if $settings !== null}
   <Nav />
   <Route path="/">
-    <VideosBar />
     <VideosPage />
   </Route>
   <Route path="/channels">

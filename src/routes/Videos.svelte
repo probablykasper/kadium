@@ -3,7 +3,7 @@
   import { event, shell } from '@tauri-apps/api'
   import { listen } from '@tauri-apps/api/event'
   import { onDestroy, tick } from 'svelte'
-  import { checkShortcut, runCmd } from '../lib/general'
+  import { checkModifiers, checkMouseShortcut, checkShortcut, runCmd } from '../lib/general'
   import VideoBar from './_VideoBar.svelte'
 
   let videos: Video[] = []
@@ -119,11 +119,11 @@
     selectionVisible = true
   }
 
-  function openSelectedVideo() {
-    shell.open('https://youtube.com/watch?v=' + videos[selectedIndex].id)
+  function openVideo(index: number) {
+    shell.open('https://youtube.com/watch?v=' + videos[index].id)
   }
-  function openSelectedChannel() {
-    shell.open('https://www.youtube.com/channel/' + videos[selectedIndex].channelId)
+  function openChannel(index: number) {
+    shell.open('https://www.youtube.com/channel/' + videos[index].channelId)
   }
 
   function keydown(e: KeyboardEvent) {
@@ -145,10 +145,10 @@
         selectionVisible = false
         e.preventDefault()
       } else if (checkShortcut(e, 'Enter')) {
-        openSelectedVideo()
+        openVideo(selectedIndex)
         e.preventDefault()
       } else if (checkShortcut(e, 'Enter', { shift: true })) {
-        openSelectedChannel()
+        openChannel(selectedIndex)
         e.preventDefault()
       }
     } else {
@@ -163,12 +163,24 @@
       }
     }
   }
+  function videoClick(e: MouseEvent, index: number) {
+    if (checkModifiers(e, {})) {
+      selectedIndex = index
+    } else if (checkModifiers(e, { cmdOrCtrl: true })) {
+      openVideo(index)
+    }
+  }
+  function channelClick(e: MouseEvent, index: number) {
+    if (checkModifiers(e, { cmdOrCtrl: true })) {
+      openChannel(index)
+    }
+  }
 
   const unlistenFuture = event.listen('tauri://menu', async ({ payload }) => {
     if (payload === 'Open Selected Video' && selectionVisible) {
-      openSelectedVideo()
+      openVideo(selectedIndex)
     } else if (payload === 'Open Selected Channel' && selectionVisible) {
-      openSelectedChannel()
+      openChannel(selectedIndex)
     } else if (payload === 'Archive') {
       archive(videos[selectedIndex].id)
     } else if (payload === 'Unarchive') {
@@ -192,6 +204,7 @@
         class="box"
         class:selected={selectionVisible && i === selectedIndex}
         on:mousedown={() => select(i)}
+        on:click={(e) => videoClick(e, i)}
       >
         <a
           class="img-box"
@@ -228,11 +241,15 @@
             />
           </svg>
         </button>
-        <a class="row" target="_blank" href="https://youtube.com/watch?v={video.id}">
+        <a class="row" href="https://youtube.com/watch?v={video.id}" on:click|preventDefault>
           <p class="title selectable">{video.title}</p>
         </a>
         <p class="channel sub">
-          <a class="row" target="_blank" href="https://www.youtube.com/channel/{video.channelId}">
+          <a
+            class="row"
+            href="https://www.youtube.com/channel/{video.channelId}"
+            on:click|preventDefault|stopPropagation={(e) => channelClick(e, i)}
+          >
             {video.channelName}
           </a>
         </p>
@@ -273,8 +290,8 @@
     border: 1px solid transparent
     border-radius: 3px
   .selected
-    background-color: hsla(0deg, 0%, 100%, 0.05)
-    border-color: hsla(0deg, 0%, 100%, 0.1)
+    background-color: hsla(210, 100%, 95%, 0.07)
+    border-color: hsla(210, 100%, 90%, 0.25)
   .row
     display: block
     width: 100%
@@ -310,14 +327,12 @@
     color: #ffffff
     opacity: 1
     transition: 100ms opacity $ease-md
-    &:hover
-      opacity: 0.9
   .channel
     transition: 80ms opacity $ease-md
     a
       display: inline
     a:hover
-      opacity: 0.9
+      color: hsl(210, 8%, 90%)
   p.sub
     font-size: 12px
     cursor: default

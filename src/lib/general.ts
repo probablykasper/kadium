@@ -46,6 +46,3 @@ export function checkShortcut(e: KeyboardEvent, key: string, options: ShortcutOp
   if (e.key.toUpperCase() !== key.toUpperCase()) return false
   return checkModifiers(e, options)
 }
-export function checkMouseShortcut(e: MouseEvent, options: ShortcutOptions = {}) {
-  return checkModifiers(e, options)
-}

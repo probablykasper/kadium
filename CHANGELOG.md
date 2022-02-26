@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## 1.2.1 - 2022 Feb 26
 - Fix video loading issue
 
 ## 1.2.0 - 2022 Feb 26

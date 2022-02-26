@@ -1,7 +1,11 @@
 # Changelog
 
 ## Next
+- Clicking on videos now selects them. To open a video, double click or cmd/ctrl+click on it.
+- Add `Cmd/Ctrl+Delete` shortcut to archive the selected video
+- Add `Shift+Cmd/Ctrl+Delete` shortcut to unarchive the selected video
 - Add `Cmd/Ctrl+,` shortcut to open the settings
+- Small design changes
 - Fix incorrect video page loading
 - Fix missing Windows release
 - Fix channel title line wrapping

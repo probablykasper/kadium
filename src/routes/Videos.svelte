@@ -3,7 +3,7 @@
   import { event, shell } from '@tauri-apps/api'
   import { listen } from '@tauri-apps/api/event'
   import { onDestroy, tick } from 'svelte'
-  import { checkModifiers, checkMouseShortcut, checkShortcut, runCmd } from '../lib/general'
+  import { checkModifiers, checkShortcut, runCmd } from '../lib/general'
   import VideoBar from './_VideoBar.svelte'
 
   let videos: Video[] = []
@@ -100,11 +100,11 @@
     else archive(id)
   }
 
-  let main: HTMLElement | null = null
+  let boxParent: HTMLElement | null = null
   const loadThreshold = 200
   function isScrolledToBottom() {
-    if (main) {
-      const offset = main.scrollHeight - (main.clientHeight + main.scrollTop)
+    if (boxParent) {
+      const offset = boxParent.scrollHeight - (boxParent.clientHeight + boxParent.scrollTop)
       if (offset <= loadThreshold) {
         return true
       }
@@ -191,18 +191,35 @@
     const unlisten = await unlistenFuture
     unlisten()
   })
+
+  let boxes = [] as HTMLDivElement[]
+  $: scrollToBox(selectedIndex)
+  function scrollToBox(index: number) {
+    if (boxParent && boxes[index]) {
+      const el = boxes[index].getBoundingClientRect()
+      const parent = boxParent.getBoundingClientRect()
+      const topOffset = el.top - parent.top
+      const bottomOffset = el.bottom - (parent.bottom - parent.top)
+      if (topOffset < 0) {
+        boxParent.scrollTop += topOffset
+      } else if (bottomOffset > 0) {
+        boxParent.scrollTop += bottomOffset
+      }
+    }
+  }
 </script>
 
 <svelte:window on:resize={autoloadHandler} on:keydown={keydown} />
 
 <VideoBar loadedVideosCount={videos.length} {allLoaded} />
 
-<main bind:this={main} on:scroll={autoloadHandler} tabindex="0">
-  <div class="grid" tabindex="-1">
+<main tabindex="0">
+  <div class="grid" tabindex="-1" on:scroll={autoloadHandler} bind:this={boxParent}>
     {#each videos as video, i}
       <div
         class="box"
         class:selected={selectionVisible && i === selectedIndex}
+        bind:this={boxes[i]}
         on:mousedown={() => select(i)}
         on:dblclick={() => shell.open('https://youtube.com/watch?v=' + videos[i].id)}
         on:click={(e) => videoClick(e, i)}
@@ -266,11 +283,13 @@
   .selectable
     user-select: text
   main
-    max-width: 100%
-    height: 100%
-    overflow-y: auto
     outline: none
+    height: 100%
+    max-width: 100%
   .grid
+    height: 100%
+    max-height: 100%
+    overflow-y: auto
     flex-grow: 0
     box-sizing: border-box
     display: grid
@@ -329,6 +348,7 @@
     color: #ffffff
     opacity: 1
     transition: 100ms opacity $ease-md
+    margin-top: 1px
   .channel
     transition: 80ms opacity $ease-md
     a

@@ -24,7 +24,6 @@
     refreshRateMinutes = channels[index].refresh_rate_ms / 1000 / 60
   }
   $: if (visible && editIndex === null) {
-    console.log('editIndex === null')
     url = ''
     fromTime = new Date()
     refreshRateMinutes = 60

@@ -380,14 +380,16 @@
     margin-top: 2px
   .box:hover button.archive
     opacity: 1
-  .archive
+  button.archive
     position: absolute
+    cursor: pointer
     top: 0px
     right: 0px
     border-radius: 10px
     box-shadow: inset 0px 0px 10px 8px rgba(0, 0, 0, 0.15), 0px 0px 12px 12px rgba(0, 0, 0, 0.15)
     background-color: transparent
-    margin: 0px
+    margin-right: 2px
+    margin-top: 2px
     padding: 0px
     border: none
     transform: translate3d(0, 0, 0) // fix glitch after transform/opacity

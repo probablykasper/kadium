@@ -135,11 +135,27 @@
     if (selectionVisible) {
       if (checkShortcut(e, 'ArrowLeft')) {
         selectedIndex--
-        selectedIndex = Math.max(0, Math.min(selectedIndex, videos.length - 1))
+        selectedIndex = Math.max(0, selectedIndex)
         e.preventDefault()
       } else if (checkShortcut(e, 'ArrowRight')) {
         selectedIndex++
-        selectedIndex = Math.max(0, Math.min(selectedIndex, videos.length - 1))
+        selectedIndex = Math.min(selectedIndex, videos.length - 1)
+        e.preventDefault()
+      } else if (checkShortcut(e, 'ArrowUp') && boxParent) {
+        const gridStyle = window.getComputedStyle(boxParent)
+        const gridTemplateCols = gridStyle.getPropertyValue('grid-template-columns')
+        const columnCount = gridTemplateCols.split(' ').length
+        if (selectedIndex - columnCount >= 0) {
+          selectedIndex -= columnCount
+        }
+        e.preventDefault()
+      } else if (checkShortcut(e, 'ArrowDown') && boxParent) {
+        const gridStyle = window.getComputedStyle(boxParent)
+        const gridTemplateCols = gridStyle.getPropertyValue('grid-template-columns')
+        const columnCount = gridTemplateCols.split(' ').length
+        if (selectedIndex + columnCount <= videos.length - 1) {
+          selectedIndex += columnCount
+        }
         e.preventDefault()
       } else if (checkShortcut(e, 'Escape')) {
         selectionVisible = false
@@ -213,8 +229,8 @@
 
 <VideoBar loadedVideosCount={videos.length} {allLoaded} />
 
-<main tabindex="0">
-  <div class="grid" tabindex="-1" on:scroll={autoloadHandler} bind:this={boxParent}>
+<main tabindex="0" bind:this={boxParent}>
+  <div class="grid" tabindex="-1" on:scroll={autoloadHandler}>
     {#each videos as video, i}
       <div
         class="box"
@@ -284,12 +300,11 @@
     user-select: text
   main
     outline: none
-    height: 100%
+    overflow-y: auto
     max-width: 100%
   .grid
     height: 100%
     max-height: 100%
-    overflow-y: auto
     flex-grow: 0
     box-sizing: border-box
     display: grid

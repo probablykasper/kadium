@@ -127,6 +127,11 @@
   function openChannel(index: number) {
     shell.open('https://www.youtube.com/channel/' + videos[index].channelId)
   }
+  function getColumnCount() {
+    const gridStyle = window.getComputedStyle(grid)
+    const gridTemplateCols = gridStyle.getPropertyValue('grid-template-columns')
+    return gridTemplateCols.split(' ').length
+  }
 
   function keydown(e: KeyboardEvent) {
     let target = e.target as HTMLElement
@@ -136,25 +141,25 @@
 
     if (selectionVisible) {
       if (checkShortcut(e, 'ArrowLeft')) {
-        selectedIndex--
-        selectedIndex = Math.max(0, selectedIndex)
-        e.preventDefault()
+        if (selectedIndex % getColumnCount() !== 0) {
+          selectedIndex--
+          selectedIndex = Math.max(0, selectedIndex)
+          e.preventDefault()
+        }
       } else if (checkShortcut(e, 'ArrowRight')) {
-        selectedIndex++
-        selectedIndex = Math.min(selectedIndex, videos.length - 1)
+        if ((selectedIndex + 1) % getColumnCount() !== 0) {
+          selectedIndex++
+          selectedIndex = Math.min(selectedIndex, videos.length - 1)
+        }
         e.preventDefault()
       } else if (checkShortcut(e, 'ArrowUp')) {
-        const gridStyle = window.getComputedStyle(grid)
-        const gridTemplateCols = gridStyle.getPropertyValue('grid-template-columns')
-        const columnCount = gridTemplateCols.split(' ').length
+        const columnCount = getColumnCount()
         if (selectedIndex - columnCount >= 0) {
           selectedIndex -= columnCount
         }
         e.preventDefault()
       } else if (checkShortcut(e, 'ArrowDown')) {
-        const gridStyle = window.getComputedStyle(grid)
-        const gridTemplateCols = gridStyle.getPropertyValue('grid-template-columns')
-        const columnCount = gridTemplateCols.split(' ').length
+        const columnCount = getColumnCount()
         if (selectedIndex + columnCount <= videos.length - 1) {
           selectedIndex += columnCount
         }

@@ -24,8 +24,7 @@
 <nav>
   <a on:mousedown={go} use:active data-exact href="/"><button>Videos</button></a>
   <a on:mousedown={go} use:active href="/channels"><button>Channels</button></a>
-  <div class="spacer" />
-  <button class="control-style" on:click={checkNow}>Check Now</button>
+  <button class="control-style ml-auto" on:click={checkNow}>Check Now</button>
   <button class="control-style" on:click={openSettings}>Settings</button>
 </nav>
 
@@ -38,8 +37,6 @@
     flex-shrink: 0
     background-color: hsl(220, 17%, 10%)
     border-bottom: 1px solid hsla(0, 0%, 50%, 0.08)
-  .spacer
-    margin-left: auto
   a
     background-color: transparent
     border: none
@@ -68,6 +65,8 @@
     margin-right: 0px
     font-size: 13px
     color: inherit
+    &.ml-auto
+      margin-left: auto
   button.control-style
     height: 28px
     padding: 0px 11px

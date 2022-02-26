@@ -1,6 +1,9 @@
 # Changelog
 
 ## Next
+- Fix video loading issue
+
+## 1.2.0 - 2022 Feb 26
 - Clicking on videos now selects them. To open a video, double click or cmd/ctrl+click on it.
 - Add `Cmd/Ctrl+Delete` shortcut to archive the selected video
 - Add `Shift+Cmd/Ctrl+Delete` shortcut to unarchive the selected video

@@ -236,8 +236,8 @@
 
 <VideoBar loadedVideosCount={videos.length} {allLoaded} />
 
-<main tabindex="0" bind:this={scrollDiv}>
-  <div class="grid" tabindex="-1" on:scroll={autoloadHandler} bind:this={grid}>
+<main tabindex="0" on:scroll={autoloadHandler} bind:this={scrollDiv}>
+  <div class="grid" tabindex="-1" bind:this={grid}>
     {#each videos as video, i}
       <div
         class="box"

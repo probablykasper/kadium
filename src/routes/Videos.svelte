@@ -100,17 +100,19 @@
     else archive(id)
   }
 
-  let boxParent: HTMLElement | null = null
+  let scrollDiv: HTMLElement | null = null
   const loadThreshold = 200
   function isScrolledToBottom() {
-    if (boxParent) {
-      const offset = boxParent.scrollHeight - (boxParent.clientHeight + boxParent.scrollTop)
+    if (scrollDiv) {
+      const offset = scrollDiv.scrollHeight - (scrollDiv.clientHeight + scrollDiv.scrollTop)
       if (offset <= loadThreshold) {
         return true
       }
     }
     return false
   }
+
+  let grid: HTMLDivElement
 
   let selectionVisible = false
   let selectedIndex = 0
@@ -141,16 +143,16 @@
         selectedIndex++
         selectedIndex = Math.min(selectedIndex, videos.length - 1)
         e.preventDefault()
-      } else if (checkShortcut(e, 'ArrowUp') && boxParent) {
-        const gridStyle = window.getComputedStyle(boxParent)
+      } else if (checkShortcut(e, 'ArrowUp')) {
+        const gridStyle = window.getComputedStyle(grid)
         const gridTemplateCols = gridStyle.getPropertyValue('grid-template-columns')
         const columnCount = gridTemplateCols.split(' ').length
         if (selectedIndex - columnCount >= 0) {
           selectedIndex -= columnCount
         }
         e.preventDefault()
-      } else if (checkShortcut(e, 'ArrowDown') && boxParent) {
-        const gridStyle = window.getComputedStyle(boxParent)
+      } else if (checkShortcut(e, 'ArrowDown')) {
+        const gridStyle = window.getComputedStyle(grid)
         const gridTemplateCols = gridStyle.getPropertyValue('grid-template-columns')
         const columnCount = gridTemplateCols.split(' ').length
         if (selectedIndex + columnCount <= videos.length - 1) {
@@ -211,15 +213,15 @@
   let boxes = [] as HTMLDivElement[]
   $: scrollToBox(selectedIndex)
   function scrollToBox(index: number) {
-    if (boxParent && boxes[index]) {
+    if (scrollDiv && boxes[index]) {
       const el = boxes[index].getBoundingClientRect()
-      const parent = boxParent.getBoundingClientRect()
+      const parent = scrollDiv.getBoundingClientRect()
       const topOffset = el.top - parent.top
-      const bottomOffset = el.bottom - (parent.bottom - parent.top)
+      const bottomOffset = el.bottom - parent.bottom
       if (topOffset < 0) {
-        boxParent.scrollTop += topOffset
+        scrollDiv.scrollTop += topOffset - 5
       } else if (bottomOffset > 0) {
-        boxParent.scrollTop += bottomOffset
+        scrollDiv.scrollTop += bottomOffset + 5
       }
     }
   }
@@ -229,8 +231,8 @@
 
 <VideoBar loadedVideosCount={videos.length} {allLoaded} />
 
-<main tabindex="0" bind:this={boxParent}>
-  <div class="grid" tabindex="-1" on:scroll={autoloadHandler}>
+<main tabindex="0" bind:this={scrollDiv}>
+  <div class="grid" tabindex="-1" on:scroll={autoloadHandler} bind:this={grid}>
     {#each videos as video, i}
       <div
         class="box"

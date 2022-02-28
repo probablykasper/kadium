@@ -1,5 +1,8 @@
 # Changelog
 
+## Next
+- Fix total video count not showing
+
 ## 1.2.1 - 2022 Feb 26
 - Fix video loading issue
 

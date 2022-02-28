@@ -13,8 +13,9 @@
   async function getVideos(options: ViewOptions) {
     loading = true
 
-    videos = await runCmd('get_videos', { options })
+    const newVideos = await runCmd('get_videos', { options })
     allLoaded = videos.length < $viewOptions.limit
+    videos = newVideos
     selectedIndex = 0
     selectionVisible = false
 
@@ -33,8 +34,8 @@
         id: videos[videos.length - 1].id,
       },
     })
+    allLoaded = newVideos.length < $viewOptions.limit
     videos = videos.concat(newVideos)
-    allLoaded = videos.length < $viewOptions.limit
 
     loading = false
     await tick()

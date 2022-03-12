@@ -1,5 +1,9 @@
 # Changelog
 
+## Next
+- Prevent double clicking the archive button from opening video
+- Fix "0 of ?" showing on empty pages
+
 ## 1.2.2 - 2022 Feb 28
 - Fix total video count not showing
 

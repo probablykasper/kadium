@@ -96,7 +96,7 @@
     await runCmd('unarchive', { id })
     getVideos($viewOptions)
   }
-  async function archiveToggle(id: string, isArchived: boolean) {
+  async function archiveToggleClick(id: string, isArchived: boolean) {
     if (isArchived) unarchive(id)
     else archive(id)
   }
@@ -260,7 +260,8 @@
         </a>
         <button
           class="archive"
-          on:click={() => archiveToggle(video.id, video.archived)}
+          on:click={() => archiveToggleClick(video.id, video.archived)}
+          on:dblclick|stopPropagation
           title="Archive"
           tabindex="-1"
         >

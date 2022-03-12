@@ -14,7 +14,7 @@
     loading = true
 
     const newVideos = await runCmd('get_videos', { options })
-    allLoaded = videos.length < $viewOptions.limit
+    allLoaded = newVideos.length < $viewOptions.limit
     videos = newVideos
     selectedIndex = 0
     selectionVisible = false

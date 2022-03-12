@@ -45,7 +45,7 @@
     }
   }
 
-  const unlistenFuture = event.listen('menu', ({ payload }) => {
+  const unlistenFuture = event.listen('tauri://menu', ({ payload }) => {
     if (payload === 'Videos') {
       router.goto('/', true)
     } else if (payload === 'Channels') {

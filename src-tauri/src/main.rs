@@ -254,16 +254,12 @@ async fn main() {
         menu::new(vec![MenuItem::Custom(custom_item("Learn More"))]),
       )),
     ]))
-    .on_menu_event(|event| {
-      let event_name = event.menu_item_id();
-      let _ = event.window().emit("menu", event_name);
-      match event.menu_item_id() {
-        "Learn More" => {
-          let url = "https://github.com/probablykasper/kadium";
-          shell::open(&event.window().shell_scope(), url.to_string(), None).unwrap();
-        }
-        _ => {}
+    .on_menu_event(|event| match event.menu_item_id() {
+      "Learn More" => {
+        let url = "https://github.com/probablykasper/kadium";
+        shell::open(&event.window().shell_scope(), url.to_string(), None).unwrap();
       }
+      _ => {}
     })
     .build(ctx)
     .expect("Error running tauri app");

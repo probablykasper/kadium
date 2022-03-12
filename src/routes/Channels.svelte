@@ -44,7 +44,7 @@
 
   let filter = ''
   let filterInput: HTMLInputElement
-  const unlistenFuture = event.listen('menu', ({ payload }) => {
+  const unlistenFuture = event.listen('tauri://menu', ({ payload }) => {
     if (payload === 'Find') {
       filterInput.focus()
     }

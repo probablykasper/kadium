@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## 1.2.3 - 2022 Mar 12
 - Prevent double clicking the archive button from opening video
 - Fix "0 of ?" showing on empty pages
 

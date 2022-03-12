@@ -177,6 +177,7 @@ async fn main() {
         .fullscreen(false);
       return (win, webview);
     })
+    .unwrap()
     .manage(ArcData::new(loaded_data))
     .menu(menu::new(vec![
       #[cfg(target_os = "macos")]

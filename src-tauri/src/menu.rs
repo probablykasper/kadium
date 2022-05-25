@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use tauri::{CustomMenuItem, Menu, MenuItem, Submenu};
+use tauri::{AboutMetadata, CustomMenuItem, Menu, MenuItem, Submenu};
 
 #[derive(Debug, Clone)]
 pub enum Item {
@@ -40,7 +40,7 @@ pub fn new(items: Vec<Item>) -> Menu {
         menu = menu.add_submenu(submenu);
         continue;
       }
-      Item::About(name) => MenuItem::About(name),
+      Item::About(name) => MenuItem::About(name, AboutMetadata::default()),
       Item::Hide => MenuItem::Hide,
       Item::Services => MenuItem::Services,
       Item::HideOthers => MenuItem::HideOthers,

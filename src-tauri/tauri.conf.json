@@ -32,13 +32,11 @@
       "shortDescription": "App for YouTube upload notifications",
       "longDescription": "App for YouTube upload notifications",
       "deb": {
-        "depends": [],
-        "useBootstrapper": false
+        "depends": []
       },
       "macOS": {
         "frameworks": [],
         "minimumSystemVersion": "10.13",
-        "useBootstrapper": false,
         "exceptionDomain": "",
         "signingIdentity": null,
         "entitlements": null

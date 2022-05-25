@@ -113,8 +113,6 @@ async fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
   Ok((data, None))
 }
 
-const MAIN_WIN: &str = "main";
-
 #[tokio::main]
 async fn main() {
   if cfg!(debug_assertions) && env::var("DEVELOPMENT").is_err() {
@@ -166,18 +164,15 @@ async fn main() {
       }
       Ok(())
     })
-    .create_window(MAIN_WIN, WindowUrl::default(), |win, webview| {
-      let win = win
+    .setup(|app| {
+      let _ = WindowBuilder::new(app, "main", WindowUrl::default())
         .title("Kadium")
-        .resizable(true)
-        .decorations(true)
-        .always_on_top(false)
         .inner_size(900.0, 800.0)
         .min_inner_size(400.0, 150.0)
-        .fullscreen(false);
-      return (win, webview);
+        .build()
+        .expect("Unable to create window");
+      Ok(())
     })
-    .unwrap()
     .manage(ArcData::new(loaded_data))
     .menu(menu::new(vec![
       #[cfg(target_os = "macos")]
@@ -263,14 +258,18 @@ async fn main() {
     })
     .build(ctx)
     .expect("Error running tauri app");
+
   app.run(|_app_handle, e| match e {
-    tauri::RunEvent::CloseRequested { label: _, api, .. } => {
-      if cfg!(target_os = "macos") {
-        api.prevent_close();
-        #[cfg(target_os = "macos")]
-        _app_handle.hide().unwrap();
+    tauri::RunEvent::WindowEvent { event, .. } => match event {
+      tauri::WindowEvent::CloseRequested { api, .. } => {
+        if cfg!(target_os = "macos") {
+          api.prevent_close();
+          #[cfg(target_os = "macos")]
+          _app_handle.hide().unwrap();
+        }
       }
-    }
+      _ => {}
+    },
     _ => {}
   });
 }

@@ -4,18 +4,19 @@
 )]
 
 use crate::data::{AppPaths, ArcData, Data};
-use crate::menu::Item as MenuItem;
 use crate::settings::yt_email_notifier;
 use crate::settings::VersionedSettings;
 use std::{env, thread};
 use tauri::api::{dialog, shell};
-use tauri::{command, CustomMenuItem, Manager, Submenu, Window, WindowBuilder, WindowUrl};
+use tauri::{
+  command, AboutMetadata, CustomMenuItem, Manager, Menu, MenuEntry, MenuItem, Submenu, Window,
+  WindowBuilder, WindowUrl,
+};
 
 mod api;
 mod background;
 mod data;
 mod db;
-mod menu;
 mod settings;
 
 fn error_popup_main_thread(msg: impl AsRef<str>) {
@@ -41,10 +42,6 @@ fn error_popup(msg: String, win: Window) {
   thread::spawn(move || {
     dialog::message(Some(&win), "Error", msg);
   });
-}
-
-fn custom_item(name: &str) -> CustomMenuItem {
-  CustomMenuItem::new(name.to_string(), name)
 }
 
 /// Note title and message to show asynchronously when/after the app starts
@@ -174,79 +171,101 @@ async fn main() {
       Ok(())
     })
     .manage(ArcData::new(loaded_data))
-    .menu(menu::new(vec![
+    .menu(Menu::with_items([
       #[cfg(target_os = "macos")]
-      MenuItem::Submenu(Submenu::new(
+      MenuEntry::Submenu(Submenu::new(
         &ctx.package_info().name,
-        menu::new(vec![
-          MenuItem::About(ctx.package_info().name.clone()),
-          MenuItem::Separator,
-          MenuItem::Custom(custom_item("Preferences...").accelerator("CmdOrCtrl+,")),
-          MenuItem::Separator,
-          MenuItem::Services,
-          MenuItem::Separator,
-          MenuItem::Hide,
-          MenuItem::HideOthers,
-          MenuItem::ShowAll,
-          MenuItem::Separator,
-          MenuItem::Quit,
+        Menu::with_items([
+          MenuItem::About(ctx.package_info().name.clone(), AboutMetadata::default()).into(),
+          MenuItem::Separator.into(),
+          CustomMenuItem::new("Preferences...", "Preferences...")
+            .accelerator("CmdOrCtrl+,")
+            .into(),
+          MenuItem::Separator.into(),
+          MenuItem::Services.into(),
+          MenuItem::Separator.into(),
+          MenuItem::Hide.into(),
+          MenuItem::HideOthers.into(),
+          MenuItem::ShowAll.into(),
+          MenuItem::Separator.into(),
+          MenuItem::Quit.into(),
         ]),
       )),
-      MenuItem::Submenu(Submenu::new(
+      MenuEntry::Submenu(Submenu::new(
         "File",
-        menu::new(vec![
-          MenuItem::Custom(custom_item("Add Channel...").accelerator("CmdOrCtrl+N")),
-          MenuItem::Custom(custom_item("Open")),
-          MenuItem::Custom(custom_item("Open Channel")),
-          MenuItem::Custom(custom_item("Archive").accelerator("CmdOrCtrl+Backspace")),
-          MenuItem::Custom(custom_item("Unarchive").accelerator("Shift+CmdOrCtrl+Backspace")),
-          MenuItem::Separator,
+        Menu::with_items([
+          CustomMenuItem::new("Add Channel...", "Add Channel...")
+            .accelerator("CmdOrCtrl+N")
+            .into(),
+          CustomMenuItem::new("Open", "Open").into(),
+          CustomMenuItem::new("Open Channel", "Open Channel").into(),
+          CustomMenuItem::new("Archive", "Archive")
+            .accelerator("CmdOrCtrl+Backspace")
+            .into(),
+          CustomMenuItem::new("Unarchive", "Unarchive")
+            .accelerator("Shift+CmdOrCtrl+Backspace")
+            .into(),
+          MenuItem::Separator.into(),
           #[cfg(not(target_os = "macos"))]
-          MenuItem::Custom(custom_item("Options...").accelerator("CmdOrCtrl+,")),
+          CustomMenuItem::new("Options...", "Options...")
+            .accelerator("CmdOrCtrl+,")
+            .into(),
           #[cfg(not(target_os = "macos"))]
-          MenuItem::Separator,
-          MenuItem::CloseWindow,
+          MenuItem::Separator.into(),
+          MenuItem::CloseWindow.into(),
         ]),
       )),
-      MenuItem::Submenu(Submenu::new(
+      MenuEntry::Submenu(Submenu::new(
         "Edit",
-        menu::new(vec![
-          MenuItem::Undo,
-          MenuItem::Redo,
-          MenuItem::Separator,
-          MenuItem::Cut,
-          MenuItem::Copy,
-          MenuItem::Paste,
+        Menu::with_items([
+          MenuItem::Undo.into(),
+          MenuItem::Redo.into(),
+          MenuItem::Separator.into(),
+          MenuItem::Cut.into(),
+          MenuItem::Copy.into(),
+          MenuItem::Paste.into(),
           #[cfg(not(target_os = "macos"))]
-          MenuItem::Separator,
-          MenuItem::SelectAll,
-          MenuItem::Separator,
-          MenuItem::Custom(custom_item("Find").accelerator("CmdOrCtrl+F")),
+          MenuItem::Separator.into(),
+          MenuItem::SelectAll.into(),
+          MenuItem::Separator.into(),
+          CustomMenuItem::new("Find", "Find")
+            .accelerator("CmdOrCtrl+F")
+            .into(),
         ]),
       )),
-      MenuItem::Submenu(Submenu::new(
+      MenuEntry::Submenu(Submenu::new(
         "View",
-        menu::new(vec![
-          MenuItem::Custom(custom_item("Show New").accelerator("Alt+CmdOrCtrl+N")),
-          MenuItem::Custom(custom_item("Show Archived").accelerator("Alt+CmdOrCtrl+E")),
-          MenuItem::Custom(custom_item("Show All").accelerator("Alt+CmdOrCtrl+A")),
-          MenuItem::Separator,
-          MenuItem::EnterFullScreen,
+        Menu::with_items([
+          CustomMenuItem::new("Show New", "Show New")
+            .accelerator("Alt+CmdOrCtrl+N")
+            .into(),
+          CustomMenuItem::new("Show Archived", "Show Archived")
+            .accelerator("Alt+CmdOrCtrl+E")
+            .into(),
+          CustomMenuItem::new("Show All", "Show All")
+            .accelerator("Alt+CmdOrCtrl+A")
+            .into(),
+          MenuItem::Separator.into(),
+          MenuItem::EnterFullScreen.into(),
         ]),
       )),
-      MenuItem::Submenu(Submenu::new(
+      MenuEntry::Submenu(Submenu::new(
         "Window",
-        menu::new(vec![
-          MenuItem::Minimize,
-          MenuItem::Zoom,
-          MenuItem::Separator,
-          MenuItem::Custom(custom_item("Videos").accelerator("Alt+CmdOrCtrl+1")),
-          MenuItem::Custom(custom_item("Channels").accelerator("Alt+CmdOrCtrl+2")),
+        Menu::with_items([
+          MenuItem::Minimize.into(),
+          MenuItem::Zoom.into(),
+          MenuItem::Separator.into(),
+          CustomMenuItem::new("Videos", "Videos")
+            .accelerator("Alt+CmdOrCtrl+1")
+            .into(),
+          CustomMenuItem::new("Channels", "Channels")
+            .accelerator("Alt+CmdOrCtrl+2")
+            .into(),
         ]),
       )),
-      MenuItem::Submenu(Submenu::new(
+      MenuEntry::Submenu(Submenu::new(
         "Help",
-        menu::new(vec![MenuItem::Custom(custom_item("Learn More"))]),
+        Menu::with_items([CustomMenuItem::new("Learn More", "Learn More").into()]).into(),
       )),
     ]))
     .on_menu_event(|event| match event.menu_item_id() {

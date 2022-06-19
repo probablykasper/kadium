@@ -1,5 +1,8 @@
 # Changelog
 
+## Next
+- Use `actualStartTime` as the publish date for livestreams
+
 ## 1.2.3 - 2022 Mar 12
 - Prevent double clicking the archive button from opening video
 - Fix "0 of ?" showing on empty pages

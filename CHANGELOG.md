@@ -2,6 +2,7 @@
 
 ## Next
 - Use `actualStartTime` as the publish date for livestreams
+- Fix new videos not showing up immediately
 
 ## 1.2.3 - 2022 Mar 12
 - Prevent double clicking the archive button from opening video

@@ -4,11 +4,9 @@ use chrono::{DateTime, FixedOffset};
 use iso8601_duration::Duration as IsoDuration;
 use sqlx::SqlitePool;
 use std::collections::HashMap;
-use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 use tauri::api::notification::Notification;
-use tauri::async_runtime::Mutex;
 use tokio::sync::broadcast;
 use tokio::{task, time};
 
@@ -25,7 +23,6 @@ pub struct ChannelInfo {
 pub struct BgHandle {
   pub handle: thread::JoinHandle<Result<(), String>>,
   pub stop_sender: broadcast::Sender<()>,
-  pub update_counter: Arc<Mutex<u64>>,
 }
 
 impl BgHandle {
@@ -48,22 +45,35 @@ impl BgHandle {
   }
 }
 
-pub fn spawn_bg(settings: &settings::Settings, pool: &SqlitePool) -> Option<BgHandle> {
+pub fn spawn_bg(
+  settings: &settings::Settings,
+  pool: &SqlitePool,
+  window: tauri::Window,
+) -> Option<BgHandle> {
   if settings.check_in_background {
-    spawn(settings, pool, false)
+    spawn(settings, pool, false, window)
   } else {
     None
   }
 }
-pub fn spawn_bg_or_check_now(settings: &settings::Settings, pool: &SqlitePool) -> Option<BgHandle> {
+pub fn spawn_bg_or_check_now(
+  settings: &settings::Settings,
+  pool: &SqlitePool,
+  window: tauri::Window,
+) -> Option<BgHandle> {
   if settings.check_in_background {
-    spawn(settings, pool, false)
+    spawn(settings, pool, false, window)
   } else {
-    spawn(settings, pool, true)
+    spawn(settings, pool, true, window)
   }
 }
 
-fn spawn(settings: &settings::Settings, pool: &SqlitePool, run_once: bool) -> Option<BgHandle> {
+fn spawn(
+  settings: &settings::Settings,
+  pool: &SqlitePool,
+  run_once: bool,
+  window: tauri::Window,
+) -> Option<BgHandle> {
   if settings.channels.len() == 0 {
     return None;
   }
@@ -72,14 +82,13 @@ fn spawn(settings: &settings::Settings, pool: &SqlitePool, run_once: bool) -> Op
   let interval_infos = to_interval_info_vector(interval_map);
 
   let (stop_sender, _stop_receiver) = broadcast::channel(1);
-  let update_counter = Arc::new(Mutex::new(0));
 
   let options = IntervalOptions {
     pool: pool.clone(),
     key: settings.api_key_or_default(),
     stop_sender: stop_sender.clone(),
-    update_counter: update_counter.clone(),
     run_once,
+    window,
   };
 
   let tokio_thread = thread::spawn(move || {
@@ -89,7 +98,6 @@ fn spawn(settings: &settings::Settings, pool: &SqlitePool, run_once: bool) -> Op
   Some(BgHandle {
     handle: tokio_thread,
     stop_sender: stop_sender,
-    update_counter: update_counter,
   })
 }
 
@@ -121,8 +129,8 @@ struct IntervalOptions {
   pool: SqlitePool,
   key: String,
   stop_sender: broadcast::Sender<()>,
-  update_counter: Arc<Mutex<u64>>,
   run_once: bool,
+  window: tauri::Window,
 }
 
 #[tokio::main]
@@ -162,16 +170,30 @@ async fn start(options: IntervalOptions, interval_infos: Vec<IntervalInfo>) -> R
 
 async fn run(options: IntervalOptions, interval_info: IntervalInfo) {
   if options.run_once {
-    println!("Start checking once");
     run_interval_once(options, interval_info).await;
-    println!("Done checking once");
   } else {
     run_interval(options, interval_info).await;
   }
 }
 
 async fn run_interval_once(options: IntervalOptions, interval_info: IntervalInfo) {
-  println!("Start checking {}ms task", interval_info.ms);
+  println!("Start checking once");
+  check_channels(&options, &interval_info).await;
+  println!("Done checking once");
+}
+
+async fn run_interval(options: IntervalOptions, interval_info: IntervalInfo) {
+  let mut interval = time::interval(Duration::from_millis(interval_info.ms));
+  interval.set_missed_tick_behavior(time::MissedTickBehavior::Delay);
+  loop {
+    interval.tick().await;
+    println!("Start checking {}ms task", interval_info.ms);
+    check_channels(&options, &interval_info).await;
+    println!("Done checking {}ms task", interval_info.ms);
+  }
+}
+
+async fn check_channels(options: &IntervalOptions, interval_info: &IntervalInfo) {
   for channel in &interval_info.channels {
     match check_channel(&options, &channel).await {
       Ok(()) => {}
@@ -182,28 +204,6 @@ async fn run_interval_once(options: IntervalOptions, interval_info: IntervalInfo
         break;
       }
     }
-  }
-  println!("Done checking {}ms task", interval_info.ms);
-}
-
-async fn run_interval(options: IntervalOptions, interval_info: IntervalInfo) {
-  let mut interval = time::interval(Duration::from_millis(interval_info.ms));
-  interval.set_missed_tick_behavior(time::MissedTickBehavior::Delay);
-  loop {
-    interval.tick().await;
-    println!("Start checking {}ms task", interval_info.ms);
-    for channel in &interval_info.channels {
-      match check_channel(&options, &channel).await {
-        Ok(()) => {}
-        Err(e) => {
-          let title = format!("Error checking {}", channel.name);
-          eprintln!("Error checking {}: {}", title, e);
-          let _ = Notification::new("error").title(title).body(e).show();
-          break;
-        }
-      }
-    }
-    println!("Done checking {}ms task", interval_info.ms);
   }
 }
 
@@ -292,8 +292,12 @@ async fn check_channel(options: &IntervalOptions, channel: &ChannelInfo) -> Resu
     db::insert_video(&video, &options.pool).await?;
   }
   if videos_to_add.len() >= 1 {
-    let mut count = options.update_counter.lock().await;
-    *count = count.clone() + 1;
+    match options.window.emit("refresh", "") {
+      Ok(_) => {}
+      Err(e) => {
+        return Err(format!("Failed to emit refresh: {}", e));
+      }
+    };
   }
   Ok(())
 }

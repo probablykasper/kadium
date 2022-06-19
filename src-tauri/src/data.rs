@@ -39,7 +39,7 @@ pub struct Data {
   pub db_pool: SqlitePool,
   pub versioned_settings: VersionedSettings,
   pub paths: AppPaths,
-  pub window_handle: Option<tauri::Window>,
+  pub window: tauri::Window,
 }
 impl Data {
   pub fn settings(&mut self) -> &mut Settings {
@@ -53,7 +53,7 @@ impl Data {
       bg_handle.stop();
       bg_handle.wait_until_stopped()?;
     }
-    self.bg_handle = background::spawn_bg(self.settings_ref(), &self.db_pool);
+    self.bg_handle = background::spawn_bg(self.settings_ref(), &self.db_pool, self.window.clone());
     Ok(())
   }
   pub fn check_now(&mut self) -> Result<(), String> {
@@ -61,7 +61,8 @@ impl Data {
       bg_handle.stop();
       bg_handle.wait_until_stopped()?;
     }
-    self.bg_handle = background::spawn_bg_or_check_now(self.settings_ref(), &self.db_pool);
+    self.bg_handle =
+      background::spawn_bg_or_check_now(self.settings_ref(), &self.db_pool, self.window.clone());
     Ok(())
   }
   pub fn save_settings(&mut self) -> Result<(), String> {
@@ -93,18 +94,6 @@ pub fn write_atomically(file_path: &PathBuf, buf: &[u8]) -> Result<(), String> {
   match af.write(|f| f.write_all(&buf)) {
     Ok(_) => Ok(()),
     Err(e) => Err(e.to_string()),
-  }
-}
-
-#[command]
-pub async fn video_update_counter(data: DataState<'_>) -> Result<u64, String> {
-  let data = data.0.lock().await;
-  match &data.bg_handle {
-    Some(bg_handle) => {
-      let count = bg_handle.update_counter.lock().await;
-      Ok(count.clone())
-    }
-    None => Ok(0),
   }
 }
 

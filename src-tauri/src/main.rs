@@ -48,21 +48,10 @@ fn error_popup(msg: String, win: Window) {
 type ImportedNote = Option<(String, String)>;
 
 /// This can display dialogs, which needs to happen before tauri runs to not panic
-async fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
-  let db_pool_future = db::init(&paths);
+async fn load_data(paths: &AppPaths) -> Result<(VersionedSettings, ImportedNote), String> {
   if paths.settings_file.exists() {
     return match settings::VersionedSettings::load(&paths) {
-      Ok(mut settings) => {
-        let pool = db_pool_future.await?;
-        let data = Data {
-          bg_handle: background::spawn_bg(&settings.unwrap(), &pool),
-          db_pool: pool,
-          versioned_settings: settings,
-          paths: paths.clone(),
-          window_handle: None,
-        };
-        return Ok((data, None));
-      }
+      Ok(settings) => Ok((settings, None)),
       Err(e) => Err(e),
     };
   }
@@ -82,44 +71,18 @@ async fn load_data(paths: &AppPaths) -> Result<(Data, ImportedNote), String> {
   };
   if will_import {
     let imported_stuff = yt_email_notifier::import()?;
-    let pool = db_pool_future.await?;
-    let rt = background::spawn_bg(&imported_stuff.settings, &pool);
     let versioned_settings = imported_stuff.settings.wrap();
     versioned_settings.save(&paths)?;
 
-    let data = Data {
-      bg_handle: rt,
-      db_pool: pool,
-      versioned_settings,
-      paths: paths.clone(),
-      window_handle: None,
-    };
     let import_note = Some(("Import note".to_string(), imported_stuff.update_note));
-    return Ok((data, import_note));
+    return Ok((versioned_settings, import_note));
   }
 
-  let mut default_settings = VersionedSettings::default();
-  let pool = db_pool_future.await?;
-  let data = Data {
-    bg_handle: background::spawn_bg(default_settings.unwrap(), &pool),
-    db_pool: pool,
-    versioned_settings: default_settings,
-    paths: paths.clone(),
-    window_handle: None,
-  };
-  Ok((data, None))
+  Ok((VersionedSettings::default(), None))
 }
 
 #[tokio::main]
 async fn main() {
-  if cfg!(debug_assertions) && env::var("DEVELOPMENT").is_err() {
-    eprintln!(
-      "Detected debug mode without the DEVELOPMENT environment \
-      variable set. Set it using DEVELOPMENT=1. This is explicitly required \
-      so you won't forget if you decide to run in release mode"
-    );
-    panic!();
-  }
   let ctx = tauri::generate_context!();
 
   // macOS "App Nap" periodically pauses our app when it's in the background.
@@ -128,10 +91,17 @@ async fn main() {
   macos_app_nap::prevent();
 
   let app_paths = AppPaths::from_tauri_config(&ctx.config());
-  let data_load_result = load_data(&app_paths).await;
 
-  let (loaded_data, _note) = match data_load_result {
+  let (mut settings, _note) = match load_data(&app_paths).await {
     Ok(v) => v,
+    Err(e) => {
+      error_popup_main_thread(&e);
+      panic!("{}", e);
+    }
+  };
+
+  let pool = match db::init(&app_paths).await {
+    Ok(pool) => pool,
     Err(e) => {
       error_popup_main_thread(&e);
       panic!("{}", e);
@@ -141,7 +111,6 @@ async fn main() {
   let app = tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
       error_popup,
-      data::video_update_counter,
       data::get_settings,
       data::tags,
       data::set_channels,
@@ -152,25 +121,29 @@ async fn main() {
       db::archive,
       db::unarchive,
     ])
-    .setup(move |_app| {
-      #[cfg(target_os = "macos")]
-      if let Some(note) = _note.clone() {
-        thread::spawn(move || {
-          dialog::message(Option::<&tauri::Window<tauri::Wry>>::None, note.0, note.1);
-        });
-      }
-      Ok(())
-    })
-    .setup(|app| {
-      let _ = WindowBuilder::new(app, "main", WindowUrl::default())
+    .setup(move |app| {
+      let win = WindowBuilder::new(app, "main", WindowUrl::default())
         .title("Kadium")
         .inner_size(900.0, 800.0)
         .min_inner_size(400.0, 150.0)
         .build()
         .expect("Unable to create window");
+
+      let data = Data {
+        bg_handle: background::spawn_bg(settings.unwrap(), &pool, win.clone()),
+        db_pool: pool,
+        versioned_settings: settings,
+        paths: app_paths,
+        window: win.clone(),
+      };
+      app.manage(ArcData::new(data));
+
+      #[cfg(target_os = "macos")]
+      if let Some(note) = _note.clone() {
+        dialog::message(Option::Some(&win), note.0, note.1);
+      }
       Ok(())
     })
-    .manage(ArcData::new(loaded_data))
     .menu(Menu::with_items([
       #[cfg(target_os = "macos")]
       MenuEntry::Submenu(Submenu::new(

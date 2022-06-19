@@ -47,27 +47,11 @@
     }
   }
 
-  let updateCounter = 0
-  async function getUpdateCount() {
-    const newCount = await runCmd('video_update_counter')
-    if (newCount > updateCounter) {
-      updateCounter = newCount
-      getVideos($viewOptions)
-    }
-  }
-  let updateInterval = setInterval(getUpdateCount, 2000)
-  const focusUnlistener = listen('tauri://focus', () => {
-    clearInterval(updateInterval)
-    getUpdateCount()
-    updateInterval = setInterval(getUpdateCount, 2000)
-  })
-  const blurUnlistener = listen('tauri://blur', () => {
-    clearInterval(updateInterval)
+  const refreshUnlistener = listen('refresh', () => {
+    getVideos($viewOptions)
   })
   onDestroy(async () => {
-    clearInterval(updateInterval)
-    ;(await focusUnlistener)()
-    ;(await blurUnlistener)()
+    ;(await refreshUnlistener)()
   })
 
   const months = [

@@ -145,8 +145,8 @@
         if (selectedIndex % getColumnCount() !== 0) {
           selectedIndex--
           selectedIndex = Math.max(0, selectedIndex)
-          e.preventDefault()
         }
+        e.preventDefault()
       } else if (checkShortcut(e, 'ArrowRight')) {
         if ((selectedIndex + 1) % getColumnCount() !== 0) {
           selectedIndex++

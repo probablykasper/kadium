@@ -284,7 +284,6 @@
           on:click={() => archiveToggleClick(video.id, video.archived)}
           on:dblclick|stopPropagation
           title="Archive"
-          tabindex="-1"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

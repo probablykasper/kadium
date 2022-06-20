@@ -1,5 +1,8 @@
 # Changelog
 
+## Next
+- Fix archive button having an outline when clicked
+
 ## 1.3.0 - 2022 Jun 20
 - Add `Escape` shortcut to reset focus
 - Show loading indicator while checking for new videos

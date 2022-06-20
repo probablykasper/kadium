@@ -58,6 +58,15 @@
     const unlisten = await unlistenFuture
     unlisten()
   })
+
+  function blurEscapeKeydown(e: KeyboardEvent) {
+    if (checkShortcut(e, 'Escape')) {
+      if (e.target instanceof HTMLElement) {
+        e.target.blur()
+      }
+      e.preventDefault()
+    }
+  }
 </script>
 
 <header>
@@ -73,6 +82,7 @@
       type="text"
       placeholder="Channel Filter"
       bind:value={$viewOptions.channel_filter}
+      on:keydown={blurEscapeKeydown}
     />
     {#each $tags as tag}
       <button

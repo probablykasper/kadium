@@ -217,8 +217,6 @@
   let boxes = [] as HTMLDivElement[]
   $: scrollToBox(selectedIndex)
   function scrollToBox(index: number) {
-    console.log('STB')
-
     if (scrollDiv && boxes[index]) {
       const el = boxes[index].getBoundingClientRect()
       const parent = scrollDiv.getBoundingClientRect()
@@ -233,12 +231,13 @@
   }
 </script>
 
-<svelte:window on:resize={autoloadHandler} on:keydown={keydown} />
+<svelte:window on:resize={autoloadHandler} on:keydown|self={keydown} />
+<svelte:body on:keydown|self={keydown} />
 
 <VideoBar loadedVideosCount={videos.length} {allLoaded} />
 
-<main tabindex="0" on:scroll={autoloadHandler} bind:this={scrollDiv}>
-  <div class="grid" tabindex="-1" bind:this={grid}>
+<main on:scroll={autoloadHandler} bind:this={scrollDiv}>
+  <div class="grid" bind:this={grid}>
     {#each videos as video, i}
       <div
         class="box"
@@ -248,17 +247,12 @@
         on:dblclick={() => shell.open('https://youtube.com/watch?v=' + videos[i].id)}
         on:click={(e) => videoClick(e, i)}
       >
-        <a
-          class="img-box"
-          href="https://youtube.com/watch?v={video.id}"
-          draggable="false"
-          on:click|preventDefault
-        >
+        <div class="img-box" href="https://youtube.com/watch?v={video.id}">
           <div class="img-parent">
             <img src="https://i.ytimg.com/vi/{video.id}/hqdefault.jpg" alt="" />
           </div>
-        </a>
-        <button
+        </div>
+        <div
           class="archive"
           on:click={() => archiveToggleClick(video.id, video.archived)}
           on:dblclick|stopPropagation
@@ -284,19 +278,16 @@
               d="M9.348,14.652l8.839,-8.839l1.768,1.768l-10.607,10.606l-5.303,-5.303l1.768,-1.768l3.535,3.536Z"
             />
           </svg>
-        </button>
-        <a class="row" href="https://youtube.com/watch?v={video.id}" on:click|preventDefault>
+        </div>
+        <div class="row">
           <p class="title selectable">{video.title}</p>
-        </a>
-        <p class="channel sub">
-          <a
-            class="row"
-            href="https://www.youtube.com/channel/{video.channelId}"
-            on:click|preventDefault|stopPropagation={(e) => channelClick(e, i)}
-            on:dblclick|stopPropagation={() => openChannel(i)}
-          >
-            {video.channelName}
-          </a>
+        </div>
+        <p
+          class="channel sub"
+          on:click|stopPropagation={(e) => channelClick(e, i)}
+          on:dblclick|stopPropagation={() => openChannel(i)}
+        >
+          {video.channelName}
         </p>
         <p class="row sub selectable">{formatDate(video.publishTimeMs)}</p>
       </div>
@@ -309,7 +300,6 @@
   .selectable
     user-select: text
   main
-    outline: none
     overflow-y: auto
     max-width: 100%
   .grid
@@ -322,7 +312,6 @@
     grid-gap: 15px
     padding: var(--page-padding)
     padding-top: 15px
-    outline: none
     @media screen and (max-width: 450px)
       grid-template-columns: 1fr
       .box
@@ -338,9 +327,6 @@
   .selected
     background-color: hsla(210, 100%, 95%, 0.07)
     border-color: hsla(210, 100%, 90%, 0.25)
-  .row
-    display: block
-    width: 100%
   .img-box
     display: block
     width: 100%
@@ -361,12 +347,6 @@
     bottom:-100%
   p
     margin: 0px
-  a
-    text-decoration: none
-    color: inherit
-    cursor: default
-    &:focus
-      border-color: hsl(210, 100%, 55%)
   p.title
     font-size: 13px
     font-weight: 500
@@ -376,18 +356,16 @@
     margin-top: 1px
   .channel
     transition: 80ms opacity $ease-md
-    a
-      display: inline
-    a:hover
+    &:hover
       color: hsl(210, 8%, 90%)
   p.sub
     font-size: 12px
     cursor: default
     color: hsl(210, 8%, 80%)
     margin-top: 2px
-  .box:hover button.archive
+  .box:hover .archive
     opacity: 1
-  button.archive
+  .archive
     position: absolute
     cursor: pointer
     top: 0px

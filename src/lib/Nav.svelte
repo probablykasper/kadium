@@ -22,8 +22,8 @@
 </script>
 
 <nav>
-  <a on:mousedown={go} use:active data-exact href="/"><button>Videos</button></a>
-  <a on:mousedown={go} use:active href="/channels"><button>Channels</button></a>
+  <a on:mousedown={go} use:active data-exact href="/">Videos</a>
+  <a on:mousedown={go} use:active href="/channels">Channels</a>
   <button class="control-style ml-auto" on:click={checkNow}>Check Now</button>
   <button class="control-style" on:click={openSettings}>Settings</button>
 </nav>
@@ -48,13 +48,6 @@
       color: hsl(210, 100%, 45%)
     &:global(.active)
       color: hsl(216, 30%, 93%)
-    button
-      background-color: transparent
-      border: none
-      font-size: 16px
-      color: inherit
-      margin: 0px
-      padding: 6px 0px
   .control-style
     border-radius: 3px
     border: 1px solid hsl(233, 7%, 22%)

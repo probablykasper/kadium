@@ -1,6 +1,7 @@
 # Changelog
 
 ## Next
+- Keep selection and scroll position when archiving and unarchiving
 - Use `actualStartTime` as the publish date for livestreams
 - Fix new videos not showing up immediately
 

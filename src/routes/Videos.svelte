@@ -24,6 +24,18 @@
     await tick()
     await autoloadHandler()
   }
+  async function softRefresh(options: ViewOptions) {
+    loading = true
+
+    const newVideos = await runCmd('get_videos', { options })
+    allLoaded = newVideos.length < $viewOptions.limit
+    videos = newVideos
+
+    loading = false
+
+    await tick()
+    await autoloadHandler()
+  }
   async function getMoreVideos() {
     loading = true
 
@@ -74,11 +86,13 @@
   }
   async function archive(id: string) {
     await runCmd('archive', { id })
-    getVideos($viewOptions)
+    await softRefresh($viewOptions)
+    selectedIndex = Math.min(selectedIndex, videos.length - 1)
   }
   async function unarchive(id: string) {
     await runCmd('unarchive', { id })
-    getVideos($viewOptions)
+    await softRefresh($viewOptions)
+    selectedIndex = Math.min(selectedIndex, videos.length - 1)
   }
   async function archiveToggleClick(id: string, isArchived: boolean) {
     if (isArchived) unarchive(id)
@@ -203,6 +217,8 @@
   let boxes = [] as HTMLDivElement[]
   $: scrollToBox(selectedIndex)
   function scrollToBox(index: number) {
+    console.log('STB')
+
     if (scrollDiv && boxes[index]) {
       const el = boxes[index].getBoundingClientRect()
       const parent = scrollDiv.getBoundingClientRect()

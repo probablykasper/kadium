@@ -1,5 +1,8 @@
 # Changelog
 
+## Next
+- Fix Content Security Policy issue
+
 ## 1.3.1 - 2022 Jun 20
 - Fix archive button having an outline when clicked
 

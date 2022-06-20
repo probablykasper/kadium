@@ -31,8 +31,6 @@
 
   let keyGuideVisible = false
   function keyGuideKeydown(e: KeyboardEvent) {
-    console.log(document.activeElement)
-
     if (e.key === 'Escape') {
       keyGuideVisible = false
       e.preventDefault()

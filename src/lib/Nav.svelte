@@ -33,8 +33,6 @@
   }
   let checking = 0
   const unlistenChecking = event.listen('checking', () => {
-    console.log('CHECKIN')
-
     checking++
   })
   const unlistenDoneChecking = event.listen('doneChecking', () => {

@@ -23,7 +23,7 @@
 
 ### Commands
 
-- `DEVELOPMENT=1 npm run dev`: Start app in dev mode. `DEVELOPMENT=1` tells it to use `./src-tauri/appdata` for app data.
+- `npm run dev`: Start app in dev mode. It sets `DEVELOPMENT=1` to tell the app to use `./src-tauri/appdata` for app data.
 - `npm run build`: Build
 - `npm run lint`: Lint
 - `npm run format`: Format

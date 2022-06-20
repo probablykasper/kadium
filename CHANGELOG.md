@@ -3,6 +3,7 @@
 ## Next
 - Add `Escape` shortcut to reset focus
 - Bring back focus when closing a modal
+- Show tags alphabetically
 - Use custom link drag image
 - Keep selection and scroll position when archiving and unarchiving
 - Use `actualStartTime` as the publish date for livestreams

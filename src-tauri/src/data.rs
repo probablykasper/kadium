@@ -112,7 +112,8 @@ pub async fn tags(data: DataState<'_>) -> Result<Value, String> {
       tags_map.entry(&tag).or_insert(());
     }
   }
-  let tags: Vec<_> = tags_map.keys().collect();
+  let mut tags: Vec<_> = tags_map.keys().collect();
+  tags.sort();
   to_json(&tags)
 }
 

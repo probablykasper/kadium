@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## 1.3.0 - 2022 Jun 20
 - Add `Escape` shortcut to reset focus
 - Show loading indicator while checking for new videos
 - Bring back focus when closing a modal

@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## 1.3.1 - 2022 Jun 20
 - Fix archive button having an outline when clicked
 
 ## 1.3.0 - 2022 Jun 20

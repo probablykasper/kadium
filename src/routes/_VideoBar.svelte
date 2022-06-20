@@ -17,25 +17,25 @@
       show = 0
     }
   }
-  function show0() {
-    $viewOptions.show_all = false
-    $viewOptions.show_archived = false
-  }
-  function show1() {
-    $viewOptions.show_all = false
-    $viewOptions.show_archived = true
-  }
-  function show2() {
-    $viewOptions.show_all = true
-    $viewOptions.show_archived = false
+  function setShow(i: number) {
+    if (i === 0) {
+      $viewOptions.show_all = false
+      $viewOptions.show_archived = false
+    } else if (i === 1) {
+      $viewOptions.show_all = false
+      $viewOptions.show_archived = true
+    } else if (i === 2) {
+      $viewOptions.show_all = true
+      $viewOptions.show_archived = false
+    }
   }
 
   function showGroupKeydown(e: KeyboardEvent) {
     if (checkShortcut(e, 'ArrowLeft')) {
-      show = Math.max(0, show - 1)
+      setShow(show - 1)
       e.preventDefault()
     } else if (checkShortcut(e, 'ArrowRight')) {
-      show = Math.min(2, show + 1)
+      setShow(show + 1)
       e.preventDefault()
     }
   }
@@ -72,9 +72,9 @@
 <header>
   <div class="options-bar">
     <button class="control-style group" on:keydown={showGroupKeydown} tabindex="0">
-      <div class="item" class:selected={show === 0} on:mousedown={show0}>New</div>
-      <div class="item" class:selected={show === 1} on:mousedown={show1}>Archived</div>
-      <div class="item" class:selected={show === 2} on:mousedown={show2}>All</div>
+      <div class="item" class:selected={show === 0} on:mousedown={() => setShow(0)}>New</div>
+      <div class="item" class:selected={show === 1} on:mousedown={() => setShow(1)}>Archived</div>
+      <div class="item" class:selected={show === 2} on:mousedown={() => setShow(2)}>All</div>
     </button>
     <input
       bind:this={filterInput}

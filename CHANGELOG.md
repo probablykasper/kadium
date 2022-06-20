@@ -7,6 +7,7 @@
 - Fix new videos not showing up immediately
 - Prevent archive/unarchive shortcuts when there is no selection
 - Improve tab navigation
+- Fix switching between New/Archived/All using arrow keys
 
 ## 1.2.3 - 2022 Mar 12
 - Prevent double clicking the archive button from opening video

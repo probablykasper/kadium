@@ -1,6 +1,12 @@
 <script lang="ts">
   export let visible = false
   let modalBg: HTMLDivElement
+  let lastFocus: Element | null
+  $: if (visible) {
+    lastFocus = document.activeElement
+  } else if (lastFocus instanceof HTMLElement) {
+    lastFocus.focus()
+  }
   $: if (visible && modalBg) {
     modalBg.focus()
     const firstInput = modalBg.querySelector('input, textarea')

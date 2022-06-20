@@ -1,11 +1,17 @@
 <script lang="ts">
   export let href = ''
+  let target = '_self'
+  $: if (href.startsWith('/') || href.startsWith('./')) {
+    target = '_self'
+  } else {
+    target = '_blank'
+  }
 </script>
 
 {#if href === ''}
   <button type="button" on:click><slot /></button>
 {:else}
-  <a {href}><button type="button" on:click><slot /></button></a>
+  <a {href} {target}><button type="button" on:click><slot /></button></a>
 {/if}
 
 <style lang="sass">

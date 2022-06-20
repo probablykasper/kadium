@@ -2,6 +2,7 @@
 
 ## Next
 - Add `Escape` shortcut to reset focus
+- Show loading indicator while checking for new videos
 - Bring back focus when closing a modal
 - Show tags alphabetically
 - Use custom link drag image

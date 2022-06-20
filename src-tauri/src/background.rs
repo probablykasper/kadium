@@ -194,6 +194,13 @@ async fn run_interval(options: IntervalOptions, interval_info: IntervalInfo) {
 }
 
 async fn check_channels(options: &IntervalOptions, interval_info: &IntervalInfo) {
+  let window_visible = match options.window.is_visible() {
+    Ok(true) => true,
+    _ => false,
+  };
+  if window_visible {
+    let _ = options.window.emit("checking", "");
+  }
   for channel in &interval_info.channels {
     match check_channel(&options, &channel).await {
       Ok(()) => {}
@@ -204,6 +211,9 @@ async fn check_channels(options: &IntervalOptions, interval_info: &IntervalInfo)
         break;
       }
     }
+  }
+  if window_visible {
+    let _ = options.window.emit("doneChecking", "");
   }
 }
 

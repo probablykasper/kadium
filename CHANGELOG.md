@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## 1.3.2 - 2022 Jun 20
 - Fix Content Security Policy issue
 
 ## 1.3.1 - 2022 Jun 20

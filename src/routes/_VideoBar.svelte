@@ -63,15 +63,15 @@
     if (checkShortcut(e, 'Escape')) {
       if (e.target instanceof HTMLElement) {
         e.target.blur()
+        e.preventDefault()
       }
-      e.preventDefault()
     }
   }
 </script>
 
-<header>
+<header on:keydown={blurEscapeKeydown}>
   <div class="options-bar">
-    <button class="control-style group" on:keydown={showGroupKeydown} tabindex="0">
+    <button class="control-style group" on:keydown={showGroupKeydown}>
       <div class="item" class:selected={show === 0} on:mousedown={() => setShow(0)}>New</div>
       <div class="item" class:selected={show === 1} on:mousedown={() => setShow(1)}>Archived</div>
       <div class="item" class:selected={show === 2} on:mousedown={() => setShow(2)}>All</div>
@@ -82,7 +82,6 @@
       type="text"
       placeholder="Channel Filter"
       bind:value={$viewOptions.channel_filter}
-      on:keydown={blurEscapeKeydown}
     />
     {#each $tags as tag}
       <button

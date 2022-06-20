@@ -1,7 +1,7 @@
 <script lang="ts">
   import { active, router } from 'tinro'
   import { settingsOpen } from './data'
-  import { runCmd } from './general'
+  import { checkShortcut, runCmd } from './general'
   function go(e: MouseEvent) {
     if (e.target instanceof HTMLElement) {
       const href = e.target.getAttribute('href')
@@ -19,9 +19,17 @@
   function openSettings() {
     $settingsOpen = true
   }
+  function keydown(e: KeyboardEvent) {
+    if (checkShortcut(e, 'Escape')) {
+      if (e.target instanceof HTMLElement) {
+        e.target?.blur()
+        e.preventDefault()
+      }
+    }
+  }
 </script>
 
-<nav>
+<nav on:keydown={keydown}>
   <a on:mousedown={go} use:active data-exact href="/">Videos</a>
   <a on:mousedown={go} use:active href="/channels">Channels</a>
   <button class="control-style ml-auto" on:click={checkNow}>Check Now</button>

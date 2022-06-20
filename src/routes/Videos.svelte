@@ -198,6 +198,27 @@
     }
   }
 
+  let dragEl: HTMLElement
+  let dragElDiv: HTMLElement
+  function dragStartVideo(e: DragEvent, video: Video) {
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'link'
+      dragElDiv.innerText = video.title
+      e.dataTransfer.setDragImage(dragEl, 0, 0)
+      e.dataTransfer.setData('text/uri-list', 'https://youtube.com/watch?v=' + video.id)
+      e.dataTransfer.setData('text/plain', 'https://youtube.com/watch?v=' + video.id)
+    }
+  }
+  function dragStartChannel(e: DragEvent, video: Video) {
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'link'
+      dragElDiv.innerText = video.channelName
+      e.dataTransfer.setDragImage(dragEl, 0, 0)
+      e.dataTransfer.setData('text/uri-list', 'https://youtube.com/channel/' + video.channelId)
+      e.dataTransfer.setData('text/plain', 'https://youtube.com/channel/' + video.channelId)
+    }
+  }
+
   const unlistenFuture = event.listen('tauri://menu', async ({ payload }) => {
     if (payload === 'Open Selected Video' && selectionVisible) {
       openVideo(selectedIndex)
@@ -236,6 +257,10 @@
 
 <VideoBar loadedVideosCount={videos.length} {allLoaded} />
 
+<div class="drag-ghost" bind:this={dragEl}>
+  <div bind:this={dragElDiv} />
+</div>
+
 <main on:scroll={autoloadHandler} bind:this={scrollDiv}>
   <div class="grid" bind:this={grid}>
     {#each videos as video, i}
@@ -246,10 +271,12 @@
         on:mousedown={() => select(i)}
         on:dblclick={() => shell.open('https://youtube.com/watch?v=' + videos[i].id)}
         on:click={(e) => videoClick(e, i)}
+        draggable="true"
+        on:dragstart={(e) => dragStartVideo(e, video)}
       >
         <div class="img-box" href="https://youtube.com/watch?v={video.id}">
           <div class="img-parent">
-            <img src="https://i.ytimg.com/vi/{video.id}/hqdefault.jpg" alt="" />
+            <img src="https://i.ytimg.com/vi/{video.id}/hqdefault.jpg" alt="" draggable="false" />
           </div>
         </div>
         <div
@@ -286,6 +313,8 @@
           class="channel sub"
           on:click|stopPropagation={(e) => channelClick(e, i)}
           on:dblclick|stopPropagation={() => openChannel(i)}
+          draggable="true"
+          on:dragstart|stopPropagation={(e) => dragStartChannel(e, video)}
         >
           {video.channelName}
         </p>
@@ -302,6 +331,17 @@
   main
     overflow-y: auto
     max-width: 100%
+  .drag-ghost
+      font-size: 14px
+      top: -1000px
+      position: absolute
+      background-color: transparent
+      padding-left: 3px
+      div
+        background-color: hsl(220, 17%, 7%)
+        padding: 4px 8px
+        max-width: 300px
+        border-radius: 3px
   .grid
     height: 100%
     max-height: 100%

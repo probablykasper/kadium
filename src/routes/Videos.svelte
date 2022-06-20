@@ -203,9 +203,9 @@
       openVideo(selectedIndex)
     } else if (payload === 'Open Selected Channel' && selectionVisible) {
       openChannel(selectedIndex)
-    } else if (payload === 'Archive') {
+    } else if (payload === 'Archive' && selectionVisible) {
       archive(videos[selectedIndex].id)
-    } else if (payload === 'Unarchive') {
+    } else if (payload === 'Unarchive' && selectionVisible) {
       unarchive(videos[selectedIndex].id)
     }
   })

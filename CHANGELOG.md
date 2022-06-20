@@ -4,6 +4,7 @@
 - Keep selection and scroll position when archiving and unarchiving
 - Use `actualStartTime` as the publish date for livestreams
 - Fix new videos not showing up immediately
+- Prevent archive/unarchive shortcuts when there is no selection
 
 ## 1.2.3 - 2022 Mar 12
 - Prevent double clicking the archive button from opening video

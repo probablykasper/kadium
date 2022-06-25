@@ -6,12 +6,13 @@
 use crate::data::{AppPaths, ArcData, Data};
 use crate::settings::yt_email_notifier;
 use crate::settings::VersionedSettings;
-use cocoa::appkit::NSWindow;
 use std::{env, thread};
 use tauri::api::{dialog, shell};
+#[cfg(target_os = "macos")]
+use tauri::AboutMetadata;
 use tauri::{
-  command, AboutMetadata, CustomMenuItem, Manager, Menu, MenuEntry, MenuItem, Submenu, Window,
-  WindowBuilder, WindowUrl,
+  command, CustomMenuItem, Manager, Menu, MenuEntry, MenuItem, Submenu, Window, WindowBuilder,
+  WindowUrl,
 };
 
 mod api;
@@ -131,6 +132,7 @@ async fn main() {
         .expect("Unable to create window");
       #[cfg(target_os = "macos")]
       {
+        use cocoa::appkit::NSWindow;
         let nsw = win.ns_window().unwrap() as cocoa::base::id;
         unsafe {
           // manual implementation for now (PR https://github.com/tauri-apps/tauri/pull/3965)
@@ -291,11 +293,12 @@ async fn main() {
 
   app.run(|_app_handle, e| match e {
     tauri::RunEvent::WindowEvent { event, .. } => match event {
-      tauri::WindowEvent::CloseRequested { api, .. } => {
-        if cfg!(target_os = "macos") {
+      tauri::WindowEvent::CloseRequested { api: _api, .. } => {
+        #[cfg(target_os = "macos")]
+        {
           // hide the application
           // manual for now (PR https://github.com/tauri-apps/tauri/pull/3689)
-          api.prevent_close();
+          _api.prevent_close();
           use objc::*;
           let cls = objc::runtime::Class::get("NSApplication").unwrap();
           let app: cocoa::base::id = unsafe { msg_send![cls, sharedApplication] };

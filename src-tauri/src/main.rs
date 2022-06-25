@@ -129,36 +129,42 @@ async fn main() {
         .min_inner_size(400.0, 150.0)
         .build()
         .expect("Unable to create window");
-      let nsw = win.ns_window().unwrap() as cocoa::base::id;
-      unsafe {
-        nsw.setTitlebarAppearsTransparent_(cocoa::base::YES);
+      #[cfg(target_os = "macos")]
+      {
+        let nsw = win.ns_window().unwrap() as cocoa::base::id;
+        unsafe {
+          // manual implementation for now (PR https://github.com/tauri-apps/tauri/pull/3965)
+          {
+            nsw.setTitlebarAppearsTransparent_(cocoa::base::YES);
 
-        // tauri enables fullsizecontentview by default, so disable it
-        let mut style_mask = nsw.styleMask();
-        style_mask.set(
-          cocoa::appkit::NSWindowStyleMask::NSFullSizeContentViewWindowMask,
-          false,
-        );
-        nsw.setStyleMask_(style_mask);
+            // tauri enables fullsizecontentview by default, so disable it
+            let mut style_mask = nsw.styleMask();
+            style_mask.set(
+              cocoa::appkit::NSWindowStyleMask::NSFullSizeContentViewWindowMask,
+              false,
+            );
+            nsw.setStyleMask_(style_mask);
+          }
 
-        // set window to always be dark mode
-        use cocoa::appkit::NSAppearanceNameVibrantDark;
-        use objc::*;
-        let appearance: cocoa::base::id = msg_send![
-          class!(NSAppearance),
-          appearanceNamed: NSAppearanceNameVibrantDark
-        ];
-        let () = msg_send![nsw, setAppearance: appearance];
+          // set window to always be dark mode
+          use cocoa::appkit::NSAppearanceNameVibrantDark;
+          use objc::*;
+          let appearance: cocoa::base::id = msg_send![
+            class!(NSAppearance),
+            appearanceNamed: NSAppearanceNameVibrantDark
+          ];
+          let () = msg_send![nsw, setAppearance: appearance];
 
-        // set window background color
-        let bg_color = cocoa::appkit::NSColor::colorWithRed_green_blue_alpha_(
-          cocoa::base::nil,
-          34.0 / 255.0,
-          38.0 / 255.0,
-          45.5 / 255.0,
-          1.0,
-        );
-        nsw.setBackgroundColor_(bg_color);
+          // set window background color
+          let bg_color = cocoa::appkit::NSColor::colorWithRed_green_blue_alpha_(
+            cocoa::base::nil,
+            34.0 / 255.0,
+            38.0 / 255.0,
+            45.5 / 255.0,
+            1.0,
+          );
+          nsw.setBackgroundColor_(bg_color);
+        }
       }
 
       let data = Data {
@@ -287,9 +293,13 @@ async fn main() {
     tauri::RunEvent::WindowEvent { event, .. } => match event {
       tauri::WindowEvent::CloseRequested { api, .. } => {
         if cfg!(target_os = "macos") {
+          // hide the application
+          // manual for now (PR https://github.com/tauri-apps/tauri/pull/3689)
           api.prevent_close();
-          #[cfg(target_os = "macos")]
-          _app_handle.hide().unwrap();
+          use objc::*;
+          let cls = objc::runtime::Class::get("NSApplication").unwrap();
+          let app: cocoa::base::id = unsafe { msg_send![cls, sharedApplication] };
+          unsafe { msg_send![app, hide: 0] }
         }
       }
       _ => {}

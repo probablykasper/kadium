@@ -3253,7 +3253,8 @@ dependencies = [
 [[package]]
 name = "tauri"
 version = "1.0.0"
-source = "git+https://github.com/tauri-apps/tauri?branch=mac-app-hide#8a41e8b5fb3276db645e4d12b0558ac155bda649"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8e1ebb60bb8f246d5351ff9b7728fdfa7a6eba72baa722ab6021d553981caba1"
 dependencies = [
  "anyhow",
  "cocoa",
@@ -3287,7 +3288,7 @@ dependencies = [
  "tauri-macros",
  "tauri-runtime",
  "tauri-runtime-wry",
- "tauri-utils 1.0.0 (git+https://github.com/tauri-apps/tauri?branch=mac-app-hide)",
+ "tauri-utils",
  "tempfile",
  "thiserror",
  "tokio",
@@ -3309,14 +3310,15 @@ dependencies = [
  "heck 0.4.0",
  "semver 1.0.10",
  "serde_json",
- "tauri-utils 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tauri-utils",
  "winres",
 ]
 
 [[package]]
 name = "tauri-codegen"
 version = "1.0.0"
-source = "git+https://github.com/tauri-apps/tauri?branch=mac-app-hide#8a41e8b5fb3276db645e4d12b0558ac155bda649"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9468c5189188c820ef605dfe4937c768cb2918e9460c8093dc4ee2cbd717b262"
 dependencies = [
  "base64",
  "brotli",
@@ -3329,7 +3331,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2",
- "tauri-utils 1.0.0 (git+https://github.com/tauri-apps/tauri?branch=mac-app-hide)",
+ "tauri-utils",
  "thiserror",
  "uuid 1.1.2",
  "walkdir",
@@ -3338,20 +3340,22 @@ dependencies = [
 [[package]]
 name = "tauri-macros"
 version = "1.0.0"
-source = "git+https://github.com/tauri-apps/tauri?branch=mac-app-hide#8a41e8b5fb3276db645e4d12b0558ac155bda649"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "40e3ffddd7a274fc7baaa260888c971a0d95d2ef403aa16600c878b8b1c00ffe"
 dependencies = [
  "heck 0.4.0",
  "proc-macro2",
  "quote",
  "syn",
  "tauri-codegen",
- "tauri-utils 1.0.0 (git+https://github.com/tauri-apps/tauri?branch=mac-app-hide)",
+ "tauri-utils",
 ]
 
 [[package]]
 name = "tauri-runtime"
 version = "0.9.0"
-source = "git+https://github.com/tauri-apps/tauri?branch=mac-app-hide#8a41e8b5fb3276db645e4d12b0558ac155bda649"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fb7dc4db360bb40584187b6cb7834da736ce4ef2ab0914e2be98014444fa9920"
 dependencies = [
  "gtk",
  "http",
@@ -3359,7 +3363,7 @@ dependencies = [
  "infer",
  "serde",
  "serde_json",
- "tauri-utils 1.0.0 (git+https://github.com/tauri-apps/tauri?branch=mac-app-hide)",
+ "tauri-utils",
  "thiserror",
  "uuid 1.1.2",
  "webview2-com",
@@ -3369,14 +3373,15 @@ dependencies = [
 [[package]]
 name = "tauri-runtime-wry"
 version = "0.9.0"
-source = "git+https://github.com/tauri-apps/tauri?branch=mac-app-hide#8a41e8b5fb3276db645e4d12b0558ac155bda649"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c876fb3a6e7c6fe2ac466b2a6ecd83658528844b4df0914558a9bc1501b31cf3"
 dependencies = [
  "cocoa",
  "gtk",
  "percent-encoding",
  "rand 0.8.5",
  "tauri-runtime",
- "tauri-utils 1.0.0 (git+https://github.com/tauri-apps/tauri?branch=mac-app-hide)",
+ "tauri-utils",
  "uuid 1.1.2",
  "webkit2gtk",
  "webview2-com",
@@ -3389,30 +3394,6 @@ name = "tauri-utils"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "727145cb55b8897fa9f2bcea4fad31dc39394703d037c9669b40f2d1c0c2d7f3"
-dependencies = [
- "ctor",
- "glob",
- "heck 0.4.0",
- "html5ever",
- "json-patch",
- "kuchiki",
- "memchr",
- "phf 0.10.1",
- "proc-macro2",
- "quote",
- "semver 1.0.10",
- "serde",
- "serde_json",
- "serde_with",
- "thiserror",
- "url",
- "walkdir",
-]
-
-[[package]]
-name = "tauri-utils"
-version = "1.0.0"
-source = "git+https://github.com/tauri-apps/tauri?branch=mac-app-hide#8a41e8b5fb3276db645e4d12b0558ac155bda649"
 dependencies = [
  "brotli",
  "ctor",

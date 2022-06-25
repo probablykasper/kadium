@@ -6,6 +6,7 @@
 use crate::data::{AppPaths, ArcData, Data};
 use crate::settings::yt_email_notifier;
 use crate::settings::VersionedSettings;
+use cocoa::appkit::NSWindow;
 use std::{env, thread};
 use tauri::api::{dialog, shell};
 use tauri::{
@@ -128,6 +129,37 @@ async fn main() {
         .min_inner_size(400.0, 150.0)
         .build()
         .expect("Unable to create window");
+      let nsw = win.ns_window().unwrap() as cocoa::base::id;
+      unsafe {
+        nsw.setTitlebarAppearsTransparent_(cocoa::base::YES);
+
+        // tauri enables fullsizecontentview by default, so disable it
+        let mut style_mask = nsw.styleMask();
+        style_mask.set(
+          cocoa::appkit::NSWindowStyleMask::NSFullSizeContentViewWindowMask,
+          false,
+        );
+        nsw.setStyleMask_(style_mask);
+
+        // set window to always be dark mode
+        use cocoa::appkit::NSAppearanceNameVibrantDark;
+        use objc::*;
+        let appearance: cocoa::base::id = msg_send![
+          class!(NSAppearance),
+          appearanceNamed: NSAppearanceNameVibrantDark
+        ];
+        let () = msg_send![nsw, setAppearance: appearance];
+
+        // set window background color
+        let bg_color = cocoa::appkit::NSColor::colorWithRed_green_blue_alpha_(
+          cocoa::base::nil,
+          34.0 / 255.0,
+          38.0 / 255.0,
+          45.5 / 255.0,
+          1.0,
+        );
+        nsw.setBackgroundColor_(bg_color);
+      }
 
       let data = Data {
         bg_handle: background::spawn_bg(settings.unwrap(), &pool, win.clone()),

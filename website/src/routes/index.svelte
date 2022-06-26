@@ -148,7 +148,7 @@
 </Revealed>
 
 <Revealed
-  class="relative mx-auto mb-24 max-w-5xl px-6 sm:px-8"
+  class="relative mx-auto mb-24 max-w-5xl px-6 transition-[transform,opacity] will-change-contents sm:px-8"
   options={{ opacity: 0, y: 10, duration: 1000, delay: 600 }}
 >
   <div class="gradient gradient-1 show-gradient absolute inset-0 -z-10 blur-[160px]" />
@@ -158,7 +158,7 @@
   </div>
 </Revealed>
 <Revealed
-  class="relative mx-auto mb-24 max-w-5xl px-6 sm:px-8"
+  class="relative mx-auto mb-24 max-w-5xl px-6 transition-[transform,opacity] will-change-contents sm:px-8"
   options={{ opacity: 0, y: 10, duration: 1000 }}
 >
   <div class="gradient gradient-2 absolute inset-0 -z-10 blur-[160px]" />
@@ -194,11 +194,5 @@
     100%
       opacity: 0.7
   .ripple
-    // animation: ping 3s cubic-bezier(0, 0, 0.2, 1) infinite
     box-shadow: 0px 0px 0px 1px hsla(0, 0%, 100%, 0.1), 0px 0px 0px 4px hsla(0, 0%, 100%, 0.15)
-  // @keyframes ping
-  //   0%
-  //     box-shadow: 0px 0px 0px 1px hsla(0, 0%, 100%, 0.1), 0px 0px 0px 0px hsla(0, 0%, 100%, 0.15)
-  //   100%
-  //     box-shadow: 0px 0px 0px 1px hsla(0, 100%, 100%, 0.1), 0px 0px 0px 9px hsla(0, 0%, 100%, 0)
 </style>

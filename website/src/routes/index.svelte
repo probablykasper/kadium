@@ -133,7 +133,7 @@
     </div>
     <div
       slot="popup"
-      class="mt-0.5 w-full divide-y divide-white divide-opacity-10 rounded-xl border border-white border-opacity-20 bg-white bg-opacity-5 text-white backdrop-blur-sm will-change-contents"
+      class="mt-0.5 w-full divide-y divide-white divide-opacity-10 rounded-xl border border-white border-opacity-20 bg-white bg-opacity-5 text-white backdrop-blur-md will-change-contents"
       transition:scale={{ start: 0.9, opacity: 0, duration: 300 }}
     >
       {#each versionList as version}

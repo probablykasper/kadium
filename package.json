@@ -11,7 +11,7 @@
     "build": "tauri build",
     "build:web": "vite build",
     "test": "echo 'No tests'",
-    "lint": "prettier --check --plugin-search-dir=. src *.js && eslint src *.js && svelte-check",
+    "lint": "prettier --check --plugin-search-dir=. src *.js && eslint src *.js && svelte-check --ignore website",
     "format": "prettier --write --plugin-search-dir=. src *.js && eslint --fix src *.js"
   },
   "devDependencies": {

@@ -1,5 +1,8 @@
 # Changelog
 
+## Next
+- Fancy macOS single-color title bar
+
 ## 1.3.2 - 2022 Jun 20
 - Fix Content Security Policy issue
 

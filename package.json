@@ -1,6 +1,9 @@
 {
   "private": true,
   "type": "module",
+  "workspaces": [
+    "website"
+  ],
   "scripts": {
     "tauri": "tauri",
     "dev": "DEVELOPMENT=1 tauri dev",
@@ -8,15 +11,15 @@
     "build": "tauri build",
     "build:web": "vite build",
     "test": "echo 'No tests'",
-    "lint": "prettier --check --plugin-search-dir=. src *.js && eslint src *.js && svelte-check",
-    "format": "prettier --write --plugin-search-dir=. src *.js && eslint --fix src *.js"
+    "lint": "prettier --check --plugin-search-dir=. src website *.js && eslint src *.js && svelte-check",
+    "format": "prettier --write --plugin-search-dir=. src website *.js && eslint --fix src *.js"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "1.0.0-next.49",
     "@tauri-apps/api": "1.0.1",
     "@tauri-apps/cli": "1.0.0",
-    "@typescript-eslint/eslint-plugin": "^5.28.0",
-    "@typescript-eslint/parser": "^5.28.0",
+    "@typescript-eslint/eslint-plugin": "^5.29.0",
+    "@typescript-eslint/parser": "^5.29.0",
     "autoprefixer": "^10.4.7",
     "date-picker-svelte": "^2.0.0",
     "eslint": "^8.18.0",
@@ -25,7 +28,7 @@
     "postcss": "^8.4.14",
     "prettier": "^2.7.1",
     "prettier-plugin-svelte": "^2.7.0",
-    "sass": "^1.52.3",
+    "sass": "^1.53.0",
     "svelte": "^3.48.0",
     "svelte-check": "^2.7.2",
     "svelte-preprocess": "^4.10.7",

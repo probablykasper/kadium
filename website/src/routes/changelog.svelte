@@ -1,4 +1,5 @@
 <script lang="ts">
+  // @ts-ignore (linter error)
   import Changelog from '../../../CHANGELOG.md'
   import Revealed from './_Revealed.svelte'
 </script>

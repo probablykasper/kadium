@@ -4,7 +4,7 @@
   import Revealed from './_Revealed.svelte'
   import Bowser from 'bowser'
   import { onMount } from 'svelte'
-  // @ts-ignore
+  // @ts-ignore (linter error)
   import { Octokit } from '/skypack/octokit@1.x'
 
   type Version = {

@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   content: ['./src/**/*.{html,js,svelte,ts}'],
 
   theme: {

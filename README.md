@@ -5,7 +5,7 @@
 <p align="center">
   App for staying ontop of YouTube channels' uploads
   <br/>
-  <a href="https://github.com/probablykasper/kadium/releases"><b>Download for Mac, Windows or Linux</b></a>
+  <a href="https://kadium.kasper.space"><b>Download for Mac, Windows or Linux</b></a>
 </p>
 <br/>
 

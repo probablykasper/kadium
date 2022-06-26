@@ -3,8 +3,6 @@
   import ButtonPopup from './_ButtonPopup.svelte'
   import Bowser from 'bowser'
   import { onMount } from 'svelte'
-  // @ts-ignore (linter error)
-  import { Octokit } from '/skypack/octokit@1.x'
 
   type Version = {
     os: string
@@ -46,6 +44,8 @@
   })
 
   async function download(version: Version) {
+    // @ts-ignore
+    const { Octokit } = await import('https://cdn.skypack.dev/octokit@1.x')
     const octokit = new Octokit()
     try {
       const { data } = await octokit.rest.repos.getLatestRelease({
@@ -126,4 +126,6 @@
 <style lang="sass">
   .gradient
     will-change: contents
+  .gradient-3
+    background: linear-gradient(130deg,#09cff6 10%,#3159f6 90%)
 </style>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  // @ts-ignore (linter error)
+  // @ts-ignore
   import Changelog from '../../../CHANGELOG.md'
   import Revealed from './_Revealed.svelte'
 </script>
@@ -29,7 +29,7 @@
       -webkit-text-fill-color: transparent
       position: relative
 
-      &::before, &::after
+      &::before
         content: ''
         position: absolute
         inset: 0
@@ -42,7 +42,6 @@
             opacity: 0
           100%
             opacity: 0.7
-      &::before
         width: 100%
         height: 100%
         filter: blur(80px)

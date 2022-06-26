@@ -10,6 +10,13 @@ const config = {
     prerender: {
       default: true,
     },
+    vite: {
+      resolve: {
+        alias: {
+          '/skypack/': 'https://cdn.skypack.dev/',
+        },
+      },
+    },
   },
 }
 

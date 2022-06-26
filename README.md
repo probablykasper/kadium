@@ -9,8 +9,9 @@
 </p>
 <br/>
 
-![Screenshot 1](assets/screenshot-1.png)
-![Screenshot 2](assets/screenshot-2.png)
+![Screenshot 1](website/static/screenshot-1.webp)
+
+![Screenshot 2](website/static/screenshot-2.webp)
 
 ## Dev instructions
 

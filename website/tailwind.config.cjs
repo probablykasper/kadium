@@ -1,5 +1,3 @@
-const defaultTheme = require('tailwindcss/defaultTheme')
-
 const config = {
   content: ['./src/**/*.{html,js,svelte,ts}'],
 
@@ -7,10 +5,6 @@ const config = {
     extend: {
       transitionTimingFunction: {
         md: 'cubic-bezier(0.4, 0.0, 0.2, 1)',
-      },
-      screens: {
-        xs: '440px',
-        ...defaultTheme.screens,
       },
     },
   },

@@ -1,0 +1,14 @@
+{
+  "changelogDefault": "CHANGELOG.md",
+  "versions": {
+    "1.0.2": {
+      "update_from": "1.0.1",
+      "macos": {
+        "version": "^10.13",
+        "arch": "x86_64"
+      }
+    },
+
+    "1.0.1": {}
+  }
+}

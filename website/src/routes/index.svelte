@@ -66,14 +66,19 @@
   }
 </script>
 
+<svelte:head>
+  <title>Kadium</title>
+  <meta name="description" content="An app for staying ontop of YouTube channels' uploads" />
+</svelte:head>
+
 <Revealed
-  class="mt-32 mb-4 transition-all ease-out"
+  class="mt-20 mb-4 text-center transition-all ease-out"
   options={{ opacity: 0, scale: 0.9, duration: 1000 }}
 >
   <h1 class="inline-block text-7xl font-extrabold">Kadium</h1>
 </Revealed>
 <Revealed
-  class="mb-8 transition-all ease-out"
+  class="mb-12 text-center transition-all ease-out"
   options={{ opacity: 0, y: -10, duration: 750, delay: 500 }}
 >
   <p class="text-xl text-blue-100 opacity-60 transition-all duration-500 ease-out">
@@ -82,12 +87,12 @@
 </Revealed>
 
 <Revealed
-  class="mx-auto mb-24 inline-block transition-all ease-out"
+  class="mb-24 flex justify-center transition-all ease-out"
   options={{ opacity: 0, scale: 0.9, duration: 750, delay: 700 }}
 >
   <ButtonPopup let:toggle let:isOpen>
     <div
-      class="relative flex h-9 cursor-default items-center border border-white border-opacity-10 bg-white bg-opacity-5 text-base font-medium transition-all duration-300 ease-in-out hover:border-opacity-20"
+      class="relative mx-auto flex h-9 cursor-default items-center border border-white border-opacity-10 bg-white bg-opacity-5 text-base font-medium transition-all duration-300 ease-in-out hover:border-opacity-20"
       class:rounded-2xl={!isOpen}
       class:rounded-lg={isOpen}
     >
@@ -165,13 +170,6 @@
 </Revealed>
 
 <style lang="sass">
-  :global(html)
-    background-color: #000000
-  :global(body)
-    font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji
-    font-size: 18px
-    color: #f2f2f2
-    text-align: center
   h1
     background: linear-gradient(130deg,#09cff6 10%,#3159f6 90%)
     background-clip: text

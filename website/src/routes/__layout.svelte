@@ -4,6 +4,27 @@
   import Revealed from './_Revealed.svelte'
 </script>
 
+<svelte:head>
+  <title>Kadium</title>
+  <meta name="description" content="An app for staying ontop of YouTube channels' uploads" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://kadium.kasper.space/" />
+  <meta property="og:title" content="Kadium" />
+  <meta property="og:description" content="An app for staying ontop of YouTube channels' uploads" />
+  <meta property="og:image" content="https://kadium.kasper.space/website-screenshot.jpg" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta property="twitter:domain" content="kadium.kasper.space" />
+  <meta property="twitter:url" content="https://kadium.kasper.space/" />
+  <meta name="twitter:title" content="Kadium" />
+  <meta
+    name="twitter:description"
+    content="An app for staying ontop of YouTube channels' uploads"
+  />
+  <meta name="twitter:image" content="https://kadium.kasper.space/website-screenshot.jpg" />
+</svelte:head>
+
 <nav
   class="mx-auto flex max-w-5xl items-center py-4 px-4 text-base text-white text-opacity-60 sm:justify-between"
 >
@@ -15,13 +36,13 @@
   </Revealed>
   <Revealed options={{ opacity: 0, y: -10, duration: 1000, delay: 1000 }}>
     <a
-      class="mx-1.5 transition-colors duration-200 ease-md hover:text-white"
+      class="ease-md mx-1.5 transition-colors duration-200 hover:text-white"
       class:font-medium={$page.url.pathname === '/'}
       class:text-white={$page.url.pathname === '/'}
       href="/">Overview</a
     >
     <a
-      class="mx-1.5 transition-colors duration-200 ease-md hover:text-white"
+      class="ease-md mx-1.5 transition-colors duration-200 hover:text-white"
       class:font-medium={$page.url.pathname === '/changelog'}
       class:text-white={$page.url.pathname === '/changelog'}
       href="/changelog">Changelog</a

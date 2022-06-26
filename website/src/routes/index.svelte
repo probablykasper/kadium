@@ -68,7 +68,6 @@
 
 <svelte:head>
   <title>Kadium</title>
-  <meta name="description" content="An app for staying ontop of YouTube channels' uploads" />
 </svelte:head>
 
 <Revealed

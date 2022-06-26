@@ -1,4 +1,4 @@
-const config = {
+export default {
   content: ['./src/**/*.{html,js,svelte,ts}'],
 
   theme: {
@@ -11,5 +11,3 @@ const config = {
 
   plugins: [require('@tailwindcss/forms')],
 }
-
-module.exports = config

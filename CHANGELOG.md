@@ -2,6 +2,7 @@
 
 ## Next
 - Fancy macOS single-color title bar
+- Use Tauri 1.0, hopefully fixing some issues
 
 ## 1.3.2 - 2022 Jun 20
 - Fix Content Security Policy issue

@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## 1.4.0 - 202
 - Fancy macOS single-color title bar
 - Use Tauri 1.0, hopefully fixing some issues
 

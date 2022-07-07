@@ -206,7 +206,7 @@ async fn check_channels(options: &IntervalOptions, interval_info: &IntervalInfo)
       Ok(()) => {}
       Err(e) => {
         let title = format!("Error checking {}", channel.name);
-        eprintln!("Error checking {}: {}", title, e);
+        eprintln!("{}: {}", title, e);
         let _ = Notification::new("error").title(title).body(e).show();
         break;
       }
@@ -243,7 +243,13 @@ async fn check_channel(options: &IntervalOptions, channel: &ChannelInfo) -> Resu
       continue;
     }
 
-    let published_str = fetched_video.contentDetails.videoPublishedAt;
+    let published_str = match fetched_video.contentDetails.videoPublishedAt {
+      Some(published_str) => published_str,
+      None => {
+        // video isn't public
+        continue;
+      }
+    };
     let published_time = parse_datetime(&published_str)?.timestamp_millis();
     if published_time < channel.from_time {
       continue;

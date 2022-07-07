@@ -1,5 +1,8 @@
 # Changelog
 
+## Next
+- Fix "missing field `videoPublishedAt`" error (which happens when videos are privated but still accessible).
+
 ## 1.4.0 - 2022 Jun 28
 - Fancy macOS single-color title bar
 - Use Tauri 1.0, hopefully fixing some issues

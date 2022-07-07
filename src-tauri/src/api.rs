@@ -169,7 +169,8 @@ pub mod playlist_items {
   #[derive(Deserialize, Debug)]
   #[allow(non_snake_case)]
   pub struct ContentDetails {
-    pub videoPublishedAt: String,
+    /// Soemtimes videoPublishedAt is missing when videos are privated, but still included in the channel video list.
+    pub videoPublishedAt: Option<String>,
     pub videoId: String,
   }
 }

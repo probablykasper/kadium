@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## 1.4.1 - 2022 Jul 8
 - Fix "missing field `videoPublishedAt`" error (which happens when videos are privated but still accessible).
 
 ## 1.4.0 - 2022 Jun 28

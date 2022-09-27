@@ -1,7 +1,7 @@
 <script lang="ts">
   // @ts-ignore
-  import Changelog from '../../../CHANGELOG.md'
-  import Revealed from './_Revealed.svelte'
+  import Changelog from '../../../../CHANGELOG.md'
+  import Revealed from '../Revealed.svelte'
 </script>
 
 <svelte:head>

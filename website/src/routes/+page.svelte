@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Revealed from './_Revealed.svelte'
-  import Download from './_download.svelte'
+  import Revealed from './Revealed.svelte'
+  import Download from './Download.svelte'
 </script>
 
 <svelte:head>

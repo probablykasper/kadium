@@ -1,6 +1,6 @@
 <script lang="ts">
   import { scale } from 'svelte/transition'
-  import ButtonPopup from './_ButtonPopup.svelte'
+  import ButtonPopup from './ButtonPopup.svelte'
   import Bowser from 'bowser'
   import { onMount } from 'svelte'
 
@@ -63,7 +63,6 @@
       console.error(e)
     }
   }
-  export const prerender = true
 </script>
 
 <ButtonPopup let:toggle let:isOpen>

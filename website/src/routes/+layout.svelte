@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores'
   import '../app.css'
-  import Revealed from './_Revealed.svelte'
+  import Revealed from './Revealed.svelte'
 </script>
 
 <svelte:head>

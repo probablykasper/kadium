@@ -26,7 +26,9 @@
   class="mb-24 flex justify-center transition-all ease-out"
   options={{ opacity: 0, scale: 0.9, duration: 750, delay: 700 }}
 >
-  <Download />
+  <div>
+    <Download />
+  </div>
 </Revealed>
 
 <Revealed

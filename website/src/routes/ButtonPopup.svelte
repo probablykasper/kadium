@@ -4,6 +4,9 @@
   function toggle() {
     isOpen = !isOpen
   }
+  function close() {
+    isOpen = false
+  }
 
   let parent: HTMLDivElement
   function focusout(e: FocusEvent) {
@@ -21,7 +24,7 @@
 </script>
 
 <div class="relative" bind:this={parent} on:focusout={focusout} tabindex="-1">
-  <slot {toggle} {isOpen} />
+  <slot {toggle} {isOpen} {close} />
   {#if isOpen}
     <div class="absolute z-10 w-full divide-y divide-gray-100 text-sm text-gray-700 shadow">
       <slot name="popup" />

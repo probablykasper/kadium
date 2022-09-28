@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { scale } from 'svelte/transition'
+  import { fly, scale } from 'svelte/transition'
   import ButtonPopup from './ButtonPopup.svelte'
   import Bowser from 'bowser'
   import { onMount } from 'svelte'
+  import type { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods'
 
   type Version = {
     os: string
@@ -43,37 +44,78 @@
     }
   })
 
-  async function download(version: Version) {
-    // @ts-ignore
-    const { Octokit } = await import('https://cdn.skypack.dev/octokit@1.x')
-    const octokit = new Octokit()
-    try {
-      const { data } = await octokit.rest.repos.getLatestRelease({
-        owner: 'probablykasper',
-        repo: 'kadium',
-      })
-      for (const asset of data.assets) {
-        if (asset.name.toLowerCase().endsWith(version.ending)) {
-          console.log(asset)
-          window.open(asset.browser_download_url, '_self')
-          return
-        }
+  let downloadError = ''
+  let loading = false
+  type LatestRelease = RestEndpointMethodTypes['repos']['getLatestRelease']['response']['data']
+
+  function getAsset(assets: LatestRelease['assets'], version: Version) {
+    for (const asset of assets) {
+      if (asset.name.toLowerCase().endsWith(version.ending)) {
+        return asset
       }
-    } catch (e) {
-      console.error(e)
     }
+    return null
+  }
+  async function innerDownload(version: Version) {
+    downloadError = ''
+    try {
+      const response = await fetch(
+        `https://api.github.com/repos/probablykasper/kadium/releases/latest`
+      )
+      console.log(response)
+
+      const json: LatestRelease = await response.json()
+      console.log(json)
+
+      if (response.status !== 200) {
+        downloadError = 'Could not download'
+        console.error('Error response from GitHub', json)
+        return
+      }
+
+      const asset = getAsset(json.assets, version)
+      if (asset === null) {
+        downloadError = 'No file found'
+        console.error('No file found')
+        return
+      }
+      console.log(asset)
+      location.href = asset.browser_download_url
+    } catch (error) {
+      downloadError = 'Network error'
+      console.error(error)
+    }
+  }
+  async function download(version: Version) {
+    loading = true
+    await innerDownload(version)
+    loading = false
   }
 </script>
 
-<ButtonPopup let:toggle let:isOpen>
+<div class="mb-2 h-6">
+  {#if downloadError}
+    <div
+      class="error block text-center text-sm font-semibold text-red-500"
+      transition:fly={{ y: 3, duration: 200 }}
+    >
+      {downloadError}
+    </div>
+  {/if}
+</div>
+
+<ButtonPopup let:toggle let:isOpen let:close>
   <div
     class="relative mx-auto flex h-9 cursor-default items-center border border-white border-opacity-10 bg-white bg-opacity-5 text-base font-medium transition-all duration-300 ease-in-out hover:border-opacity-20"
     class:rounded-2xl={!isOpen}
     class:rounded-lg={isOpen}
+    class:pointer-events-none={loading}
+    class:opacity-75={loading}
   >
     <button
       class="group relative flex h-full items-center pr-4 pl-5 text-white text-opacity-70 outline-none transition-all duration-300 hover:text-opacity-100"
       on:click={() => download(suggestedVersion)}
+      class:opacity-50={loading}
     >
       <div
         class="opacity-0 transition-all duration-700 ease-out group-hover:opacity-40 group-focus:opacity-40"
@@ -114,7 +156,10 @@
     {#each versionList as version}
       <button
         class="h-9 w-full bg-white bg-opacity-0 px-5 text-left outline-none hover:bg-opacity-5 focus:bg-opacity-5"
-        on:click={() => download(version)}
+        on:click={() => {
+          close()
+          download(version)
+        }}
       >
         {version.os} <span class="opacity-70">{version.arch}</span>
       </button>
@@ -127,4 +172,6 @@
     will-change: contents
   .gradient-3
     background: linear-gradient(130deg,#09cff6 10%,#3159f6 90%)
+  .error
+    text-shadow: 0px 0px 7px hsl(0deg 100% 50% / 60%)
 </style>

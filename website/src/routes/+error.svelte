@@ -1,6 +1,6 @@
 <script lang="ts">
-  // @ts-ignore
   import Revealed from './Revealed.svelte'
+  import { page } from '$app/stores'
 </script>
 
 <svelte:head>
@@ -12,14 +12,18 @@
     class="mt-20 mb-4 text-center transition-all ease-out"
     options={{ opacity: 0, scale: 0.9, duration: 1000 }}
   >
-    <h1 class="text-7xl font-extrabold">404</h1>
+    <h1 class="text-7xl font-extrabold">{$page.status}</h1>
   </Revealed>
   <Revealed
     class="mb-12 text-center transition-all ease-out"
     options={{ opacity: 0, y: -10, duration: 750, delay: 500 }}
   >
     <p class="text-xl text-green-100 opacity-60 transition-all duration-500 ease-out">
-      This page did not survive the nuclear fallout
+      {#if $page.status === 404}
+        This page did not survive the nuclear fallout
+      {:else}
+        {$page.error?.message || 'Something went wrong'}
+      {/if}
     </p>
   </Revealed>
 </main>

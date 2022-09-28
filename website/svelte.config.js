@@ -1,5 +1,5 @@
 import { mdsvex } from 'mdsvex'
-import adapter from '@sveltejs/adapter-static'
+import adapter from '@sveltejs/adapter-cloudflare'
 import preprocess from 'svelte-preprocess'
 import { defineMDSveXConfig as defineConfig } from 'mdsvex'
 

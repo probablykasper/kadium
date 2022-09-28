@@ -31,6 +31,7 @@
 
       &::before
         content: ''
+        pointer-events: none
         position: absolute
         inset: 0
         will-change: contents

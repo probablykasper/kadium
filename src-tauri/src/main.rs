@@ -127,27 +127,18 @@ async fn main() {
       let win = WindowBuilder::new(app, "main", WindowUrl::default())
         .title("Kadium")
         .inner_size(900.0, 800.0)
-        .min_inner_size(400.0, 150.0)
-        .build()
-        .expect("Unable to create window");
+        .min_inner_size(400.0, 150.0);
+
+      #[cfg(target_os = "macos")]
+      let win = win.title_bar_style(tauri::TitleBarStyle::Transparent);
+
+      let win = win.build().expect("Unable to create window");
+
       #[cfg(target_os = "macos")]
       {
         use cocoa::appkit::NSWindow;
         let nsw = win.ns_window().unwrap() as cocoa::base::id;
         unsafe {
-          // manual implementation for now (PR https://github.com/tauri-apps/tauri/pull/3965)
-          {
-            nsw.setTitlebarAppearsTransparent_(cocoa::base::YES);
-
-            // tauri enables fullsizecontentview by default, so disable it
-            let mut style_mask = nsw.styleMask();
-            style_mask.set(
-              cocoa::appkit::NSWindowStyleMask::NSFullSizeContentViewWindowMask,
-              false,
-            );
-            nsw.setStyleMask_(style_mask);
-          }
-
           // set window to always be dark mode
           use cocoa::appkit::NSAppearanceNameVibrantDark;
           use objc::*;

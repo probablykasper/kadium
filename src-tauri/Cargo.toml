@@ -7,25 +7,25 @@ edition = "2018"
 build = "src/build.rs"
 
 [build-dependencies]
-tauri-build = { version = "1.0.0", features = [] }
+tauri-build = { version = "1.2", features = [] }
 
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.0", features = ["devtools", "dialog-message", "notification-all", "shell-open"] }
-rfd = "0.9.1"
-atomicwrites = "0.3.0"
-tokio = { version = "1.12.0", features = ["macros", "time", "sync"] }
-reqwest = { version = "0.11.6", features = ["json"] }
-sqlx = { version = "0.6.0", features = ["runtime-tokio-rustls", "sqlite"] }
-chrono = "0.4.0"
-iso8601-duration = "0.1.0"
-url = "2.2.2"
+tauri = { version = "1.2", features = ["devtools", "dialog-message", "notification-all", "shell-open"] }
+rfd = "0.10"
+atomicwrites = "0.3"
+tokio = { version = "1.12", features = ["macros", "time", "sync"] }
+reqwest = { version = "0.11", features = ["json"] }
+sqlx = { version = "0.6", features = ["runtime-tokio-rustls", "sqlite"] }
+chrono = "0.4"
+iso8601-duration = "0.1"
+url = "2.2"
 
 [target.'cfg(target_os = "macos")'.dependencies]
-macos-app-nap = "0.0.1"
-cocoa = "0.24.0"
-objc = "0.2.7"
+macos-app-nap = "0.0"
+cocoa = "0.24"
+objc = "0.2"
 
 [features]
 default = [ "custom-protocol" ]

@@ -24,7 +24,7 @@ impl AppPaths {
   pub fn from_tauri_config(config: &Config) -> Self {
     let app_dir = match env::var("DEVELOPMENT").is_ok() {
       true => env::current_dir().unwrap().join("appdata"),
-      false => tauri::api::path::app_dir(config).unwrap(),
+      false => tauri::api::path::app_data_dir(config).unwrap(),
     };
     AppPaths {
       app_dir: app_dir.clone(),

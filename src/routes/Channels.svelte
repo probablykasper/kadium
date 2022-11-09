@@ -76,8 +76,11 @@
       <div class="channel selectable" class:show={filter === '' || channel.name.includes(filter)}>
         <img src={channel.icon} alt="" />
         <div class="details">
-          <a href="https://youtube.com/channel/{channel.id}" target="_blank" class="title"
-            >{channel.name}</a
+          <a
+            href="https://youtube.com/channel/{channel.id}"
+            target="_blank"
+            rel="noreferrer"
+            class="title">{channel.name}</a
           >
           <div class="content">
             <!-- <span>{channel.id}</span> -->

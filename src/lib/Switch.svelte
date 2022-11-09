@@ -1,11 +1,20 @@
 <script lang="ts">
+  import { checkShortcut } from './general'
+
   export let checked = false
   export let offColor = 'hsl(220, 20%, 31%)'
   export let onColor = 'hsl(220, 100%, 52%)'
   $: color = checked ? onColor : offColor
+
+  function keydown(e: KeyboardEvent) {
+    if (checkShortcut(e, ' ')) {
+      checked = !checked
+    }
+  }
 </script>
 
-<div class="switch" class:checked tabindex="0">
+<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+<div class="switch" class:checked tabindex="0" on:keydown={keydown}>
   <input class="hidden" type="checkbox" bind:checked />
   <div
     class="box"
@@ -13,6 +22,7 @@
     style:border-color={color}
     on:click={() => (checked = !checked)}
     tabindex="-1"
+    on:keydown={keydown}
   >
     <div class="handle" />
   </div>

@@ -50,6 +50,7 @@
     </p>
     <input class="textbox" type="text" bind:value={apiKey} placeholder="AIzaSyNq5Y9knL..." />
     <div class="toggle-row">
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <p on:click={() => (checkInBackground = !checkInBackground)}>
         Check for new videos automatically
       </p>

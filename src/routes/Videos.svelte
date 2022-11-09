@@ -264,6 +264,7 @@
 <main on:scroll={autoloadHandler} bind:this={scrollDiv}>
   <div class="grid" bind:this={grid}>
     {#each videos as video, i}
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div
         class="box"
         class:selected={selectionVisible && i === selectedIndex}

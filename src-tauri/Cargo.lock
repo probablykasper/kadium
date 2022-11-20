@@ -1559,7 +1559,7 @@ dependencies = [
 
 [[package]]
 name = "kadium"
-version = "1.4.1"
+version = "1.4.2"
 dependencies = [
  "atomicwrites",
  "chrono",

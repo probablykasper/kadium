@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.4.2 - 2022 Nov 20
+- Update Tauri
+
 ## 1.4.1 - 2022 Jul 8
 - Fix "missing field `videoPublishedAt`" error (which happens when videos are privated but still accessible)
 

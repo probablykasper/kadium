@@ -1,6 +1,7 @@
 use crate::data::{write_atomically, AppPaths};
 use crate::throw;
 use serde::{Deserialize, Serialize};
+use specta::Type;
 use std::fs::File;
 use std::io::Read;
 
@@ -71,7 +72,7 @@ impl VersionedSettings {
   }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Type)]
 pub struct Channel {
   pub id: String,
   pub name: String,
@@ -82,7 +83,7 @@ pub struct Channel {
   pub tags: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Type)]
 pub struct Settings {
   api_key: String,
   pub max_concurrent_requests: u32,

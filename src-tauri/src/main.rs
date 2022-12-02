@@ -39,6 +39,7 @@ macro_rules! throw {
 }
 
 #[command]
+#[specta::specta]
 fn error_popup(msg: String, win: Window) {
   eprintln!("Error: {}", msg);
   thread::spawn(move || {
@@ -85,6 +86,30 @@ async fn load_data(paths: &AppPaths) -> Result<(VersionedSettings, ImportedNote)
 
 #[tokio::main]
 async fn main() {
+  #[cfg(debug_assertions)]
+  {
+    use data::{add_channel, check_now, get_settings, set_channels, set_general_settings, tags};
+    use db::{archive, get_videos, unarchive};
+    use tauri_specta::{collate_types, export_to_ts};
+    export_to_ts(
+      collate_types![
+        error_popup,
+        get_settings,
+        tags,
+        set_channels,
+        add_channel,
+        set_general_settings,
+        check_now,
+        get_videos,
+        archive,
+        unarchive
+      ],
+      "../bindings.ts",
+    )
+    .unwrap();
+    println!("Generated TS types");
+  }
+
   let ctx = tauri::generate_context!();
 
   // macOS "App Nap" periodically pauses our app when it's in the background.

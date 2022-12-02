@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { ViewOptions, viewOptions, Video } from '../lib/data'
+  import { ViewOptions, viewOptions } from '../lib/data'
   import { event, shell } from '@tauri-apps/api'
   import { listen } from '@tauri-apps/api/event'
   import { onDestroy, tick } from 'svelte'
-  import { checkModifiers, checkShortcut, runCmd } from '../lib/general'
+  import { checkModifiers, checkShortcut, runCmd, Video } from '../lib/general'
   import VideoBar from './_VideoBar.svelte'
 
   let videos: Video[] = []
@@ -13,7 +13,7 @@
   async function getVideos(options: ViewOptions) {
     loading = true
 
-    const newVideos = await runCmd('get_videos', { options })
+    const newVideos = await runCmd('get_videos', { options, after: null })
     allLoaded = newVideos.length < $viewOptions.limit
     videos = newVideos
     selectedIndex = 0
@@ -27,7 +27,7 @@
   async function softRefresh(options: ViewOptions) {
     loading = true
 
-    const newVideos = await runCmd('get_videos', { options })
+    const newVideos = await runCmd('get_videos', { options, after: null })
     allLoaded = newVideos.length < $viewOptions.limit
     videos = newVideos
 
@@ -80,8 +80,8 @@
     'Nov',
     'Dec',
   ]
-  function formatDate(timestamp: number) {
-    let ts = new Date(timestamp)
+  function formatDate(timestamp: bigint) {
+    let ts = new Date(Number(timestamp))
     return ts.getDate() + ' ' + months[ts.getMonth()] + ' ' + ts.getFullYear()
   }
   async function archive(id: string) {

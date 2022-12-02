@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { Channel, loadSettings } from '../lib/data'
+  import { loadSettings } from '../lib/data'
   import Modal from '../lib/Modal.svelte'
   import { DateInput } from 'date-picker-svelte'
   import Button from '../lib/Button.svelte'
-  import { runCmd } from '../lib/general'
+  import { Channel, runCmd } from '../lib/general'
 
   async function saveChannels() {
     await runCmd('set_channels', { channels })
@@ -20,8 +20,8 @@
   export let editIndex: null | number
   function get(channels: Channel[], index: number) {
     url = ''
-    fromTime = new Date(channels[index].from_time)
-    refreshRateMinutes = channels[index].refresh_rate_ms / 1000 / 60
+    fromTime = new Date(Number(channels[index].from_time))
+    refreshRateMinutes = Number(channels[index].refresh_rate_ms) / 1000 / 60
   }
   $: if (visible && editIndex === null) {
     url = ''
@@ -40,16 +40,16 @@
       await runCmd('add_channel', {
         options: {
           url,
-          from_time: fromTime.getTime(),
-          refresh_rate_ms: refreshRateMinutes * 60 * 1000,
+          from_time: BigInt(Math.round(fromTime.getTime())),
+          refresh_rate_ms: BigInt(Math.round(refreshRateMinutes * 60 * 1000)),
           tags: [],
         },
       })
       await loadSettings()
       visible = false
     } else {
-      channels[editIndex].from_time = fromTime.getTime()
-      channels[editIndex].refresh_rate_ms = refreshRateMinutes * 60 * 1000
+      channels[editIndex].from_time = BigInt(Math.round(fromTime.getTime()))
+      channels[editIndex].refresh_rate_ms = BigInt(Math.round(refreshRateMinutes * 60 * 1000))
       await saveChannels()
       visible = false
     }

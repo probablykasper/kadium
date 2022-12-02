@@ -2,10 +2,10 @@ use crate::api::{channels, yt_request};
 use crate::settings::{Channel, Settings, VersionedSettings};
 use crate::{api, background, throw};
 use atomicwrites::{AtomicFile, OverwriteBehavior};
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use serde::Deserialize;
+use specta::Type;
 use sqlx::SqlitePool;
-use std::collections::HashMap;
+use std::collections::HashSet;
 use std::env;
 use std::io::Write;
 use std::path::PathBuf;
@@ -72,13 +72,6 @@ impl Data {
   }
 }
 
-pub fn to_json<T: Serialize>(data: &T) -> Result<Value, String> {
-  match serde_json::to_value(data) {
-    Ok(v) => Ok(v),
-    Err(e) => throw!("Error serializing {}", e),
-  }
-}
-
 pub fn ensure_parent_exists(file_path: &PathBuf) -> Result<(), String> {
   if let Some(parent) = file_path.parent() {
     if let Err(e) = std::fs::create_dir_all(parent) {
@@ -98,33 +91,36 @@ pub fn write_atomically(file_path: &PathBuf, buf: &[u8]) -> Result<(), String> {
 }
 
 #[command]
-pub async fn get_settings(data: DataState<'_>) -> Result<Value, String> {
+#[specta::specta]
+pub async fn get_settings(data: DataState<'_>) -> Result<Settings, String> {
   let mut data = data.0.lock().await;
-  to_json(&data.settings())
+  Ok(data.settings().clone())
 }
 
 #[command]
-pub async fn tags(data: DataState<'_>) -> Result<Value, String> {
+#[specta::specta]
+pub async fn tags(data: DataState<'_>) -> Result<Vec<String>, String> {
   let data = data.0.lock().await;
-  let mut tags_map: HashMap<&str, ()> = HashMap::new();
+  let mut tags_set: HashSet<String> = HashSet::new();
   for channel in &data.settings_ref().channels {
     for tag in &channel.tags {
-      tags_map.entry(&tag).or_insert(());
+      tags_set.insert(tag.clone());
     }
   }
-  let mut tags: Vec<_> = tags_map.keys().collect();
+  let mut tags: Vec<_> = tags_set.into_iter().collect();
   tags.sort();
-  to_json(&tags)
+  Ok(tags)
 }
 
 #[command]
+#[specta::specta]
 pub async fn check_now(data: DataState<'_>) -> Result<(), String> {
   let mut data = data.0.lock().await;
   data.check_now()?;
   Ok(())
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Type)]
 pub struct AddChannelOptions {
   pub url: String,
   pub from_time: i64,
@@ -161,6 +157,7 @@ fn url_parse_channel_id(value: &str) -> Option<String> {
 }
 
 #[command]
+#[specta::specta]
 pub async fn set_channels(channels: Vec<Channel>, data: DataState<'_>) -> Result<(), String> {
   let mut data = data.0.lock().await;
   data.settings().channels = channels;
@@ -169,6 +166,7 @@ pub async fn set_channels(channels: Vec<Channel>, data: DataState<'_>) -> Result
 }
 
 #[command]
+#[specta::specta]
 pub async fn add_channel(options: AddChannelOptions, data: DataState<'_>) -> Result<(), String> {
   let mut data = data.0.lock().await;
   let settings = data.settings();
@@ -215,16 +213,18 @@ pub async fn add_channel(options: AddChannelOptions, data: DataState<'_>) -> Res
 }
 
 #[command]
+#[specta::specta]
+#[allow(non_snake_case)] // https://github.com/oscartbeaumont/tauri-specta/issues/5
 pub async fn set_general_settings(
-  api_key: String,
-  max_concurrent_requests: u32,
-  check_in_background: bool,
+  apiKey: String,
+  maxConcurrentRequests: u32,
+  checkInBackground: bool,
   data: DataState<'_>,
 ) -> Result<(), String> {
   let mut data = data.0.lock().await;
-  data.settings().set_api_key(api_key);
-  data.settings().max_concurrent_requests = max_concurrent_requests;
-  data.settings().check_in_background = check_in_background;
+  data.settings().set_api_key(apiKey);
+  data.settings().max_concurrent_requests = maxConcurrentRequests;
+  data.settings().check_in_background = checkInBackground;
   data.save_settings()?;
   Ok(())
 }

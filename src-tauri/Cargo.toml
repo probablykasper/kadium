@@ -21,6 +21,8 @@ sqlx = { version = "0.6", features = ["runtime-tokio-rustls", "sqlite"] }
 chrono = "0.4"
 iso8601-duration = "0.1"
 url = "2.2"
+tauri-specta = "0.0.2"
+specta = { version = "0.0.6", features = ["function", "tauri", "openapi"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 macos-app-nap = "0.0"

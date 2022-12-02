@@ -1,8 +1,8 @@
 <script lang="ts">
   import Link from '../lib/Link.svelte'
-  import { Channel, loadSettings } from '../lib/data'
+  import { loadSettings } from '../lib/data'
   import Tags from '../lib/Tags.svelte'
-  import { runCmd } from '../lib/general'
+  import { Channel, runCmd } from '../lib/general'
   import ChannelModal from '../modals/Channel.svelte'
   import { event } from '@tauri-apps/api'
   import { onDestroy } from 'svelte'
@@ -84,8 +84,10 @@
           >
           <div class="content">
             <!-- <span>{channel.id}</span> -->
-            <span>Check for videos after {new Date(channel.from_time).toLocaleString()}</span>
-            <span>Refresh rate: {channel.refresh_rate_ms / 1000 / 60} minutes</span>
+            <span
+              >Check for videos after {new Date(Number(channel.from_time)).toLocaleString()}</span
+            >
+            <span>Refresh rate: {Number(channel.refresh_rate_ms) / (1000 * 60)} minutes</span>
           </div>
           <Tags bind:value={channel.tags} on:update={saveChannels} />
         </div>

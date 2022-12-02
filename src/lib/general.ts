@@ -1,15 +1,22 @@
 import { invoke } from '@tauri-apps/api/tauri'
+import { Commands } from '../../bindings'
+export * from '../../bindings'
 
 export function popup(msg: string) {
   invoke('error_popup', { msg })
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function runCmd<T = any>(cmd: string, options: { [key: string]: any } = {}) {
-  return (await invoke(cmd, options).catch((msg) => {
-    popup(msg)
-    throw msg
-  })) as T
+export async function runCmd<N extends Commands['name']>(
+  cmd: N,
+  input: Extract<Commands, { name: N }>['input']
+) {
+  try {
+    type ThisCmd = Extract<Commands, { name: N }>
+    return await invoke<ThisCmd['result']>(cmd, input || undefined)
+  } catch (e) {
+    popup(String(e))
+    throw e
+  }
 }
 
 type ShortcutOptions = {

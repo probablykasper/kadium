@@ -18,7 +18,7 @@
   }
   async function checkNow() {
     checking = 0
-    await runCmd('check_now')
+    await runCmd('check_now', null)
   }
   function openSettings() {
     $settingsOpen = true

@@ -1,8 +1,8 @@
 use crate::api::playlist_items;
-use crate::data::{to_json, AppPaths, DataState};
+use crate::data::{AppPaths, DataState};
 use crate::throw;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use specta::Type;
 use sqlx::migrate::MigrateDatabase;
 use sqlx::sqlite::{SqliteConnectOptions, SqliteRow};
 use sqlx::{Row, Sqlite, SqlitePool};
@@ -67,7 +67,7 @@ pub async fn get_ids(
   Ok(existing_ids)
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Type)]
 #[allow(non_snake_case)]
 pub struct Video {
   pub id: String,
@@ -127,7 +127,7 @@ pub async fn insert_video(video: &Video, pool: &SqlitePool) -> Result<(), String
   Ok(())
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Type)]
 pub struct Options {
   show_all: bool,
   show_archived: bool,
@@ -135,7 +135,7 @@ pub struct Options {
   tag: Option<String>,
   limit: u16,
 }
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Type)]
 #[allow(non_snake_case)]
 pub struct After {
   publishTimeMs: i64,
@@ -143,11 +143,12 @@ pub struct After {
 }
 
 #[command]
+#[specta::specta]
 pub async fn get_videos(
   options: Options,
   after: Option<After>,
   data: DataState<'_>,
-) -> Result<Value, String> {
+) -> Result<Vec<Video>, String> {
   let data = data.0.lock().await;
   let mut selects: Vec<&str> = vec!["*"];
   let mut wheres: Vec<&str> = Vec::new();
@@ -202,7 +203,7 @@ pub async fn get_videos(
     Ok(videos) => videos,
     Err(e) => throw!("Error getting videos: {}", e),
   };
-  to_json(&videos)
+  Ok(videos)
 }
 
 async fn set_archived(pool: &SqlitePool, id: &str, value: bool) -> Result<(), String> {
@@ -220,6 +221,7 @@ async fn set_archived(pool: &SqlitePool, id: &str, value: bool) -> Result<(), St
 }
 
 #[command]
+#[specta::specta]
 pub async fn archive(id: String, data: DataState<'_>) -> Result<(), String> {
   let data = data.0.lock().await;
   match set_archived(&data.db_pool, &id, true).await {
@@ -229,6 +231,7 @@ pub async fn archive(id: String, data: DataState<'_>) -> Result<(), String> {
 }
 
 #[command]
+#[specta::specta]
 pub async fn unarchive(id: String, data: DataState<'_>) -> Result<(), String> {
   let data = data.0.lock().await;
   match set_archived(&data.db_pool, &id, false).await {

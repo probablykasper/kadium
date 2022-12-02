@@ -80,8 +80,8 @@
     'Nov',
     'Dec',
   ]
-  function formatDate(timestamp: bigint) {
-    let ts = new Date(Number(timestamp))
+  function formatDate(timestamp: number) {
+    let ts = new Date(timestamp)
     return ts.getDate() + ' ' + months[ts.getMonth()] + ' ' + ts.getFullYear()
   }
   async function archive(id: string) {
@@ -318,7 +318,7 @@
         >
           {video.channelName}
         </p>
-        <p class="row sub selectable">{formatDate(video.publishTimeMs)}</p>
+        <p class="row sub selectable">{formatDate(Number(video.publishTimeMs))}</p>
       </div>
     {/each}
   </div>

@@ -40,16 +40,16 @@
       await runCmd('add_channel', {
         options: {
           url,
-          from_time: BigInt(Math.round(fromTime.getTime())),
-          refresh_rate_ms: BigInt(Math.round(refreshRateMinutes * 60 * 1000)),
+          from_time: Math.round(fromTime.getTime()),
+          refresh_rate_ms: Math.round(refreshRateMinutes * 60 * 1000),
           tags: [],
         },
       })
       await loadSettings()
       visible = false
     } else {
-      channels[editIndex].from_time = BigInt(Math.round(fromTime.getTime()))
-      channels[editIndex].refresh_rate_ms = BigInt(Math.round(refreshRateMinutes * 60 * 1000))
+      channels[editIndex].from_time = Math.round(fromTime.getTime())
+      channels[editIndex].refresh_rate_ms = Math.round(refreshRateMinutes * 60 * 1000)
       await saveChannels()
       visible = false
     }

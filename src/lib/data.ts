@@ -41,9 +41,9 @@ export function enableSampleData() {
           channelId: 'UC9RM-iSvTu1uPJb8X5yp3EQ',
           channelName: 'Wendover Productions ' + i,
           description: '',
-          durationMs: BigInt(1093000),
+          durationMs: 1093000,
           id: 'aH4b3sAs-l8',
-          publishTimeMs: BigInt(1623861277000),
+          publishTimeMs: 1623861277000,
           thumbnailMaxres: true,
           thumbnailStandard: true,
           title: 'Why Electric Planes are Inevitably Coming',
@@ -60,12 +60,12 @@ export function enableSampleData() {
       const channels: Channel[] = []
       for (let i = 0; i < 100; i++) {
         channels.push({
-          from_time: BigInt(1611870142000),
+          from_time: 1611870142000,
           icon: 'https://yt3.ggpht.com/ytc/AAUvwni4bZoon2txFxQCiRVUoabFsxFhth0z5W89mymg=s240-c-k-c0x00ffffff-no-rj',
           id: 'UCp4csaOD64mSzPxbfuzJcuA',
           name: 'Chuckle Sandwich ' + i,
           uploads_playlist_id: 'UUp4csaOD64mSzPxbfuzJcuA',
-          refresh_rate_ms: BigInt(60 * 1000),
+          refresh_rate_ms: 60 * 1000,
           tags: ['Chungus'],
         })
       }

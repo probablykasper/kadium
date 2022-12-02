@@ -42,8 +42,8 @@ jobs:
 
       - run: npm run build:web
 
-      - run: npm run lint
-        if: matrix.platform == 'ubuntu-latest'
+      - if: matrix.platform == 'ubuntu-20.04'
+        run: npm run lint
 
       - run: npm run test
 

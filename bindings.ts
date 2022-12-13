@@ -2,14 +2,14 @@
 
 export type Commands = { name: "error_popup", input: { msg: string }, result: null } | { name: "get_settings", input: null, result: Settings } | { name: "tags", input: null, result: Array<string> } | { name: "set_channels", input: { channels: Array<Channel> }, result: null } | { name: "add_channel", input: { options: AddChannelOptions }, result: null } | { name: "set_general_settings", input: { apiKey: string, maxConcurrentRequests: number, checkInBackground: boolean }, result: null } | { name: "check_now", input: null, result: null } | { name: "get_videos", input: { options: Options, after: After | null }, result: Array<Video> } | { name: "archive", input: { id: string }, result: null } | { name: "unarchive", input: { id: string }, result: null }
 
-export type AddChannelOptions = { url: string, from_time: bigint, refresh_rate_ms: bigint, tags: Array<string> }
+export type AddChannelOptions = { url: string, from_time: number, refresh_rate_ms: number, tags: Array<string> }
 
-export type After = { publishTimeMs: bigint, id: string }
+export type After = { publishTimeMs: number, id: string }
 
-export type Channel = { id: string, name: string, icon: string, uploads_playlist_id: string, from_time: bigint, refresh_rate_ms: bigint, tags: Array<string> }
+export type Channel = { id: string, name: string, icon: string, uploads_playlist_id: string, from_time: number, refresh_rate_ms: number, tags: Array<string> }
 
 export type Options = { show_all: boolean, show_archived: boolean, channel_filter: string, tag: string | null, limit: number }
 
 export type Settings = { api_key: string, max_concurrent_requests: number, channels: Array<Channel>, check_in_background: boolean }
 
-export type Video = { id: string, title: string, description: string, publishTimeMs: bigint, durationMs: bigint, thumbnailStandard: boolean, thumbnailMaxres: boolean, channelId: string, channelName: string, unread: boolean, archived: boolean }
+export type Video = { id: string, title: string, description: string, publishTimeMs: number, durationMs: number, thumbnailStandard: boolean, thumbnailMaxres: boolean, channelId: string, channelName: string, unread: boolean, archived: boolean }

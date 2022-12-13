@@ -73,8 +73,10 @@ pub struct Video {
   pub id: String,
   pub title: String,
   pub description: String,
+  #[specta(type = i32)] // tauri bigint fix
   pub publishTimeMs: i64,
   /// SQLite does not support unsigned integers
+  #[specta(type = i32)] // tauri bigint fix
   pub durationMs: i64,
   pub thumbnailStandard: bool,
   pub thumbnailMaxres: bool,
@@ -138,6 +140,7 @@ pub struct Options {
 #[derive(Debug, Serialize, Deserialize, Type)]
 #[allow(non_snake_case)]
 pub struct After {
+  #[specta(type = i32)] // tauri bigint fix
   publishTimeMs: i64,
   id: String,
 }

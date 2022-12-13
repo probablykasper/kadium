@@ -235,7 +235,7 @@
     unlisten()
   })
 
-  let boxes = [] as HTMLDivElement[]
+  let boxes: HTMLDivElement[] = []
   $: scrollToBox(selectedIndex)
   function scrollToBox(index: number) {
     if (scrollDiv && boxes[index]) {

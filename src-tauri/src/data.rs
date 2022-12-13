@@ -123,7 +123,9 @@ pub async fn check_now(data: DataState<'_>) -> Result<(), String> {
 #[derive(Deserialize, Type)]
 pub struct AddChannelOptions {
   pub url: String,
+  #[specta(type = i32)] // tauri bigint fix
   pub from_time: i64,
+  #[specta(type = u32)] // tauri bigint fix
   pub refresh_rate_ms: u64,
   pub tags: Vec<String>,
 }

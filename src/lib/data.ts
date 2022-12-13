@@ -17,11 +17,11 @@ export const viewOptions: Writable<ViewOptions> = writable({
   limit: 50,
 })
 
-export const videos = writable([] as Video[])
+export const videos: Writable<Video[]> = writable([])
 
 export const settingsOpen = writable(false)
 export const settings: Writable<null | Settings> = writable(null)
-export const tags = writable([] as string[])
+export const tags: Writable<string[]> = writable([])
 export async function loadSettings() {
   await runCmd('get_settings', null).then((settingsResponse: Settings) => {
     settings.set(settingsResponse)

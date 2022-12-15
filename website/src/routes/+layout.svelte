@@ -31,7 +31,7 @@
   <Revealed class="sm:w-32" options={{ opacity: 0, x: -10, duration: 1000, delay: 300 }}>
     <a
       href="/"
-      class="flex items-center text-lg font-medium text-white ease-md sm:p-1.5 sm:text-xl"
+      class="ease-md flex items-center text-lg font-medium text-white sm:p-1.5 sm:text-xl"
       style="-webkit-tap-highlight-color: hsla(0, 0%, 100%, 0.1);"
     >
       <img class="mr-2 h-8" src="/android-chrome-192x192.png" alt="" />
@@ -40,13 +40,13 @@
   </Revealed>
   <Revealed class="mx-1.5" options={{ opacity: 0, y: -10, duration: 1000, delay: 500 }}>
     <a
-      class="mx-1.5 py-2 text-sm transition-colors duration-200 ease-md hover:text-white sm:text-base"
+      class="ease-md mx-1.5 py-2 text-sm transition-colors duration-200 hover:text-white sm:text-base"
       class:font-medium={$page.url.pathname === '/'}
       class:text-white={$page.url.pathname === '/'}
       href="/">Overview</a
     >
     <a
-      class="mx-1.5 py-2 text-sm transition-colors duration-200 ease-md hover:text-white sm:text-base"
+      class="ease-md mx-1.5 py-2 text-sm transition-colors duration-200 hover:text-white sm:text-base"
       class:font-medium={$page.url.pathname === '/changelog'}
       class:text-white={$page.url.pathname === '/changelog'}
       href="/changelog">Changelog</a

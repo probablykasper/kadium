@@ -6,7 +6,7 @@
   import type { Video } from '../../bindings'
   import { checkModifiers, checkShortcut } from '../lib/general'
   import VideoBar from './_VideoBar.svelte'
-  import commands from 'src/lib/commands'
+  import commands from '../lib/commands'
 
   let videos: Video[] = []
   let allLoaded = false

@@ -7,7 +7,7 @@
   import { event } from '@tauri-apps/api'
   import { onDestroy } from 'svelte'
   import { router } from 'tinro'
-  import commands from 'src/lib/commands'
+  import commands from '../lib/commands'
 
   export let channels: Channel[]
 

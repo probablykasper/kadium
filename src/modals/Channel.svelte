@@ -4,7 +4,7 @@
   import { DateInput } from 'date-picker-svelte'
   import Button from '../lib/Button.svelte'
   import type { Channel } from '../../bindings'
-  import commands from 'src/lib/commands'
+  import commands from '../lib/commands'
 
   async function saveChannels() {
     await commands.setChannels(channels)

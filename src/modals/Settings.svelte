@@ -4,7 +4,7 @@
   import Modal from '../lib/Modal.svelte'
   import Link from '../lib/Link.svelte'
   import Switch from '../lib/Switch.svelte'
-  import commands from 'src/lib/commands'
+  import commands from '../lib/commands'
 
   export let apiKey: string
   export let maxConcurrentRequests: number

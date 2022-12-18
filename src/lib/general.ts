@@ -1,22 +1,7 @@
 import { invoke } from '@tauri-apps/api/tauri'
-import { Commands } from '../../bindings'
-export * from '../../bindings'
 
 export function popup(msg: string) {
   invoke('error_popup', { msg })
-}
-
-export async function runCmd<N extends Commands['name']>(
-  cmd: N,
-  input: Extract<Commands, { name: N }>['input']
-) {
-  try {
-    type ThisCmd = Extract<Commands, { name: N }>
-    return await invoke<ThisCmd['result']>(cmd, input || undefined)
-  } catch (e) {
-    popup(String(e))
-    throw e
-  }
 }
 
 type ShortcutOptions = {

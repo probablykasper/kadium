@@ -3,10 +3,11 @@
   import Modal from '../lib/Modal.svelte'
   import { DateInput } from 'date-picker-svelte'
   import Button from '../lib/Button.svelte'
-  import { Channel, runCmd } from '../lib/general'
+  import type { Channel } from '../../bindings'
+  import commands from 'src/lib/commands'
 
   async function saveChannels() {
-    await runCmd('set_channels', { channels })
+    await commands.setChannels(channels)
     await loadSettings()
   }
 
@@ -37,13 +38,11 @@
       return
     }
     if (editIndex === null) {
-      await runCmd('add_channel', {
-        options: {
-          url,
-          from_time: Math.round(fromTime.getTime()),
-          refresh_rate_ms: Math.round(refreshRateMinutes * 60 * 1000),
-          tags: [],
-        },
+      await commands.addChannel({
+        url,
+        from_time: Math.round(fromTime.getTime()),
+        refresh_rate_ms: Math.round(refreshRateMinutes * 60 * 1000),
+        tags: [],
       })
       await loadSettings()
       visible = false

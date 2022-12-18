@@ -1,10 +1,10 @@
 <script lang="ts">
   import Button from '../lib/Button.svelte'
-  import { runCmd } from '../lib/general'
   import { loadSettings } from '../lib/data'
   import Modal from '../lib/Modal.svelte'
   import Link from '../lib/Link.svelte'
   import Switch from '../lib/Switch.svelte'
+  import commands from 'src/lib/commands'
 
   export let apiKey: string
   export let maxConcurrentRequests: number
@@ -13,11 +13,7 @@
   export let visible = false
 
   async function setGeneralSettings() {
-    await runCmd('set_general_settings', {
-      apiKey,
-      maxConcurrentRequests,
-      checkInBackground,
-    })
+    await commands.setGeneralSettings(apiKey, maxConcurrentRequests, checkInBackground)
     await loadSettings()
     visible = false
   }

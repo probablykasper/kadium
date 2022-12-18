@@ -3,8 +3,9 @@
   import { onDestroy } from 'svelte'
   import { fade } from 'svelte/transition'
   import { active, router } from 'tinro'
+  import commands from './commands'
   import { settingsOpen } from './data'
-  import { checkShortcut, runCmd } from './general'
+  import { checkShortcut } from './general'
   function go(e: MouseEvent) {
     if (e.target instanceof HTMLElement) {
       const href = e.target.getAttribute('href')
@@ -18,7 +19,7 @@
   }
   async function checkNow() {
     checking = 0
-    await runCmd('check_now', null)
+    await commands.checkNow()
   }
   function openSettings() {
     $settingsOpen = true

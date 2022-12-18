@@ -3,8 +3,10 @@
   import { event, shell } from '@tauri-apps/api'
   import { listen } from '@tauri-apps/api/event'
   import { onDestroy, tick } from 'svelte'
-  import { checkModifiers, checkShortcut, runCmd, Video } from '../lib/general'
+  import type { Video } from '../../bindings'
+  import { checkModifiers, checkShortcut } from '../lib/general'
   import VideoBar from './_VideoBar.svelte'
+  import commands from 'src/lib/commands'
 
   let videos: Video[] = []
   let allLoaded = false
@@ -13,7 +15,7 @@
   async function getVideos(options: ViewOptions) {
     loading = true
 
-    const newVideos = await runCmd('get_videos', { options, after: null })
+    const newVideos = await commands.getVideos(options, null)
     allLoaded = newVideos.length < $viewOptions.limit
     videos = newVideos
     selectedIndex = 0
@@ -27,7 +29,7 @@
   async function softRefresh(options: ViewOptions) {
     loading = true
 
-    const newVideos = await runCmd('get_videos', { options, after: null })
+    const newVideos = await commands.getVideos(options, null)
     allLoaded = newVideos.length < $viewOptions.limit
     videos = newVideos
 
@@ -39,12 +41,9 @@
   async function getMoreVideos() {
     loading = true
 
-    const newVideos = await runCmd('get_videos', {
-      options: $viewOptions,
-      after: {
-        publishTimeMs: videos[videos.length - 1].publishTimeMs,
-        id: videos[videos.length - 1].id,
-      },
+    const newVideos = await commands.getVideos($viewOptions, {
+      publishTimeMs: videos[videos.length - 1].publishTimeMs,
+      id: videos[videos.length - 1].id,
     })
     allLoaded = newVideos.length < $viewOptions.limit
     videos = videos.concat(newVideos)
@@ -85,12 +84,12 @@
     return ts.getDate() + ' ' + months[ts.getMonth()] + ' ' + ts.getFullYear()
   }
   async function archive(id: string) {
-    await runCmd('archive', { id })
+    await commands.archive(id)
     await softRefresh($viewOptions)
     selectedIndex = Math.min(selectedIndex, videos.length - 1)
   }
   async function unarchive(id: string) {
-    await runCmd('unarchive', { id })
+    await commands.unarchive(id)
     await softRefresh($viewOptions)
     selectedIndex = Math.min(selectedIndex, videos.length - 1)
   }

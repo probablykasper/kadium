@@ -2,11 +2,12 @@
   import Link from '../lib/Link.svelte'
   import { loadSettings } from '../lib/data'
   import Tags from '../lib/Tags.svelte'
-  import { Channel, runCmd } from '../lib/general'
+  import type { Channel } from '../../bindings'
   import ChannelModal from '../modals/Channel.svelte'
   import { event } from '@tauri-apps/api'
   import { onDestroy } from 'svelte'
   import { router } from 'tinro'
+  import commands from 'src/lib/commands'
 
   export let channels: Channel[]
 
@@ -24,7 +25,7 @@
   }
 
   async function saveChannels() {
-    await runCmd('set_channels', { channels })
+    await commands.setChannels(channels)
     await loadSettings()
   }
 

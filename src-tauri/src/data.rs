@@ -216,17 +216,16 @@ pub async fn add_channel(options: AddChannelOptions, data: DataState<'_>) -> Res
 
 #[command]
 #[specta::specta]
-#[allow(non_snake_case)] // https://github.com/oscartbeaumont/tauri-specta/issues/5
 pub async fn set_general_settings(
-  apiKey: String,
-  maxConcurrentRequests: u32,
-  checkInBackground: bool,
+  api_key: String,
+  max_concurrent_requests: u32,
+  check_in_background: bool,
   data: DataState<'_>,
 ) -> Result<(), String> {
   let mut data = data.0.lock().await;
-  data.settings().set_api_key(apiKey);
-  data.settings().max_concurrent_requests = maxConcurrentRequests;
-  data.settings().check_in_background = checkInBackground;
+  data.settings().set_api_key(api_key);
+  data.settings().max_concurrent_requests = max_concurrent_requests;
+  data.settings().check_in_background = check_in_background;
   data.save_settings()?;
   Ok(())
 }

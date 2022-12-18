@@ -1,6 +1,7 @@
 import { writable } from 'svelte/store'
 import type { Writable } from 'svelte/store'
-import { Channel, runCmd, Settings, Video } from './general'
+import commands from './commands'
+import type { Channel, Settings, Video } from '../../bindings'
 
 export type ViewOptions = {
   show_all: boolean
@@ -23,12 +24,8 @@ export const settingsOpen = writable(false)
 export const settings: Writable<null | Settings> = writable(null)
 export const tags: Writable<string[]> = writable([])
 export async function loadSettings() {
-  await runCmd('get_settings', null).then((settingsResponse: Settings) => {
-    settings.set(settingsResponse)
-  })
-  await runCmd('tags', null).then((tagsResponse) => {
-    tags.set(tagsResponse)
-  })
+  settings.set(await commands.getSettings())
+  tags.set(await commands.tags())
 }
 
 export function enableSampleData() {

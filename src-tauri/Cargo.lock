@@ -1428,7 +1428,6 @@ checksum = "1885e79c1fc4b10f0e172c475f458b7f7b93061064d98c3293e98c5ba0c8b399"
 dependencies = [
  "autocfg",
  "hashbrown",
- "serde",
 ]
 
 [[package]]
@@ -2016,17 +2015,6 @@ checksum = "2078c0039e6a54a0c42c28faa984e115fb4c2d5bf2208f77d1961002df8576f8"
 dependencies = [
  "pathdiff",
  "windows-sys 0.42.0",
-]
-
-[[package]]
-name = "openapiv3"
-version = "1.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b6b4689110fd71f196934fbdf1ad0f0a4b49ea41fbc6f19008c00dba735b544c"
-dependencies = [
- "indexmap",
- "serde",
- "serde_json",
 ]
 
 [[package]]
@@ -3008,12 +2996,10 @@ dependencies = [
 [[package]]
 name = "specta"
 version = "0.0.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "427e2820d72e030de0f4e3d57a4b1060d1d5865d822751f9cc21a12ffe4e8c80"
+source = "git+https://github.com/oscartbeaumont/rspc?branch=tauri-specta-changes#d0220264f574974544436ce1ec611b3f861a3e13"
 dependencies = [
  "document-features",
  "once_cell",
- "openapiv3",
  "paste",
  "serde",
  "serde_json",
@@ -3024,8 +3010,7 @@ dependencies = [
 [[package]]
 name = "specta-macros"
 version = "0.0.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4fb7a302eb421c00c45715b2c8abb61650dd01d26a475505834f3e8ee23ffcbb"
+source = "git+https://github.com/oscartbeaumont/rspc?branch=tauri-specta-changes#d0220264f574974544436ce1ec611b3f861a3e13"
 dependencies = [
  "Inflector",
  "proc-macro2",
@@ -3472,11 +3457,9 @@ dependencies = [
 [[package]]
 name = "tauri-specta"
 version = "0.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "34040e46523f9595aa9d29f2f2c333d50f68efba2199b6e0b927d264ff0f5622"
+source = "git+https://github.com/oscartbeaumont/tauri-specta?rev=1cc004318a174b895e813b5d8af94ceb8624e4c5#1cc004318a174b895e813b5d8af94ceb8624e4c5"
 dependencies = [
- "openapiv3",
- "paste",
+ "heck 0.4.0",
  "serde",
  "serde_json",
  "specta",

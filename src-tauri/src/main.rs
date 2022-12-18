@@ -88,21 +88,19 @@ async fn load_data(paths: &AppPaths) -> Result<(VersionedSettings, ImportedNote)
 async fn main() {
   #[cfg(debug_assertions)]
   {
-    use data::{add_channel, check_now, get_settings, set_channels, set_general_settings, tags};
-    use db::{archive, get_videos, unarchive};
     use tauri_specta::{collate_types, export_to_ts};
     export_to_ts(
       collate_types![
         error_popup,
-        get_settings,
-        tags,
-        set_channels,
-        add_channel,
-        set_general_settings,
-        check_now,
-        get_videos,
-        archive,
-        unarchive
+        data::get_settings,
+        data::tags,
+        data::set_channels,
+        data::add_channel,
+        data::set_general_settings,
+        data::check_now,
+        db::get_videos,
+        db::archive,
+        db::unarchive
       ],
       "../bindings.ts",
     )

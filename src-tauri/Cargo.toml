@@ -21,8 +21,11 @@ sqlx = { version = "0.6", features = ["runtime-tokio-rustls", "sqlite"] }
 chrono = "0.4"
 iso8601-duration = "0.1"
 url = "2.2"
-tauri-specta = "0.0.2"
-specta = { version = "0.0.6", features = ["function", "tauri", "openapi"] }
+tauri-specta = { git = "https://github.com/oscartbeaumont/tauri-specta", rev = "1cc004318a174b895e813b5d8af94ceb8624e4c5" }
+specta = { version = "0.0.6", features = ["function", "tauri"] }
+
+[patch.crates-io]
+specta = { git = "https://github.com/oscartbeaumont/rspc", branch = "tauri-specta-changes", features = ["function", "tauri"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 macos-app-nap = "0.0"

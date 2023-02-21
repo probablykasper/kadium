@@ -11,7 +11,8 @@
     tags,
     settingsOpen,
   } from './lib/data'
-  import { Route, router } from 'tinro'
+  import { router } from 'tinro'
+  import Route from 'tinro/cmp/Route.svelte' // Import directly due to typescript issue
   import VideosPage from './routes/Videos.svelte'
   import Nav from './lib/Nav.svelte'
   import { onDestroy } from 'svelte'

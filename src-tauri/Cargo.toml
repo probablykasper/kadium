@@ -1,6 +1,6 @@
 [package]
 name = "kadium"
-version = "1.4.2"
+version = "1.4.3"
 description = "App for YouTube upload notifications"
 default-run = "kadium"
 edition = "2018"

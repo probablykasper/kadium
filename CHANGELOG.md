@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## 1.4.3 - 2022 Feb 21
 - Fix new videos sometimes not loading when using arrow keys
 
 ## 1.4.2 - 2022 Nov 20

@@ -99,11 +99,12 @@
   }
 
   let scrollDiv: HTMLElement | null = null
-  const loadThreshold = 200
   function isScrolledToBottom() {
     if (scrollDiv) {
-      const offset = scrollDiv.scrollHeight - (scrollDiv.clientHeight + scrollDiv.scrollTop)
-      if (offset <= loadThreshold) {
+      const lastElement = boxes[videos.length - 1]
+      const threshold = lastElement.offsetTop - 200
+      const scrollBottom = scrollDiv.clientHeight + scrollDiv.scrollTop
+      if (scrollBottom >= threshold) {
         return true
       }
     }
@@ -269,12 +270,12 @@
         class:selected={selectionVisible && i === selectedIndex}
         bind:this={boxes[i]}
         on:mousedown={() => select(i)}
-        on:dblclick={() => shell.open('https://youtube.com/watch?v=' + videos[i].id)}
+        on:dblclick={() => shell.open('https://youtube.com/watch?v=' + video.id)}
         on:click={(e) => videoClick(e, i)}
         draggable="true"
         on:dragstart={(e) => dragStartVideo(e, video)}
       >
-        <div class="img-box" href="https://youtube.com/watch?v={video.id}">
+        <div class="img-box">
           <div class="img-parent">
             <img src="https://i.ytimg.com/vi/{video.id}/hqdefault.jpg" alt="" draggable="false" />
           </div>

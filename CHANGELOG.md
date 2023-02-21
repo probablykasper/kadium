@@ -1,5 +1,8 @@
 # Changelog
 
+## Next
+- Fix new videos sometimes not loading when using arrow keys
+
 ## 1.4.2 - 2022 Nov 20
 - Update Tauri
 

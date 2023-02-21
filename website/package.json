@@ -5,36 +5,38 @@
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "prettier --plugin-search-dir=. --check src *.js && eslint src *.js && svelte-check",
-    "format": "prettier --plugin-search-dir=. --write src *.js && eslint --fix src *.js"
+    "lint": "prettier --check src *.js && eslint src *.js && svelte-check",
+    "format": "prettier --write src *.js && eslint --fix src *.js"
   },
   "devDependencies": {
-    "@octokit/plugin-rest-endpoint-methods": "^6.7.0",
-    "@sveltejs/adapter-cloudflare": "^1.0.0-next.38",
-    "@sveltejs/kit": "1.0.0",
+    "@octokit/plugin-rest-endpoint-methods": "^7.0.1",
+    "@sveltejs/adapter-cloudflare": "^2.0.2",
+    "@sveltejs/kit": "1.8.3",
     "@tailwindcss/forms": "^0.5.3",
-    "@typescript-eslint/eslint-plugin": "^5.46.1",
-    "@typescript-eslint/parser": "^5.46.1",
+    "@typescript-eslint/eslint-plugin": "^5.53.0",
+    "@typescript-eslint/parser": "^5.53.0",
     "autoprefixer": "^10.4.13",
     "bowser": "^2.11.0",
-    "eslint": "^8.29.0",
-    "eslint-config-prettier": "^8.5.0",
+    "eslint": "^8.34.0",
+    "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-svelte3": "^4.0.0",
     "mdsvex": "^0.10.6",
-    "prettier": "^2.8.1",
+    "prettier": "^2.8.4",
     "prettier-plugin-svelte": "^2.9.0",
-    "prettier-plugin-tailwindcss": "^0.2.1",
-    "sass": "^1.56.2",
-    "svelte": "^3.55.0",
-    "svelte-check": "^2.10.2",
-    "svelte-preprocess": "^5.0.0",
-    "tailwindcss": "^3.2.4",
-    "typescript": "^4.9.4",
+    "prettier-plugin-tailwindcss": "^0.2.3",
+    "sass": "^1.58.3",
+    "svelte": "^3.55.1",
+    "svelte-check": "^3.0.3",
+    "tailwindcss": "^3.2.7",
+    "typescript": "^4.9.5",
     "vite": "^4.0.1"
   },
   "prettier": {
     "printWidth": 100,
     "semi": false,
-    "singleQuote": true
+    "singleQuote": true,
+    "pluginSearchDirs": [
+      "."
+    ]
   }
 }

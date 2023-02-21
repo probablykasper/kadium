@@ -88,9 +88,8 @@ async fn load_data(paths: &AppPaths) -> Result<(VersionedSettings, ImportedNote)
 async fn main() {
   #[cfg(debug_assertions)]
   {
-    use tauri_specta::{collate_types, export_to_ts};
-    export_to_ts(
-      collate_types![
+    tauri_specta::ts::export(
+      tauri_specta::collate_types![
         error_popup,
         data::get_settings,
         data::tags,

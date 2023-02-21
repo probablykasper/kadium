@@ -10,9 +10,8 @@
     "dev:web": "vite",
     "build": "tauri build",
     "build:web": "vite build",
-    "test": "echo 'No tests'",
-    "lint": "prettier --check --plugin-search-dir=. src *.js && eslint src *.js && svelte-check --ignore website",
-    "format": "prettier --write --plugin-search-dir=. src *.js && eslint --fix src *.js"
+    "lint": "prettier --check src *.js && eslint src *.js && svelte-check --ignore website",
+    "format": "prettier --write src *.js && eslint --fix src *.js"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^2.0.2",
@@ -40,6 +39,9 @@
   "prettier": {
     "printWidth": 100,
     "semi": false,
-    "singleQuote": true
+    "singleQuote": true,
+    "pluginSearchDirs": [
+      "."
+    ]
   }
 }

@@ -12,7 +12,7 @@
     settingsOpen,
   } from './lib/data'
   import { router } from 'tinro'
-  import Route from 'tinro/cmp/Route.svelte' // Import directly due to typescript issue
+  import Route from 'tinro/cmp/Route.svelte' // workaround for https://github.com/AlexxNB/tinro/pull/121
   import VideosPage from './routes/Videos.svelte'
   import Nav from './lib/Nav.svelte'
   import { onDestroy } from 'svelte'

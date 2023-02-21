@@ -30,20 +30,18 @@ jobs:
         with:
           working-directory: ./src-tauri
 
-      - name: Install dependencies (Ubuntu only)
+      - name: Install dependencies (ubuntu only)
         if: matrix.platform == 'ubuntu-20.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
 
       - run: npm install
 
       - run: npm run build:web
 
-      - if: matrix.platform == 'ubuntu-20.04'
-        run: npm run lint
-
-      - run: npm run test
+      - run: npm run lint
+        if: matrix.platform == 'ubuntu-20.04'
 
       - name: Build
         uses: tauri-apps/tauri-action@v0

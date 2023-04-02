@@ -349,7 +349,7 @@
     box-sizing: border-box
     display: grid
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr))
-    grid-gap: 15px
+    grid-gap: 5px
     padding: var(--page-padding)
     padding-top: 15px
     @media screen and (max-width: 450px)
@@ -364,6 +364,7 @@
     padding: 3px
     border: 1px solid transparent
     border-radius: 3px
+    box-sizing: border-box
   .selected
     background-color: hsla(210, 100%, 95%, 0.07)
     border-color: hsla(210, 100%, 90%, 0.25)

@@ -1,6 +1,10 @@
 # Changelog
 
-## 1.4.3 - 20223 Feb 2
+## 1.4.4 - 2023 Apr 3
+- Fix blank screen
+- Fix grid overflow
+
+## 1.4.3 - 2023 Feb 2
 - Fix new videos sometimes not loading when using arrow keys
 
 ## 1.4.2 - 2022 Nov 20

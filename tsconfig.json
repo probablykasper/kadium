@@ -1,28 +1,11 @@
 {
+  "extends": "@tsconfig/svelte/tsconfig.json",
   "compilerOptions": {
-    "moduleResolution": "node",
-    "target": "es2019",
-    "module": "es2020",
-    "lib": ["es2020"],
-
-    // To have Svelte warnings/errors correct position
-    "sourceMap": true,
-
-    // Global types
-    "types": ["svelte", "vite/client"],
-
-    "isolatedModules": true,
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
     "resolveJsonModule": true,
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
-    "allowJs": true,
-    "paths": {
-      // "$lib/*": ["src/lib/*"],
-      // "$lib": ["src/lib"]
-    }
+    "isolatedModules": true
   },
-  "include": ["src/**/*.d.ts", "src/**/*.js", "src/**/*.ts", "src/**/*.svelte"]
+  "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte"]
 }

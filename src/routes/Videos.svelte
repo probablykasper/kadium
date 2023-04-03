@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ViewOptions, viewOptions } from '../lib/data'
+  import { type ViewOptions, viewOptions } from '../lib/data'
   import { event, shell } from '@tauri-apps/api'
   import { listen } from '@tauri-apps/api/event'
   import { onDestroy, tick } from 'svelte'

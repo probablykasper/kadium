@@ -89,7 +89,7 @@ async fn main() {
   #[cfg(debug_assertions)]
   {
     tauri_specta::ts::export(
-      tauri_specta::collate_types![
+      specta::collect_types![
         error_popup,
         data::get_settings,
         data::tags,

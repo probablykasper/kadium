@@ -343,6 +343,6 @@ pub fn parse_absolute_duration(value: &str) -> Result<i64, String> {
         throw!("Cannot parse duration with year or month: {}", value);
       }
     }
-    Err(e) => throw!("Unexpected video duration: {}", e),
+    Err(e) => throw!("Unexpected video duration: {e:?}"),
   }
 }

@@ -48,9 +48,9 @@ export function unarchive(id: string) {
     return invoke<null>("unarchive", { id })
 }
 
-export type AddChannelOptions = { url: string; from_time: number; refresh_rate_ms: number; tags: string[] }
-export type After = { publishTimeMs: number; id: string }
-export type Channel = { id: string; name: string; icon: string; uploads_playlist_id: string; from_time: number; refresh_rate_ms: number; tags: string[] }
-export type Options = { show_all: boolean; show_archived: boolean; channel_filter: string; tag: string | null; limit: number }
 export type Settings = { api_key: string; max_concurrent_requests: number; channels: Channel[]; check_in_background: boolean }
 export type Video = { id: string; title: string; description: string; publishTimeMs: number; durationMs: number; thumbnailStandard: boolean; thumbnailMaxres: boolean; channelId: string; channelName: string; unread: boolean; archived: boolean }
+export type Channel = { id: string; name: string; icon: string; uploads_playlist_id: string; from_time: number; refresh_rate_ms: number; tags: string[] }
+export type AddChannelOptions = { url: string; from_time: number; refresh_rate_ms: number; tags: string[] }
+export type After = { publishTimeMs: number; id: string }
+export type Options = { show_all: boolean; show_archived: boolean; channel_filter: string; tag: string | null; limit: number }

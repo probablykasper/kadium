@@ -1,6 +1,6 @@
 {
   "build": {
-    "distDir": "../build",
+    "distDir": "../dist",
     "devPath": "http://localhost:9000",
     "beforeDevCommand": "npm run dev:web",
     "beforeBuildCommand": "npm run build:web"
@@ -11,12 +11,7 @@
   "tauri": {
     "bundle": {
       "active": true,
-      "targets": [
-        "dmg",
-        "deb",
-        "appimage",
-        "msi"
-      ],
+      "targets": ["dmg", "deb", "appimage", "msi"],
       "identifier": "space.kasper.kadium",
       "icon": [
         "icons/32x32.png",

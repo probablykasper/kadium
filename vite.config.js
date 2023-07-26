@@ -5,7 +5,7 @@ import autoprefixer from 'autoprefixer'
 export default defineConfig({
   clearScreen: false,
   server: {
-    port: 3000,
+    port: 9000,
     strictPort: true,
   },
   build: {

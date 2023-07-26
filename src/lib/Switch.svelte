@@ -4,6 +4,7 @@
   export let checked = false
   export let offColor = 'hsl(220, 20%, 31%)'
   export let onColor = 'hsl(220, 100%, 52%)'
+  export let id: string
   $: color = checked ? onColor : offColor
 
   function keydown(e: KeyboardEvent) {
@@ -14,19 +15,13 @@
 </script>
 
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-<div class="switch" class:checked tabindex="0" on:keydown={keydown}>
-  <input class="hidden" type="checkbox" bind:checked />
-  <div
-    class="box"
-    style:background-color={color}
-    style:border-color={color}
-    on:click={() => (checked = !checked)}
-    tabindex="-1"
-    on:keydown={keydown}
-  >
+<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+<label class="switch" class:checked tabindex="0" on:keydown={keydown}>
+  <input class="hidden" type="checkbox" bind:checked {id} />
+  <div class="box" style:background-color={color} style:border-color={color}>
     <div class="handle" />
   </div>
-</div>
+</label>
 
 <style lang="sass">
   .hidden
@@ -42,7 +37,7 @@
     border: 1px solid
     transition: 200ms cubic-bezier(.4,0,.2,1)
     transition-property: background-color, border-color, box-shadow
-  .switch:focus .box
+  .switch:focus-visible .box
     // box-shadow: 0px 0px 2px 0px onColor
     border-color: hsla(220, 100%, 50%, 1)
     box-shadow: 0px 0px 0px 3px hsla(220, 100%, 50%, 0.5)

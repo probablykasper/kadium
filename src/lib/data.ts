@@ -48,7 +48,7 @@ export function enableSampleData() {
         })
       }
       return videos
-    })()
+    })(),
   )
   settings.set({
     api_key: 'example key',

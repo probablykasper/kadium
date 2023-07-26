@@ -20,6 +20,7 @@
 </script>
 
 {#if visible}
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="modal-bg" on:click|self={close} tabindex="-1" on:keydown bind:this={modalBg}>
     <div class="box">
       <div class="spacer">

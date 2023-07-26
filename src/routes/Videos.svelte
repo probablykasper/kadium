@@ -265,6 +265,7 @@
   <div class="grid" bind:this={grid}>
     {#each videos as video, i}
       <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
       <div
         class="box"
         class:selected={selectionVisible && i === selectedIndex}
@@ -274,12 +275,14 @@
         on:click={(e) => videoClick(e, i)}
         draggable="true"
         on:dragstart={(e) => dragStartVideo(e, video)}
+        role="listitem"
       >
         <div class="img-box">
           <div class="img-parent">
             <img src="https://i.ytimg.com/vi/{video.id}/hqdefault.jpg" alt="" draggable="false" />
           </div>
         </div>
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
         <div
           class="archive"
           on:click={() => archiveToggleClick(video.id, video.archived)}

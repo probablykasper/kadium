@@ -46,11 +46,10 @@
     </p>
     <input class="textbox" type="text" bind:value={apiKey} placeholder="AIzaSyNq5Y9knL..." />
     <div class="toggle-row">
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <p on:click={() => (checkInBackground = !checkInBackground)}>
-        Check for new videos automatically
-      </p>
-      <Switch bind:checked={checkInBackground} />
+      <label for="check-in-background">
+        <p>Check for new videos automatically</p>
+      </label>
+      <Switch id="check-in-background" bind:checked={checkInBackground} />
     </div>
     <div class="buttons">
       <Button secondary on:click={() => (visible = false)}>Cancel</Button>
@@ -157,9 +156,6 @@
     align-items: center
     justify-content: space-between
     margin-bottom: 15px
-    p
-      user-select: none
-      cursor: default
   .buttons
     margin-top: 20px
     display: flex

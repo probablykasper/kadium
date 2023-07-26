@@ -45,6 +45,7 @@
   })
 </script>
 
+<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <nav on:keydown={keydown}>
   <a on:mousedown={go} use:active data-exact href="/">Videos</a>
   <a on:mousedown={go} use:active href="/channels">Channels</a>

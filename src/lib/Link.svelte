@@ -11,25 +11,22 @@
 {#if href === ''}
   <button type="button" on:click><slot /></button>
 {:else}
-  <a {href} {target}><button type="button" on:click><slot /></button></a>
+  <a {href} {target}><slot /></a>
 {/if}
 
 <style lang="sass">
   button
     font-size: 13px
     margin: 0px
-    color: hsl(210, 100%, 55%)
     background-color: transparent
     padding: 0px
     border: none
-    user-select: none
     cursor: default
+  a, button
+    color: hsl(210, 100%, 55%)
     &:hover
       color: hsl(210, 100%, 45%)
   a
-    color: inherit
     text-decoration: none
     font-size: inherit
-    button
-      font-size: inherit
 </style>

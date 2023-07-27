@@ -70,6 +70,7 @@
     background-color: hsl(220, 17%, 10%)
     border-bottom: 1px solid hsla(0, 0%, 50%, 0.08)
   a
+    cursor: default
     background-color: transparent
     border: none
     display: inline-block

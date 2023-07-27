@@ -1,6 +1,6 @@
 <script lang="ts">
   import { loadSettings } from '../lib/data'
-  import Modal from '../lib/Modal.svelte'
+  import Modal from 'modal-svelte'
   import { DateInput } from 'date-picker-svelte'
   import Button from '../lib/Button.svelte'
   import type { Channel } from '../../bindings'
@@ -68,57 +68,54 @@
       datePopupVisible = false
     }, 10)
   }
-
-  function keydown(e: KeyboardEvent) {
-    if (e.key === 'Escape' && e.target) {
-      visible = false
-      e.preventDefault()
-    }
-  }
 </script>
 
-<Modal bind:visible on:keydown={keydown}>
-  <form class="content" on:submit|preventDefault={submit}>
-    {#if editIndex === null}
-      <h3>Add Channel</h3>
-    {:else}
-      <h3>Edit Channel</h3>
-    {/if}
-
-    {#if editIndex === null}
-      <p>Channel or Video URL</p>
-      <input
-        type="text"
-        placeholder="https://www.youtube.com/channel/UCeTncCK57upn3lPn6PX18Ng"
-        bind:value={url}
-      />
-    {/if}
-
-    <p>Refresh rate (minutes)</p>
-    <p class="sub">
-      Channels with identical refresh rates are grouped together in batches, so it's recommended to
-      use only a few different refresh rates
-    </p>
-    <input type="number" bind:value={refreshRateMinutes} />
-
-    <p>Check for videos after</p>
-    <div class="date-picker">
-      <DateInput bind:value={fromTime} bind:visible={datePopupVisible} />
-    </div>
-
-    <div class="buttons">
-      {#if editIndex !== null}
-        <Button danger on:click={onDelete}>Delete</Button>
+{#if visible}
+  <Modal onCancel={() => (visible = false)} noCloseIcon>
+    <form class="content" on:submit|preventDefault={submit}>
+      {#if editIndex === null}
+        <h3>Add Channel</h3>
+      {:else}
+        <h3>Edit Channel</h3>
       {/if}
-      <div class="max-spacer" />
-      <Button secondary on:click={() => (visible = false)}>Cancel</Button>
-      <div class="spacer" />
-      <Button type="submit">{editIndex === null ? 'Add' : 'Save'}</Button>
-    </div>
-  </form>
-</Modal>
+
+      {#if editIndex === null}
+        <p>Channel or Video URL</p>
+        <input
+          type="text"
+          placeholder="https://www.youtube.com/channel/UCeTncCK57upn3lPn6PX18Ng"
+          bind:value={url}
+        />
+      {/if}
+
+      <p>Refresh rate (minutes)</p>
+      <p class="sub">
+        Channels with identical refresh rates are grouped together in batches, so it's recommended
+        to use only a few different refresh rates
+      </p>
+      <input type="number" bind:value={refreshRateMinutes} />
+
+      <p>Check for videos after</p>
+      <div class="date-picker">
+        <DateInput bind:value={fromTime} bind:visible={datePopupVisible} />
+      </div>
+
+      <div class="buttons">
+        {#if editIndex !== null}
+          <Button danger on:click={onDelete}>Delete</Button>
+        {/if}
+        <div class="max-spacer" />
+        <Button secondary on:click={() => (visible = false)}>Cancel</Button>
+        <div class="spacer" />
+        <Button type="submit">{editIndex === null ? 'Add' : 'Save'}</Button>
+      </div>
+    </form>
+  </Modal>
+{/if}
 
 <style lang="sass">
+  h3
+    margin-top: 0px
   .content
     max-width: 440px
   .date-picker

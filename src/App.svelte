@@ -102,7 +102,7 @@
   />
 
   {#if getStartedWasSeen}
-    <GetStarted visible={true} />
+    <GetStarted />
   {/if}
 {:else if error}
   Error loading.

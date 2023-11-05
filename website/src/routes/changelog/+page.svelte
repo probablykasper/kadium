@@ -37,7 +37,7 @@
         will-change: contents
         animation: show-gradient 1s ease-out forwards
         opacity: 0
-        animation-delay: 500ms
+        animation-delay: 200ms
         @keyframes show-gradient
           0%
             opacity: 0

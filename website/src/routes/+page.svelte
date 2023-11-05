@@ -8,14 +8,14 @@
 </svelte:head>
 
 <Revealed
-  class="mt-20 mb-4 text-center transition-all ease-out"
-  options={{ opacity: 0, scale: 0.9, duration: 1000 }}
+  class="mt-20 mb-4 mx-2 text-center transition-all ease-out"
+  options={{ opacity: 0, scale: 0.9, duration: 750 }}
 >
   <h1 class="inline-block text-7xl font-extrabold">Kadium</h1>
 </Revealed>
 <Revealed
-  class="mb-12 text-center transition-all ease-out"
-  options={{ opacity: 0, y: -10, duration: 750, delay: 500 }}
+  class="mb-12 mx-2 text-center transition-all ease-out"
+  options={{ opacity: 0, y: -10, duration: 550, delay: 250 }}
 >
   <p class="text-xl text-blue-100 opacity-60 transition-all duration-500 ease-out">
     An app for staying ontop of YouTube channels' uploads
@@ -24,7 +24,7 @@
 
 <Revealed
   class="mb-24 flex justify-center transition-all ease-out"
-  options={{ opacity: 0, scale: 0.9, duration: 750, delay: 700 }}
+  options={{ opacity: 0, scale: 0.9, duration: 550, delay: 450 }}
 >
   <div>
     <Download />
@@ -33,7 +33,7 @@
 
 <Revealed
   class="relative mx-auto mb-24 max-w-5xl px-6 transition-[transform,opacity] will-change-contents sm:px-8"
-  options={{ opacity: 0, y: 10, duration: 1000, delay: 600 }}
+  options={{ opacity: 0, y: 10, duration: 750, delay: 350 }}
 >
   <div class="gradient gradient-1 show-gradient absolute inset-0 -z-10 blur-[160px]" />
   <div class="relative">
@@ -43,7 +43,7 @@
 </Revealed>
 <Revealed
   class="relative mx-auto mb-24 max-w-5xl px-6 transition-[transform,opacity] will-change-contents sm:px-8"
-  options={{ opacity: 0, y: 10, duration: 1000 }}
+  options={{ opacity: 0, y: 10, duration: 750 }}
 >
   <div class="gradient gradient-2 absolute inset-0 -z-10 blur-[160px]" />
   <div class="relative">
@@ -67,7 +67,6 @@
   .show-gradient
     animation: show-gradient 3s ease-in-out forwards
     opacity: 0
-    animation-delay: 500ms
   @keyframes show-gradient
     0%
       opacity: 0

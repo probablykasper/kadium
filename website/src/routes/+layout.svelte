@@ -26,7 +26,7 @@
 </svelte:head>
 
 <nav
-  class="mx-auto flex max-w-5xl items-center py-4 px-6 text-base text-white text-opacity-60 sm:justify-between"
+  class="mx-auto flex max-w-5xl items-center py-4 px-3 sm:px-6 text-base text-white text-opacity-60 sm:justify-between"
 >
   <Revealed class="sm:w-32" options={{ opacity: 0, x: -10, duration: 1000, delay: 300 }}>
     <a
@@ -35,7 +35,7 @@
       style="-webkit-tap-highlight-color: hsla(0, 0%, 100%, 0.1);"
     >
       <img class="mr-2 h-8" src="/android-chrome-192x192.png" alt="" />
-      Kadium
+      <span class='max-[350px]:hidden mr-1.5'>Kadium</span>
     </a>
   </Revealed>
   <Revealed class="mx-1.5" options={{ opacity: 0, y: -10, duration: 1000, delay: 500 }}>
@@ -59,6 +59,7 @@
     <a
       class="icon github ease-md sm:p-1.5"
       href="https://github.com/probablykasper/kadium"
+      aria-label="GitHub"
       style="-webkit-tap-highlight-color: hsla(0, 0%, 100%, 0.1);"
       ><svg height="24" width="24" viewBox="-2 -2 28 28" xmlns="http://www.w3.org/2000/svg"
         ><path

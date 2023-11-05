@@ -130,6 +130,7 @@
     <button
       class="group relative h-full pl-4 pr-5 text-white text-opacity-70 outline-none transition-all duration-300 hover:text-opacity-100"
       on:click={toggle}
+      aria-label="Download for other platforms"
     >
       <div
         class="opacity-0 transition-all duration-700 ease-out group-hover:opacity-40 group-focus:opacity-40"

@@ -1,9 +1,8 @@
-import { mdsvex } from 'mdsvex'
-import adapter from '@sveltejs/adapter-cloudflare'
-import { vitePreprocess } from '@sveltejs/kit/vite'
-import { defineMDSveXConfig as defineConfig } from 'mdsvex'
+import adapter from '@sveltejs/adapter-auto';
+import { vitePreprocess } from '@sveltejs/kit/vite';
+import { mdsvex, defineMDSveXConfig } from 'mdsvex'
 
-const mdsvexConfig = defineConfig({
+const mdsvexConfig = defineMDSveXConfig({
   extensions: ['.svelte.md', '.md', '.svx'],
 
   smartypants: {

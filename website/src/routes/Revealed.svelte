@@ -39,11 +39,11 @@
 
   $: currentClass = classes + (loaded === true ? '' : ' ')
 
-  let observer: IntersectionObserver
+  let observer: IntersectionObserver | undefined
   let element: HTMLElement
 
-  onMount(async () => {
-    await tick()
+  onMount(() => {
+    tick().then(() => {
     if (typeof IntersectionObserver === 'undefined') {
       return
     }
@@ -57,7 +57,8 @@
       })
     }, {})
     observer.observe(element)
-    return () => observer.unobserve(element)
+    })
+    return () => observer?.unobserve(element)
   })
 </script>
 

@@ -5,38 +5,38 @@
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "prettier --check src *.js && eslint src *.js && svelte-check",
-    "format": "prettier --write src *.js && eslint --fix src *.js"
+    "lint": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && eslint src && prettier --check src",
+    "format": "eslint --fix src && prettier --write src"
   },
   "devDependencies": {
-    "@octokit/plugin-rest-endpoint-methods": "^7.0.1",
-    "@sveltejs/adapter-cloudflare": "^2.0.2",
-    "@sveltejs/kit": "1.8.3",
-    "@tailwindcss/forms": "^0.5.3",
-    "@typescript-eslint/eslint-plugin": "^5.53.0",
-    "@typescript-eslint/parser": "^5.53.0",
-    "autoprefixer": "^10.4.13",
+    "@octokit/plugin-rest-endpoint-methods": "^10.1.2",
+    "@sveltejs/adapter-auto": "^2.0.0",
+    "@sveltejs/kit": "^1.27.3",
+    "@tailwindcss/forms": "^0.5.6",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "autoprefixer": "^10.4.16",
     "bowser": "^2.11.0",
-    "eslint": "^8.34.0",
-    "eslint-config-prettier": "^8.6.0",
-    "eslint-plugin-svelte3": "^4.0.0",
-    "mdsvex": "^0.10.6",
-    "prettier": "^2.8.4",
-    "prettier-plugin-svelte": "^2.9.0",
-    "prettier-plugin-tailwindcss": "^0.2.3",
-    "sass": "^1.58.3",
-    "svelte": "^3.55.1",
-    "svelte-check": "^3.0.3",
-    "tailwindcss": "^3.2.7",
-    "typescript": "^4.9.5",
-    "vite": "^4.0.1"
+    "eslint": "^8.28.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-svelte": "^2.30.0",
+    "mdsvex": "^0.11.0",
+    "prettier": "^3.0.3",
+    "prettier-plugin-svelte": "^2.10.1",
+    "prettier-plugin-tailwindcss": "^0.5.6",
+    "sass": "^1.69.5",
+    "svelte": "^4.0.5",
+    "svelte-check": "^3.4.3",
+    "typescript": "^5.0.0",
+    "vite": "^4.4.2"
   },
   "prettier": {
     "printWidth": 100,
     "semi": false,
     "singleQuote": true,
-    "pluginSearchDirs": [
-      "."
+    "plugins": [
+      "prettier-plugin-svelte",
+      "prettier-plugin-tailwindcss"
     ]
   }
 }

@@ -1,5 +1,8 @@
 # Changelog
 
+## Next
+- Fix some errors not being shown
+
 ## 1.4.4 - 2023 Apr 3
 - Fix blank screen
 - Fix grid overflow

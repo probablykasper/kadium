@@ -6,7 +6,7 @@
 use crate::data::{AppPaths, ArcData, Data};
 use crate::settings::yt_email_notifier;
 use crate::settings::VersionedSettings;
-use std::{env, thread};
+use std::env;
 use tauri::api::{dialog, shell};
 #[cfg(target_os = "macos")]
 use tauri::AboutMetadata;
@@ -27,7 +27,7 @@ fn error_popup_main_thread(msg: impl AsRef<str>) {
     .set_title("Error")
     .set_description(&msg)
     .set_buttons(rfd::MessageButtons::Ok)
-    .set_level(rfd::MessageLevel::Info);
+    .set_level(rfd::MessageLevel::Error);
   builder.show();
 }
 
@@ -42,9 +42,10 @@ macro_rules! throw {
 #[specta::specta]
 fn error_popup(msg: String, win: Window) {
   eprintln!("Error: {}", msg);
-  thread::spawn(move || {
-    dialog::message(Some(&win), "Error", msg);
-  });
+  dialog::MessageDialogBuilder::new("Error", msg)
+    .kind(dialog::MessageDialogKind::Error)
+    .parent(&win)
+    .show(|_button_press| {});
 }
 
 /// Note title and message to show asynchronously when/after the app starts

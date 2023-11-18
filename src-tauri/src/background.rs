@@ -7,6 +7,7 @@ use std::collections::HashMap;
 use std::thread;
 use std::time::Duration;
 use tauri::api::notification::Notification;
+use tauri::Manager;
 use tokio::sync::broadcast;
 use tokio::{task, time};
 
@@ -150,15 +151,14 @@ async fn start(options: IntervalOptions, interval_infos: Vec<IntervalInfo>) -> R
     tasks.push(handle);
   }
   for task in tasks {
-    let result = task.await;
-    match result {
-      Ok(_) => return Ok(()),
+    match task.await {
+      Ok(result) => result?,
       Err(e) => {
         return Err(e.to_string());
       }
     }
   }
-  Err("No intervals started".to_string())
+  Ok(())
 }
 
 async fn run(options: IntervalOptions, interval_info: IntervalInfo) {
@@ -188,8 +188,16 @@ async fn run_interval(options: IntervalOptions, interval_info: IntervalInfo) {
 
 async fn check_channels(options: &IntervalOptions, interval_info: &IntervalInfo) {
   let window_visible = match options.window.is_visible() {
-    Ok(true) => true,
-    _ => false,
+    Ok(is_visible) => is_visible,
+    Err(e) => {
+      eprintln!("{}", e);
+      let _ = Notification::new("error")
+        .title("Failed to check channels")
+        .body(e.to_string())
+        .show()
+        .expect("Unable to show notification");
+      return;
+    }
   };
   if window_visible {
     let _ = options.window.emit("checking", "");
@@ -200,7 +208,11 @@ async fn check_channels(options: &IntervalOptions, interval_info: &IntervalInfo)
       Err(e) => {
         let title = format!("Error checking {}", channel.name);
         eprintln!("{}: {}", title, e);
-        let _ = Notification::new("error").title(title).body(e).show();
+        Notification::new("error")
+          .title(title)
+          .body(e)
+          .show()
+          .expect("Unable to show notification");
         break;
       }
     }

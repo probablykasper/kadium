@@ -187,11 +187,12 @@ async fn run_interval(options: IntervalOptions, interval_info: IntervalInfo) {
 }
 
 async fn check_channels(options: &IntervalOptions, interval_info: &IntervalInfo) {
+  let identifier = &options.window.app_handle().config().tauri.bundle.identifier;
   let window_visible = match options.window.is_visible() {
     Ok(is_visible) => is_visible,
     Err(e) => {
       eprintln!("{}", e);
-      let _ = Notification::new("error")
+      Notification::new(identifier)
         .title("Failed to check channels")
         .body(e.to_string())
         .show()
@@ -208,7 +209,7 @@ async fn check_channels(options: &IntervalOptions, interval_info: &IntervalInfo)
       Err(e) => {
         let title = format!("Error checking {}", channel.name);
         eprintln!("{}: {}", title, e);
-        Notification::new("error")
+        Notification::new(identifier)
           .title(title)
           .body(e)
           .show()

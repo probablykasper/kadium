@@ -2,6 +2,7 @@
 
 ## Next
 - Fix some errors not being shown
+- Fix notification identifiers
 
 ## 1.4.4 - 2023 Apr 3
 - Fix blank screen

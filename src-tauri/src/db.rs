@@ -92,7 +92,7 @@ impl sqlx::FromRow<'_, SqliteRow> for Video {
       title: row.try_get("title")?,
       description: row.try_get("description")?,
       publishTimeMs: row.try_get("publishTimeMs")?,
-      /// SQLite does not support unsigned integers
+      // SQLite does not support unsigned integers
       durationMs: row.try_get("durationMs")?,
       thumbnailStandard: row.try_get("thumbnailStandard")?,
       thumbnailMaxres: row.try_get("thumbnailMaxres")?,
@@ -105,18 +105,17 @@ impl sqlx::FromRow<'_, SqliteRow> for Video {
 }
 
 pub async fn insert_video(video: &Video, pool: &SqlitePool) -> Result<(), String> {
-  let query_str = format!(
+  let query_str = 
     "INSERT INTO videos (id,title,description,publishTimeMs,durationMs,thumbnailStandard,thumbnailMaxres,channelId,channelName) \
-    VALUES (?,?,?,?,?,?,?,?,?)"
-  );
-  let query = sqlx::query(&query_str)
+    VALUES (?,?,?,?,?,?,?,?,?)";
+  let query = sqlx::query(query_str)
     .bind(&video.id)
     .bind(&video.title)
     .bind(&video.description)
-    .bind(&video.publishTimeMs)
-    .bind(&video.durationMs)
-    .bind(&video.thumbnailStandard)
-    .bind(&video.thumbnailMaxres)
+    .bind(video.publishTimeMs)
+    .bind(video.durationMs)
+    .bind(video.thumbnailStandard)
+    .bind(video.thumbnailMaxres)
     .bind(&video.channelId)
     .bind(&video.channelName);
   let rows_affected = match query.execute(pool).await {
@@ -191,12 +190,12 @@ pub async fn get_videos(
 
   let mut query_str = "SELECT ".to_owned() + &selects.join(",");
   query_str.push_str(" FROM videos");
-  if wheres.len() > 0 {
+  if !wheres.is_empty() {
     query_str.push_str(" WHERE ");
     query_str.push_str(&wheres.join(" AND "));
   }
   query_str.push_str(" ORDER BY publishTimeMs DESC, id DESC");
-  query_str.push_str(&format!(" LIMIT {}", options.limit.to_string()));
+  query_str.push_str(&format!(" LIMIT {}", options.limit));
 
   let mut query = sqlx::query_as(&query_str);
   for binding in bindings {
@@ -211,8 +210,8 @@ pub async fn get_videos(
 
 async fn set_archived(pool: &SqlitePool, id: &str, value: bool) -> Result<(), String> {
   let query = sqlx::query("UPDATE videos SET archived = ? WHERE id = ?")
-    .bind(&value)
-    .bind(&id);
+    .bind(value)
+    .bind(id);
   let rows_affected = match query.execute(pool).await {
     Ok(result_rows) => result_rows.rows_affected(),
     Err(e) => throw!("{}", e),

@@ -15,9 +15,9 @@ pub async fn yt_request<T: DeserializeOwned>(url: &str, key: &str) -> Result<T, 
 
   match json.get("error") {
     Some(error_obj) => {
-      let code = error_obj.get("code").map(|v| v.as_i64()).flatten();
+      let code = error_obj.get("code").and_then(|v| v.as_i64());
       let code_str = code.map(|n| n.to_string()).unwrap_or_default();
-      let message = error_obj.get("message").map(|v| v.as_str()).flatten();
+      let message = error_obj.get("message").and_then(|v| v.as_str());
       println!("{:?}", json);
       throw!("{} {}", code_str, message.unwrap_or_default());
     }
@@ -37,8 +37,8 @@ pub async fn channel_id_from_video_id(id: &str, key: &str) -> Result<String, Str
   let videos = yt_request::<videos::Response>(&url, key)
     .await
     .map_err(|e| format!("Failed to get video: {}", e))?;
-  for video in videos.items {
-    return Ok(video.snippet.channelId);
+  if let Some(video) = videos.items.first() {
+    return Ok(video.snippet.channelId.clone());
   }
   Err("No video returned".to_string())
 }

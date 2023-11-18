@@ -8,7 +8,7 @@ use sqlx::SqlitePool;
 use std::collections::HashSet;
 use std::env;
 use std::io::Write;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use tauri::{command, Config, State};
 use tokio::sync::Mutex;
@@ -72,7 +72,7 @@ impl Data {
   }
 }
 
-pub fn ensure_parent_exists(file_path: &PathBuf) -> Result<(), String> {
+pub fn ensure_parent_exists(file_path: &Path) -> Result<(), String> {
   if let Some(parent) = file_path.parent() {
     if let Err(e) = std::fs::create_dir_all(parent) {
       throw!("Error creating parent folder: {}", e.to_string());
@@ -82,9 +82,9 @@ pub fn ensure_parent_exists(file_path: &PathBuf) -> Result<(), String> {
 }
 
 pub fn write_atomically(file_path: &PathBuf, buf: &[u8]) -> Result<(), String> {
-  ensure_parent_exists(&file_path)?;
-  let af = AtomicFile::new(&file_path, OverwriteBehavior::AllowOverwrite);
-  match af.write(|f| f.write_all(&buf)) {
+  ensure_parent_exists(file_path)?;
+  let af = AtomicFile::new(file_path, OverwriteBehavior::AllowOverwrite);
+  match af.write(|f| f.write_all(buf)) {
     Ok(_) => Ok(()),
     Err(e) => Err(e.to_string()),
   }
@@ -155,7 +155,7 @@ fn url_parse_channel_id(value: &str) -> Option<String> {
   if path_segments.next()? != "channel" {
     return None;
   }
-  return Some(path_segments.next()?.to_string());
+  Some(path_segments.next()?.to_string())
 }
 
 #[command]
@@ -176,7 +176,7 @@ pub async fn add_channel(options: AddChannelOptions, data: DataState<'_>) -> Res
 
   let id = if let Some(video_id) = url_parse_video_id(&options.url) {
     let key = &settings.api_key_or_default();
-    api::channel_id_from_video_id(&video_id, &key).await?
+    api::channel_id_from_video_id(&video_id, key).await?
   } else if let Some(id) = url_parse_channel_id(&options.url) {
     id
   } else {

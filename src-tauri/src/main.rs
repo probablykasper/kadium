@@ -53,29 +53,25 @@ type ImportedNote = Option<(String, String)>;
 /// This can display dialogs, which needs to happen before tauri runs to not panic
 async fn load_data(paths: &AppPaths) -> Result<(VersionedSettings, ImportedNote), String> {
   if paths.settings_file.exists() {
-    return match settings::VersionedSettings::load(&paths) {
+    return match settings::VersionedSettings::load(paths) {
       Ok(settings) => Ok((settings, None)),
       Err(e) => Err(e),
     };
   }
 
   let will_import = match yt_email_notifier::can_import() {
-    true => {
-      let msg = "Do you want to import your data from YouTube Email Notifier?";
-      let wants_to_import = rfd::MessageDialog::new()
-        .set_title("Import")
-        .set_description(&msg)
-        .set_buttons(rfd::MessageButtons::YesNo)
-        .set_level(rfd::MessageLevel::Info)
-        .show();
-      wants_to_import
-    }
+    true => rfd::MessageDialog::new()
+      .set_title("Import")
+      .set_description("Do you want to import your data from YouTube Email Notifier?")
+      .set_buttons(rfd::MessageButtons::YesNo)
+      .set_level(rfd::MessageLevel::Info)
+      .show(),
     false => false,
   };
   if will_import {
     let imported_stuff = yt_email_notifier::import()?;
     let versioned_settings = imported_stuff.settings.wrap();
-    versioned_settings.save(&paths)?;
+    versioned_settings.save(paths)?;
 
     let import_note = Some(("Import note".to_string(), imported_stuff.update_note));
     return Ok((versioned_settings, import_note));
@@ -114,7 +110,7 @@ async fn main() {
   #[cfg(target_os = "macos")]
   macos_app_nap::prevent();
 
-  let app_paths = AppPaths::from_tauri_config(&ctx.config());
+  let app_paths = AppPaths::from_tauri_config(ctx.config());
 
   let (mut settings, _note) = match load_data(&app_paths).await {
     Ok(v) => v,
@@ -291,13 +287,13 @@ async fn main() {
       )),
       MenuEntry::Submenu(Submenu::new(
         "Help",
-        Menu::with_items([CustomMenuItem::new("Learn More", "Learn More").into()]).into(),
+        Menu::with_items([CustomMenuItem::new("Learn More", "Learn More").into()]),
       )),
     ]))
     .on_menu_event(|event| match event.menu_item_id() {
       "Learn More" => {
         let url = "https://github.com/probablykasper/kadium";
-        shell::open(&event.window().shell_scope(), url.to_string(), None).unwrap();
+        shell::open(&event.window().shell_scope(), url, None).unwrap();
       }
       _ => {}
     })

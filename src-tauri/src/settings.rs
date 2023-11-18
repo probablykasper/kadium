@@ -49,7 +49,7 @@ impl VersionedSettings {
       Ok(_) => {}
       Err(err) => throw!("Error reading file: {}", err),
     };
-    match serde_json::from_str(&mut json_str) {
+    match serde_json::from_str(&json_str) {
       Ok(settings) => Ok(settings),
       Err(err) => {
         throw!("Error parsing file: {}", err.to_string());
@@ -147,7 +147,7 @@ pub mod yt_email_notifier {
     pub instances: Vec<Instance>,
   }
   fn load_settings(file_path: PathBuf) -> Result<Settings, String> {
-    let mut file = match File::open(&file_path) {
+    let mut file = match File::open(file_path) {
       Ok(file) => file,
       Err(e) => throw!("Error opening file: {}", e.to_string()),
     };
@@ -156,7 +156,7 @@ pub mod yt_email_notifier {
       Ok(_) => {}
       Err(err) => throw!("Error reading file: {}", err),
     };
-    let settings: Settings = match serde_json::from_str(&mut json_str) {
+    let settings: Settings = match serde_json::from_str(&json_str) {
       Ok(v) => v,
       Err(err) => {
         throw!("Error parsing file: {}", err.to_string());

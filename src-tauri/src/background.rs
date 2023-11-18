@@ -74,12 +74,12 @@ fn spawn(
   run_once: bool,
   window: tauri::Window,
 ) -> Option<BgHandle> {
-  if settings.channels.len() == 0 {
+  if settings.channels.is_empty() {
     return None;
   }
 
   let interval_map = new_intervals_map(&settings.channels);
-  let interval_infos = to_interval_info_vector(interval_map);
+  let interval_infos = interval_map.into_values().collect();
 
   let (stop_sender, _stop_receiver) = broadcast::channel(1);
 
@@ -91,21 +91,16 @@ fn spawn(
     window,
   };
 
-  let tokio_thread = thread::spawn(move || {
-    return start(options, interval_infos);
-  });
+  let tokio_thread = thread::spawn(move || start(options, interval_infos));
 
   Some(BgHandle {
     handle: tokio_thread,
-    stop_sender: stop_sender,
+    stop_sender,
   })
 }
 
 pub type IntervalMap = HashMap<u64, IntervalInfo>;
-fn to_interval_info_vector(map: IntervalMap) -> Vec<IntervalInfo> {
-  map.into_iter().map(|(_ms, info)| info).collect()
-}
-fn new_intervals_map(channels: &Vec<settings::Channel>) -> IntervalMap {
+fn new_intervals_map(channels: &[settings::Channel]) -> IntervalMap {
   let mut intervals_map: IntervalMap = HashMap::new();
   for channel in channels.iter() {
     let default = IntervalInfo {
@@ -118,7 +113,7 @@ fn new_intervals_map(channels: &Vec<settings::Channel>) -> IntervalMap {
     interval_info.channels.push(ChannelInfo {
       name: channel.name.to_string(),
       uploads_playlist_id: channel.uploads_playlist_id.clone(),
-      from_time: channel.from_time.clone(),
+      from_time: channel.from_time,
     });
   }
   intervals_map
@@ -141,14 +136,12 @@ async fn start(options: IntervalOptions, interval_infos: Vec<IntervalInfo>) -> R
     let mut stop_receiver = options.stop_sender.subscribe();
     let handle = task::spawn(async move {
       tokio::select! {
-        _ = run(options, interval_info) => {
-          return Ok(())
-        }
+        _ = run(options, interval_info) => Ok(()),
         result = stop_receiver.recv() => {
           match result {
-            Ok(_) => return Ok(()),
+            Ok(_) => Ok(()),
             Err(e) => {
-              return Err(e.to_string());
+              Err(e.to_string())
             }
           }
         }
@@ -202,7 +195,7 @@ async fn check_channels(options: &IntervalOptions, interval_info: &IntervalInfo)
     let _ = options.window.emit("checking", "");
   }
   for channel in &interval_info.channels {
-    match check_channel(&options, &channel).await {
+    match check_channel(options, channel).await {
       Ok(()) => {}
       Err(e) => {
         let title = format!("Error checking {}", channel.name);
@@ -229,7 +222,7 @@ async fn check_channel(options: &IntervalOptions, channel: &ChannelInfo) -> Resu
     .await
     .map_err(|e| format!("Failed to get channel: {}", e))?;
 
-  if uploads.items.len() == 0 {
+  if uploads.items.is_empty() {
     return Ok(()); // no channel videos returned
   }
 
@@ -258,7 +251,7 @@ async fn check_channel(options: &IntervalOptions, channel: &ChannelInfo) -> Resu
     new_ids.push(fetched_video.contentDetails.videoId);
   }
 
-  if new_ids.len() == 0 {
+  if new_ids.is_empty() {
     return Ok(()); // no new videos
   }
 
@@ -305,9 +298,9 @@ async fn check_channel(options: &IntervalOptions, channel: &ChannelInfo) -> Resu
   }
 
   for video in &videos_to_add {
-    db::insert_video(&video, &options.pool).await?;
+    db::insert_video(video, &options.pool).await?;
   }
-  if videos_to_add.len() >= 1 {
+  if !videos_to_add.is_empty() {
     match options.window.emit("refresh", "") {
       Ok(_) => {}
       Err(e) => {
@@ -319,7 +312,7 @@ async fn check_channel(options: &IntervalOptions, channel: &ChannelInfo) -> Resu
 }
 
 pub fn parse_datetime(value: &str) -> Result<DateTime<FixedOffset>, String> {
-  match DateTime::parse_from_rfc3339(&value) {
+  match DateTime::parse_from_rfc3339(value) {
     Ok(datetime) => Ok(datetime),
     Err(e) => throw!("Unexpected video publish date: {}", e),
   }
@@ -328,11 +321,11 @@ pub fn parse_datetime(value: &str) -> Result<DateTime<FixedOffset>, String> {
 /// years and months have different lengths depending on what month or year
 /// it is.
 pub fn parse_absolute_duration(value: &str) -> Result<i64, String> {
-  match IsoDuration::parse(&value) {
+  match IsoDuration::parse(value) {
     Ok(duration) => {
       if duration.month == 0.0 && duration.year == 0.0 {
         let seconds = duration.second as f64
-          + duration.minute as f64 as f64 * 60.0
+          + duration.minute as f64 * 60.0
           + duration.hour as f64 * 60.0 * 60.0
           + duration.day as f64 * 60.0 * 60.0 * 24.0;
         let ms = seconds * 1000.0;

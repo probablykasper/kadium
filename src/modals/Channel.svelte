@@ -13,6 +13,7 @@
 
   export let channels: Channel[]
   export let visible = false
+  export let on_add: () => void
 
   let url = ''
   let fromTime: Date | null
@@ -46,6 +47,7 @@
       })
       await loadSettings()
       visible = false
+      on_add()
     } else {
       channels[editIndex].from_time = Math.round(fromTime.getTime())
       channels[editIndex].refresh_rate_ms = Math.round(refreshRateMinutes * 60 * 1000)

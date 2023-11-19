@@ -54,9 +54,18 @@
     const unlisten = await unlistenFuture
     unlisten()
   })
+
+  let channels_scroll_el: HTMLDivElement
 </script>
 
-<ChannelModal {channels} bind:editIndex bind:visible={editVisible} />
+<ChannelModal
+  {channels}
+  bind:editIndex
+  bind:visible={editVisible}
+  on_add={() => {
+    channels_scroll_el.scrollTo({ behavior: 'smooth', top: channels_scroll_el.scrollHeight })
+  }}
+/>
 
 <main>
   <header>
@@ -72,7 +81,7 @@
       {visibleIndexes.length} of {channels.length}
     </div>
   </header>
-  <div class="channels">
+  <div bind:this={channels_scroll_el} class="channels">
     {#each channels as channel, i}
       <div class="channel selectable" class:show={filter === '' || channel.name.includes(filter)}>
         <img src={channel.icon} alt="" />

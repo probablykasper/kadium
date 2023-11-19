@@ -3,6 +3,7 @@
 ## Next
 - Fix some errors not being shown
 - Fix notification identifiers
+- Scroll to bottom after adding channel
 
 ## 1.4.4 - 2023 Apr 3
 - Fix blank screen

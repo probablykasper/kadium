@@ -157,6 +157,18 @@ fn url_parse_channel_id(value: &str) -> Option<String> {
   }
   Some(path_segments.next()?.to_string())
 }
+fn url_parse_username(value: &str) -> Option<String> {
+  let url = Url::parse(value).ok()?;
+  let host = url.host_str()?;
+  if !host.ends_with("youtube.com") {
+    return None;
+  }
+  let mut path_segments = url.path_segments()?;
+  if path_segments.next()? != "user" {
+    return None;
+  }
+  Some(path_segments.next()?.to_string())
+}
 
 #[command]
 #[specta::specta]
@@ -179,6 +191,9 @@ pub async fn add_channel(options: AddChannelOptions, data: DataState<'_>) -> Res
     api::channel_id_from_video_id(&video_id, key).await?
   } else if let Some(id) = url_parse_channel_id(&options.url) {
     id
+  } else if let Some(username) = url_parse_username(&options.url) {
+    let key = &settings.api_key_or_default();
+    api::channel_id_from_username(&username, key).await?
   } else {
     return Err(invalid);
   };

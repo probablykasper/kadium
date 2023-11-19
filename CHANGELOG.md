@@ -1,6 +1,7 @@
 # Changelog
 
 ## Next
+- Add support for `/user/` URLs
 - Fix some errors not being shown
 - Fix notification identifiers
 - Scroll to bottom after adding channel

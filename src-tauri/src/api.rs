@@ -43,6 +43,23 @@ pub async fn channel_id_from_video_id(id: &str, key: &str) -> Result<String, Str
   Err("No video returned".to_string())
 }
 
+pub async fn channel_id_from_username(username: &str, key: &str) -> Result<String, String> {
+  let url = "https://youtube.googleapis.com/youtube/v3/channels".to_string()
+    + "?part=contentDetails,id,snippet"
+    + "&forUsername="
+    + username;
+  let channels = yt_request::<channels::Response>(&url, key)
+    .await
+    .map_err(|e| format!("Failed to get video: {}", e))?;
+  if channels.items.len() > 1 {
+    return Err("YouTube username search returned in multiple channels".to_string());
+  }
+  if let Some(channel) = channels.items.first() {
+    return Ok(channel.id.clone());
+  }
+  Err("No video returned".to_string())
+}
+
 pub mod channels {
   use serde::Deserialize;
 

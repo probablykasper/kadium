@@ -1,7 +1,7 @@
 # Changelog
 
 ## Next
-- Add support for `/user/` URLs
+- Add support for all channel URLs. URLs like `/lacunarecs`, `/@lacunarecs`, `/c/lacunarecs`, `/user/lacunarecs` and even `/lacunarecs/playlists` etc work now.
 - Fix some errors not being shown
 - Fix notification identifiers
 - Scroll to bottom after adding channel

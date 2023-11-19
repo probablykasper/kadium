@@ -2,6 +2,7 @@ use crate::api::{channels, yt_request};
 use crate::settings::{Channel, Settings, VersionedSettings};
 use crate::{api, background, throw};
 use atomicwrites::{AtomicFile, OverwriteBehavior};
+use scraper::{Html, Selector};
 use serde::Deserialize;
 use specta::Type;
 use sqlx::SqlitePool;
@@ -145,6 +146,7 @@ fn url_parse_video_id(value: &str) -> Option<String> {
   }
   None
 }
+
 fn url_parse_channel_id(value: &str) -> Option<String> {
   let url = Url::parse(value).ok()?;
   let host = url.host_str()?;
@@ -157,6 +159,7 @@ fn url_parse_channel_id(value: &str) -> Option<String> {
   }
   Some(path_segments.next()?.to_string())
 }
+
 fn url_parse_username(value: &str) -> Option<String> {
   let url = Url::parse(value).ok()?;
   let host = url.host_str()?;
@@ -168,6 +171,50 @@ fn url_parse_username(value: &str) -> Option<String> {
     return None;
   }
   Some(path_segments.next()?.to_string())
+}
+
+async fn get_channel_id_from_url(url: &str) -> Result<String, String> {
+  let client = reqwest::Client::new();
+  let text = client
+    .get(url)
+    .send()
+    .await
+    .map_err(|e| format!("API request failed: {}", e))?
+    .text()
+    .await
+    .map_err(|e| format!("API response was not JSON: {}", e))?;
+
+  let html = Html::parse_document(&text);
+  let selector = Selector::parse("link[rel='canonical'][href*='youtube.com']").unwrap();
+  let link_elements = html.select(&selector).collect::<Vec<_>>();
+  if link_elements.len() > 1 {
+    return Err("Multiple canonical URL elements in the page".to_string());
+  }
+  let link_element = link_elements
+    .first()
+    .ok_or("No canonical URL element in the page")?;
+  let canonical_url = link_element
+    .attr("href")
+    .ok_or("No canonical URL href in the page")?;
+
+  url_parse_channel_id(canonical_url).ok_or(format!("Unexpected canonical URL: {canonical_url}"))
+}
+
+async fn get_id_from_url(url: &str, key: &str) -> Result<String, String> {
+  if let Some(video_id) = url_parse_video_id(&url) {
+    api::channel_id_from_video_id(&video_id, key).await
+  } else if let Some(id) = url_parse_channel_id(&url) {
+    Ok(id)
+  } else if let Some(username) = url_parse_username(&url) {
+    api::channel_id_from_username(&username, key).await
+  } else {
+    get_channel_id_from_url(&url).await.map_err(|e| {
+      format!(
+        "Invalid URL. You could try a video URL from the channel.\n\n{}",
+        e
+      )
+    })
+  }
 }
 
 #[command]
@@ -184,19 +231,8 @@ pub async fn set_channels(channels: Vec<Channel>, data: DataState<'_>) -> Result
 pub async fn add_channel(options: AddChannelOptions, data: DataState<'_>) -> Result<(), String> {
   let mut data = data.0.lock().await;
   let settings = data.settings();
-  let invalid = "Invalid URL. You could put in a video URL from the channel".to_string();
 
-  let id = if let Some(video_id) = url_parse_video_id(&options.url) {
-    let key = &settings.api_key_or_default();
-    api::channel_id_from_video_id(&video_id, key).await?
-  } else if let Some(id) = url_parse_channel_id(&options.url) {
-    id
-  } else if let Some(username) = url_parse_username(&options.url) {
-    let key = &settings.api_key_or_default();
-    api::channel_id_from_username(&username, key).await?
-  } else {
-    return Err(invalid);
-  };
+  let id = get_id_from_url(&options.url, &settings.api_key_or_default()).await?;
 
   for channel in &settings.channels {
     if channel.id == id {

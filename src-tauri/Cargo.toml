@@ -28,6 +28,7 @@ iso8601-duration = "0.2"
 url = "2.3"
 tauri-specta = { version = "1.0", features = ["javascript", "typescript"] }
 specta = "1.0"
+scraper = "0.18.1"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 macos-app-nap = "0.0"

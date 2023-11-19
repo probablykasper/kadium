@@ -6,7 +6,6 @@
 use crate::data::{AppPaths, ArcData, Data};
 use crate::settings::yt_email_notifier;
 use crate::settings::VersionedSettings;
-use std::env;
 use tauri::api::{dialog, shell};
 #[cfg(target_os = "macos")]
 use tauri::AboutMetadata;

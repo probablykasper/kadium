@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { type ViewOptions, viewOptions } from '../lib/data'
+  import { type ViewOptions, viewOptions } from '$lib/data'
   import { event, shell } from '@tauri-apps/api'
   import { listen } from '@tauri-apps/api/event'
   import { onDestroy, tick } from 'svelte'
   import type { Video } from '../../bindings'
-  import { checkModifiers, checkShortcut } from '../lib/general'
+  import { checkModifiers, checkShortcut } from '$lib/general'
   import VideoBar from './_VideoBar.svelte'
-  import commands from '../lib/commands'
+  import commands from '$lib/commands'
 
   let videos: Video[] = []
   let allLoaded = false
@@ -404,7 +404,6 @@
       color: hsl(210, 8%, 90%)
   p.sub
     font-size: 12px
-    cursor: default
     color: hsl(210, 8%, 80%)
     margin-top: 2px
   .box:hover .archive

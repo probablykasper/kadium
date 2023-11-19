@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy } from 'svelte'
-  import { tags, viewOptions } from '../lib/data'
-  import { checkShortcut } from '../lib/general'
+  import { tags, viewOptions } from '$lib/data'
+  import { checkShortcut } from '$lib/general'
   import { event } from '@tauri-apps/api'
 
   export let loadedVideosCount: number

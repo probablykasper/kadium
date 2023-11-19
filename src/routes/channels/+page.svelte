@@ -1,15 +1,16 @@
 <script lang="ts">
-  import Link from '../lib/Link.svelte'
-  import { loadSettings } from '../lib/data'
-  import Tags from '../lib/Tags.svelte'
-  import type { Channel } from '../../bindings'
-  import ChannelModal from '../modals/Channel.svelte'
+  import Link from '$lib/Link.svelte'
+  import { loadSettings, settings } from '$lib/data'
+  import Tags from '$lib/Tags.svelte'
+  import type { Channel } from '../../../bindings'
+  import ChannelModal from '$lib/modals/Channel.svelte'
   import { event } from '@tauri-apps/api'
   import { onDestroy } from 'svelte'
-  import { router } from 'tinro'
-  import commands from '../lib/commands'
+  import commands from '$lib/commands'
+  import { page } from '$app/stores'
+  import { goto } from '$app/navigation'
 
-  export let channels: Channel[]
+  $: channels = $settings?.channels ?? []
 
   $: visibleIndexes = getVisibleIndexes(channels, filter)
   function getVisibleIndexes(channels: Channel[], filter: string) {
@@ -39,8 +40,11 @@
     editIndex = null
     editVisible = true
   }
-  $: if ($router.hash === 'add') {
+  $: if ($page.url.searchParams.has('add')) {
     openAddModal()
+  }
+  $: if (!editVisible) {
+    goto('/channels', { replaceState: true })
   }
 
   let filter = ''

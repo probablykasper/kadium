@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { loadSettings } from '../lib/data'
-  import Modal from 'modal-svelte'
+  import { loadSettings } from '$lib/data'
+  import Modal from './Modal.svelte'
   import { DateInput } from 'date-picker-svelte'
-  import Button from '../lib/Button.svelte'
-  import type { Channel } from '../../bindings'
-  import commands from '../lib/commands'
+  import Button from '$lib/Button.svelte'
+  import type { Channel } from '../../../bindings'
+  import commands from '$lib/commands'
 
   async function saveChannels() {
     await commands.setChannels(channels)
@@ -73,8 +73,14 @@
 </script>
 
 {#if visible}
-  <Modal onCancel={() => (visible = false)} noCloseIcon>
-    <form class="content" on:submit|preventDefault={submit}>
+  <Modal
+    onCancel={() => {
+      visible = false
+    }}
+    noCloseIcon
+    form={submit}
+  >
+    <div class="content">
       {#if editIndex === null}
         <h3>Add Channel</h3>
       {:else}
@@ -83,10 +89,12 @@
 
       {#if editIndex === null}
         <p>Channel or Video URL</p>
+        <!-- svelte-ignore a11y-autofocus -->
         <input
           type="text"
           placeholder="https://www.youtube.com/channel/UCeTncCK57upn3lPn6PX18Ng"
           bind:value={url}
+          autofocus
         />
       {/if}
 
@@ -111,7 +119,7 @@
         <div class="spacer" />
         <Button type="submit">{editIndex === null ? 'Add' : 'Save'}</Button>
       </div>
-    </form>
+    </div>
   </Modal>
 {/if}
 
@@ -130,11 +138,10 @@
     font-weight: 500
     margin-top: 5px
     margin-bottom: 7px
-    cursor: default
   p.sub
     font-weight: 400
     font-size: 12px
-    opacity: 0.6
+    color: hsla(0, 0%, 100%, 0.6)
     margin-top: 5px
     margin-bottom: 7px
   input, :global(.date-picker input)

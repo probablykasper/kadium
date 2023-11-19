@@ -2,10 +2,11 @@
   import { event } from '@tauri-apps/api'
   import { onDestroy } from 'svelte'
   import { fade } from 'svelte/transition'
-  import { active, router } from 'tinro'
   import commands from './commands'
   import { settingsOpen } from './data'
   import { checkShortcut } from './general'
+  import { page } from '$app/stores'
+  import { goto } from '$app/navigation'
   function go(e: MouseEvent) {
     if (e.target instanceof HTMLElement) {
       const href = e.target.getAttribute('href')
@@ -13,7 +14,7 @@
         e.preventDefault()
         e.stopPropagation()
         e.stopImmediatePropagation()
-        router.goto(href, true)
+        goto(href, { replaceState: true })
       }
     }
   }
@@ -47,8 +48,15 @@
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <nav on:keydown={keydown}>
-  <a on:mousedown={go} use:active data-exact href="/">Videos</a>
-  <a on:mousedown={go} use:active href="/channels">Channels</a>
+  <a on:mousedown={go} class:active={$page.route.id === '/'} href="/" data-sveltekit-replacestate
+    >Videos</a
+  >
+  <a
+    on:mousedown={go}
+    class:active={$page.route.id === '/channels'}
+    href="/channels"
+    data-sveltekit-replacestate>Channels</a
+  >
   <button class="control-style ml-auto" class:checking={checking > 0} on:click={checkNow}>
     Check Now
     {#if checking > 0}

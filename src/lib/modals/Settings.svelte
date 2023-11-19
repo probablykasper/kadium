@@ -1,10 +1,10 @@
 <script lang="ts">
-  import Button from '../lib/Button.svelte'
-  import { loadSettings } from '../lib/data'
+  import Button from '$lib/Button.svelte'
+  import { loadSettings } from '$lib/data'
   import Modal from 'modal-svelte'
-  import Link from '../lib/Link.svelte'
-  import Switch from '../lib/Switch.svelte'
-  import commands from '../lib/commands'
+  import Link from '$lib/Link.svelte'
+  import Switch from '$lib/Switch.svelte'
+  import commands from '$lib/commands'
 
   export let apiKey: string
   export let maxConcurrentRequests: number
@@ -25,7 +25,6 @@
     onCancel={() => {
       visible = false
     }}
-    let:focus
     noCloseIcon
   >
     <form class="page" on:submit|preventDefault={setGeneralSettings}>
@@ -37,13 +36,7 @@
           <div>Get your own key</div>
         </Link>
       </p>
-      <input
-        class="textbox"
-        type="text"
-        bind:value={apiKey}
-        placeholder="AIzaSyNq5Y9knL..."
-        use:focus
-      />
+      <input class="textbox" type="text" bind:value={apiKey} placeholder="AIzaSyNq5Y9knL..." />
       <div class="toggle-row">
         <label for="check-in-background">
           <p>Check for new videos automatically</p>

@@ -1,8 +1,7 @@
 <script lang="ts">
   import { event } from '@tauri-apps/api'
-  import ChannelsPage from './routes/Channels.svelte'
-  import { checkShortcut, checkModifiers } from './lib/general'
-  import SettingsModal from './modals/Settings.svelte'
+  import { checkShortcut, checkModifiers } from '$lib/general'
+  import SettingsModal from '$lib/modals/Settings.svelte'
   import {
     loadSettings,
     settings,
@@ -10,13 +9,12 @@
     viewOptions,
     tags,
     settingsOpen,
-  } from './lib/data'
-  import { router } from 'tinro'
-  import Route from 'tinro/cmp/Route.svelte' // workaround for https://github.com/AlexxNB/tinro/pull/121
-  import VideosPage from './routes/Videos.svelte'
-  import Nav from './lib/Nav.svelte'
+  } from '$lib/data'
+  import Nav from '$lib/Nav.svelte'
   import { onDestroy } from 'svelte'
-  import GetStarted from './modals/GetStarted.svelte'
+  import GetStarted from '$lib/modals/GetStarted.svelte'
+  import { page } from '$app/stores'
+  import { goto } from '$app/navigation'
 
   let error = false
   loadSettings().catch(() => {
@@ -35,11 +33,11 @@
       e.preventDefault()
     } else if (checkModifiers(e, { cmdOrCtrl: true }) && numShortcutDigits.includes(e.key)) {
       const num = Number(e.key)
-      if ($router.path === '/' && $tags[num - 1] === $viewOptions.tag) {
+      if ($page.route.id === '/' && $tags[num - 1] === $viewOptions.tag) {
         e.preventDefault()
         $viewOptions.tag = null
       } else if (num <= $tags.length) {
-        router.goto('/', true)
+        goto('/', { replaceState: true })
         e.preventDefault()
         $viewOptions.tag = $tags[num - 1]
       }
@@ -48,23 +46,23 @@
 
   const unlistenFuture = event.listen('tauri://menu', ({ payload }) => {
     if (payload === 'Videos') {
-      router.goto('/', true)
+      goto('/', { replaceState: true })
     } else if (payload === 'Channels') {
-      router.goto('/channels', true)
+      goto('/channels', { replaceState: true })
     } else if (payload === 'Preferences...' || payload === 'Options...') {
       $settingsOpen = true
     } else if (payload === 'Add Channel...') {
-      router.goto('/channels#add', true)
+      goto('/channels?add', { replaceState: true })
     } else if (payload === 'Show New') {
-      router.goto('/', true)
+      goto('/', { replaceState: true })
       $viewOptions.show_all = false
       $viewOptions.show_archived = false
     } else if (payload === 'Show Archived') {
-      router.goto('/', true)
+      goto('/', { replaceState: true })
       $viewOptions.show_all = false
       $viewOptions.show_archived = true
     } else if (payload === 'Show All') {
-      router.goto('/', true)
+      goto('/', { replaceState: true })
       $viewOptions.show_all = true
       $viewOptions.show_archived = false
     }
@@ -87,12 +85,7 @@
 <svelte:window on:keydown={keydown} />
 {#if $settings !== null}
   <Nav />
-  <Route path="/">
-    <VideosPage />
-  </Route>
-  <Route path="/channels">
-    <ChannelsPage channels={$settings.channels} />
-  </Route>
+  <slot />
 
   <SettingsModal
     apiKey={$settings.api_key}

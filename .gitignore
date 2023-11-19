@@ -1,6 +1,11 @@
 .DS_Store
 node_modules
-/dist
+/build
+/.svelte-kit
+/package
+.env
+.env.*
+
 /src-tauri/target
 /src-tauri/WixTools
 /src-tauri/appdata

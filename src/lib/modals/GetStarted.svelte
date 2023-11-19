@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { settingsOpen } from '../lib/data'
+  import { settingsOpen } from '$lib/data'
   import Modal from 'modal-svelte'
-  import Button from '../lib/Button.svelte'
-  import Link from '../lib/Link.svelte'
+  import Button from '$lib/Button.svelte'
+  import Link from '$lib/Link.svelte'
 
   export let visible = true
 </script>

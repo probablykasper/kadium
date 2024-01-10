@@ -11,35 +11,60 @@
 	let videos: Video[] = []
 	let allLoaded = false
 	$: getVideos($viewOptions)
-	let loading = false
+	let loading = 0
 	async function getVideos(options: ViewOptions) {
-		loading = true
+		loading++
+
+		const selectedId = videos[selectedIndex]?.id
 
 		const newVideos = await commands.getVideos(options, null)
 		allLoaded = newVideos.length < $viewOptions.limit
 		videos = newVideos
-		selectedIndex = 0
-		selectionVisible = false
-
-		loading = false
+		// Remove selection if the video changes position
+		if (!selectedId && selectedId !== videos[selectedIndex]?.id) {
+			selectedIndex = 0
+			selectionVisible = false
+		}
 
 		await tick()
 		await autoloadHandler()
+		loading--
 	}
-	async function softRefresh(options: ViewOptions) {
-		loading = true
+	async function softRefresh(startIndex: number) {
+		loading++
 
-		const newVideos = await commands.getVideos(options, null)
-		allLoaded = newVideos.length < $viewOptions.limit
-		videos = newVideos
-
-		loading = false
+		if (startIndex === 0) {
+			const newVideos = await commands.getVideos($viewOptions, null)
+			allLoaded = newVideos.length < $viewOptions.limit
+			videos = newVideos
+		} else {
+			const prevVideo = videos[startIndex - 1]
+			const prevVideos = videos.slice(0, startIndex)
+			const maxLength = videos.length
+			const reloadedVideos = await commands.getVideos(
+				{
+					...$viewOptions,
+					limit: $viewOptions.limit * 2,
+				},
+				{
+					publishTimeMs: prevVideo.publishTimeMs,
+					id: prevVideo.id,
+				},
+			)
+			videos = prevVideos.concat(reloadedVideos)
+			// Shorten length to a mulpitle of `limit`
+			if (videos.length > $viewOptions.limit) {
+				videos = videos.slice(0, maxLength - (maxLength % $viewOptions.limit))
+			}
+			videos = videos.slice(0, maxLength)
+		}
 
 		await tick()
 		await autoloadHandler()
+		loading--
 	}
 	async function getMoreVideos() {
-		loading = true
+		loading++
 
 		const newVideos = await commands.getVideos($viewOptions, {
 			publishTimeMs: videos[videos.length - 1].publishTimeMs,
@@ -48,9 +73,9 @@
 		allLoaded = newVideos.length < $viewOptions.limit
 		videos = videos.concat(newVideos)
 
-		loading = false
 		await tick()
 		await autoloadHandler()
+		loading--
 	}
 	async function autoloadHandler() {
 		if (!allLoaded && isScrolledNearBottom() && !loading) {
@@ -83,19 +108,21 @@
 		let ts = new Date(timestamp)
 		return ts.getDate() + ' ' + months[ts.getMonth()] + ' ' + ts.getFullYear()
 	}
-	async function archive(id: string) {
-		await commands.archive(id)
-		await softRefresh($viewOptions)
+	async function archive(i: number) {
+		loading++
+		const video = videos[i]
+		await commands.archive(video.id)
+		await softRefresh(i)
 		selectedIndex = Math.min(selectedIndex, videos.length - 1)
+		loading--
 	}
-	async function unarchive(id: string) {
-		await commands.unarchive(id)
-		await softRefresh($viewOptions)
+	async function unarchive(i: number) {
+		loading++
+		const video = videos[i]
+		await commands.unarchive(video.id)
+		await softRefresh(i)
 		selectedIndex = Math.min(selectedIndex, videos.length - 1)
-	}
-	async function archiveToggleClick(id: string, isArchived: boolean) {
-		if (isArchived) unarchive(id)
-		else archive(id)
+		loading--
 	}
 
 	let scrollDiv: HTMLElement | null = null
@@ -224,9 +251,9 @@
 		} else if (payload === 'Open Selected Channel' && selectionVisible) {
 			openChannel(selectedIndex)
 		} else if (payload === 'Archive' && selectionVisible) {
-			archive(videos[selectedIndex].id)
+			archive(selectedIndex)
 		} else if (payload === 'Unarchive' && selectionVisible) {
-			unarchive(videos[selectedIndex].id)
+			unarchive(selectedIndex)
 		}
 	})
 	onDestroy(async () => {
@@ -262,7 +289,7 @@
 
 <main on:scroll={autoloadHandler} bind:this={scrollDiv}>
 	<div class="grid" bind:this={grid}>
-		{#each videos as video, i}
+		{#each videos as video, i (video.id)}
 			<!-- svelte-ignore a11y-click-events-have-key-events -->
 			<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 			<div
@@ -289,7 +316,10 @@
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
 				<div
 					class="archive"
-					on:click={() => archiveToggleClick(video.id, video.archived)}
+					on:click={() => {
+						if (video.archived) unarchive(i)
+						else archive(i)
+					}}
 					on:dblclick|stopPropagation
 					title="Archive"
 				>
@@ -337,6 +367,8 @@
 	main
 		overflow-y: auto
 		max-width: 100%
+		padding-bottom: 30px
+		scroll-padding-bottom: 30px
 	.drag-ghost
 			font-size: 14px
 			top: -1000px
@@ -349,15 +381,17 @@
 				max-width: 300px
 				border-radius: 3px
 	.grid
-		height: 100%
-		max-height: 100%
-		flex-grow: 0
 		box-sizing: border-box
 		display: grid
-		grid-template-columns: repeat(auto-fill, minmax(200px, 1fr))
+		grid-template-columns: repeat(auto-fill, minmax(210px, 1fr))
 		grid-gap: 5px
+		@media screen and (min-width: 1000px)
+			grid-template-columns: repeat(auto-fill, minmax(220px, 1fr))
+			grid-gap: 10px
+		@media screen and (min-width: 1500px)
+			grid-template-columns: repeat(auto-fill, minmax(230px, 1fr))
+			grid-gap: 10px
 		padding: var(--page-padding)
-		padding-top: 15px
 		@media screen and (max-width: 450px)
 			grid-template-columns: 1fr
 			.box

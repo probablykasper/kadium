@@ -7,6 +7,8 @@
 - Allow selecting bottom row diagonally with the down arrow key
 - Fix channel tags sometimes not saving
 - Add ability to edit tags by double-clicking
+- Keep scroll position when archiving and unarchiving
+- Keep video selected if the selected video stays in the same spot when videos get refreshed
 
 ## 1.5.0 - 2023 Nov 19
 - Add support for all channel URLs. URLs like `/lacunarecs`, `/@lacunarecs`, `/c/lacunarecs`, `/user/lacunarecs` and even `/lacunarecs/playlists` etc work now.

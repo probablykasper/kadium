@@ -6,6 +6,7 @@
 - Load 100 videos at a time instead of 50
 - Allow selecting bottom row diagonally with the down arrow key
 - Fix channel tags sometimes not saving
+- Add ability to edit tags by double-clicking
 
 ## 1.5.0 - 2023 Nov 19
 - Add support for all channel URLs. URLs like `/lacunarecs`, `/@lacunarecs`, `/c/lacunarecs`, `/user/lacunarecs` and even `/lacunarecs/playlists` etc work now.

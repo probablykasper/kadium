@@ -1,34 +1,47 @@
 <script lang="ts">
+	import { tick } from 'svelte'
 	import { checkShortcut } from './general'
 
 	export let value: string[]
 	export let onUpdate: () => void
 	let inputEl: HTMLInputElement
+	let text = ''
+	let editingIndex: number | null = null
 
-	let editing = false
-	function startEditing() {
-		editing = true
-		text = value[value.length - 1]
-	}
-	function startAdding() {
-		editing = false
+	async function startAdding() {
+		editingIndex = null
+		await tick()
+		inputEl.focus()
 		text = ''
 	}
+	async function startEditing(index: number) {
+		editingIndex = index
+		await tick()
+		inputEl.focus()
+		text = value[index]
+	}
+
+	function add(text: string) {
+		value.push(text)
+		update(value)
+	}
 	function applyEditing() {
-		if (editing) {
+		if (editingIndex !== null) {
 			if (text === '') {
-				value.pop()
+				value.splice(editingIndex, 1)
 				update(value)
-			} else if (text !== value[value.length - 1]) {
-				value[value.length - 1] = text
+			} else if (text !== value[editingIndex]) {
+				value[editingIndex] = text
 				update(value)
 			}
 			text = ''
-			editing = false
+			editingIndex = null
 		}
 	}
-
-	let text = ''
+	function remove(i: number) {
+		value.splice(i, 1)
+		update(value)
+	}
 
 	function update(newValue: string[]) {
 		value = newValue
@@ -39,58 +52,48 @@
 		text = ''
 	}
 	function onBlur() {
-		if (editing) {
+		if (editingIndex !== null) {
 			applyEditing()
 		} else if (text !== '') {
-			value.push(text)
-			update(value)
+			add(text)
 		}
 		text = ''
 	}
 	let tagXEls: HTMLButtonElement[] = []
-	async function editingKeydown(e: KeyboardEvent) {
-		if (checkShortcut(e, 'Enter')) {
-			applyEditing()
-		} else if (checkShortcut(e, 'Backspace')) {
-			if (text === '' && value.length >= 2) {
-				e.preventDefault()
-				value.pop()
-				update(value)
-				startEditing()
-			}
-		} else if (checkShortcut(e, 'Escape')) {
-			startAdding()
-			e.preventDefault()
-		}
-	}
 	async function keydown(e: KeyboardEvent) {
-		if (editing) {
+		if (editingIndex !== null) {
 			editingKeydown(e)
 			return
 		}
 		if (checkShortcut(e, 'Enter')) {
 			if (text !== '') {
-				value.push(text)
-				update(value)
+				add(text)
 				startAdding()
 			}
 		} else if (checkShortcut(e, 'Backspace')) {
 			if (text === '' && value.length >= 1) {
 				e.preventDefault()
-				startEditing()
+				startEditing(value.length - 1)
 			}
-		} else if (checkShortcut(e, 'Escape')) {
-			e.preventDefault()
 		}
 	}
-	function remove(i: number) {
-		value.splice(i, 1)
-		update(value)
+	async function editingKeydown(e: KeyboardEvent) {
+		if (checkShortcut(e, 'Enter')) {
+			applyEditing()
+			startAdding()
+		} else if (checkShortcut(e, 'Backspace') && editingIndex !== null) {
+			if (text === '' && value.length >= 2) {
+				e.preventDefault()
+				remove(editingIndex)
+				startEditing(editingIndex - 1)
+			}
+		} else if (checkShortcut(e, 'Escape')) {
+			startAdding()
+		}
 	}
 	function tagKeydown(e: KeyboardEvent, i: number) {
 		if (checkShortcut(e, 'Backspace')) {
-			value.splice(i, 1)
-			update(value)
+			remove(i)
 			if (i >= 1) {
 				tagXEls[i - 1].focus()
 			} else {
@@ -103,11 +106,24 @@
 <div class="tags">
 	<div class="label">Tags</div>
 	{#each value as tag, i}
-		{#if i === value.length - 1 && editing}
-			<!-- hide last element when editing -->
+		{#if i === editingIndex}
+			<input
+				bind:this={inputEl}
+				type="text"
+				placeholder="Add tags..."
+				on:focus={onFocus}
+				on:blur={onBlur}
+				on:keydown={keydown}
+				bind:value={text}
+			/>
 		{:else}
 			<div class="tag">
-				{tag}<button
+				<span
+					role="none"
+					on:dblclick={() => {
+						startEditing(i)
+					}}>{tag}</span
+				><button
 					bind:this={tagXEls[i]}
 					on:keydown={(e) => tagKeydown(e, i)}
 					on:click={() => remove(i)}
@@ -116,15 +132,17 @@
 			</div>
 		{/if}
 	{/each}
-	<input
-		bind:this={inputEl}
-		type="text"
-		placeholder="Add tags..."
-		on:focus={onFocus}
-		on:blur={onBlur}
-		on:keydown={keydown}
-		bind:value={text}
-	/>
+	{#if editingIndex === null}
+		<input
+			bind:this={inputEl}
+			type="text"
+			placeholder="Add tags..."
+			on:focus={onFocus}
+			on:blur={onBlur}
+			on:keydown={keydown}
+			bind:value={text}
+		/>
+	{/if}
 </div>
 
 <style lang="sass">

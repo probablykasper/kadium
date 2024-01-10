@@ -53,7 +53,7 @@
     await autoloadHandler()
   }
   async function autoloadHandler() {
-    if (!allLoaded && isScrolledToBottom() && !loading) {
+    if (!allLoaded && isScrolledNearBottom() && !loading) {
       await getMoreVideos()
     }
   }
@@ -99,7 +99,7 @@
   }
 
   let scrollDiv: HTMLElement | null = null
-  function isScrolledToBottom() {
+  function isScrolledNearBottom() {
     if (scrollDiv) {
       const lastElement = boxes[videos.length - 1]
       const threshold = lastElement.offsetTop - 200
@@ -159,9 +159,8 @@
         e.preventDefault()
       } else if (checkShortcut(e, 'ArrowDown')) {
         const columnCount = getColumnCount()
-        if (selectedIndex + columnCount <= videos.length - 1) {
-          selectedIndex += columnCount
-        }
+        selectedIndex += columnCount
+        selectedIndex = Math.min(selectedIndex, videos.length - 1)
         e.preventDefault()
       } else if (checkShortcut(e, 'Escape')) {
         selectionVisible = false

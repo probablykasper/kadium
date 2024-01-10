@@ -279,7 +279,12 @@
       >
         <div class="img-box">
           <div class="img-parent">
-            <img src="https://i.ytimg.com/vi/{video.id}/hqdefault.jpg" alt="" draggable="false" />
+            <img
+              src="https://i.ytimg.com/vi/{video.id}/hqdefault.jpg"
+              alt=""
+              draggable="false"
+              loading="lazy"
+            />
           </div>
         </div>
         <!-- svelte-ignore a11y-no-static-element-interactions -->

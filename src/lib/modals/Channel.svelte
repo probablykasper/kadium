@@ -1,6 +1,6 @@
 <script lang="ts">
   import { loadSettings } from '$lib/data'
-  import Modal from './Modal.svelte'
+  import Modal from 'modal-svelte'
   import { DateInput } from 'date-picker-svelte'
   import Button from '$lib/Button.svelte'
   import type { Channel } from '../../../bindings'

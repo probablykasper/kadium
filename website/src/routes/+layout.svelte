@@ -28,36 +28,42 @@
 <nav
 	class="mx-auto flex max-w-5xl items-center px-3 py-4 text-base text-white text-opacity-60 sm:justify-between sm:px-6"
 >
-	<Revealed class="sm:w-32" options={{ opacity: 0, x: -10, duration: 1000, delay: 300 }}>
+	<Revealed
+		class="ease-out-cubic sm:w-32"
+		options={{ opacity: 0, x: -10, duration: 1000, delay: 300 }}
+	>
 		<a
 			href="/"
-			class="ease-md flex items-center text-lg font-medium text-white sm:p-1.5 sm:text-xl"
+			class="flex items-center text-lg font-medium text-white sm:p-1.5 sm:text-xl"
 			style="-webkit-tap-highlight-color: hsla(0, 0%, 100%, 0.1);"
 		>
 			<img class="mr-2 h-8" src="/android-chrome-192x192.png" alt="" />
 			<span class="mr-1.5 max-[350px]:hidden">Kadium</span>
 		</a>
 	</Revealed>
-	<Revealed class="mx-1.5" options={{ opacity: 0, y: -10, duration: 1000, delay: 500 }}>
+	<Revealed
+		class="ease-out-cubic mx-1.5"
+		options={{ opacity: 0, y: -10, duration: 1000, delay: 500 }}
+	>
 		<a
-			class="ease-md mx-1.5 py-2 text-sm transition-colors duration-200 hover:text-white sm:text-base"
+			class="mx-1.5 py-2 text-sm transition-colors duration-150 hover:text-white sm:text-base"
 			class:font-medium={$page.url.pathname === '/'}
 			class:text-white={$page.url.pathname === '/'}
 			href="/">Overview</a
 		>
 		<a
-			class="ease-md mx-1.5 py-2 text-sm transition-colors duration-200 hover:text-white sm:text-base"
+			class="mx-1.5 py-2 text-sm transition-colors duration-150 hover:text-white sm:text-base"
 			class:font-medium={$page.url.pathname === '/changelog'}
 			class:text-white={$page.url.pathname === '/changelog'}
 			href="/changelog">Changelog</a
 		>
 	</Revealed>
 	<Revealed
-		class="ml-auto flex justify-end sm:ml-0 sm:w-32"
+		class="ease-out-cubic ml-auto flex justify-end sm:ml-0 sm:w-32"
 		options={{ opacity: 0, x: 10, duration: 1000, delay: 300 }}
 	>
 		<a
-			class="icon github ease-md sm:p-1.5"
+			class="icon github sm:p-1.5"
 			href="https://github.com/probablykasper/kadium"
 			aria-label="GitHub"
 			style="-webkit-tap-highlight-color: hsla(0, 0%, 100%, 0.1);"

@@ -107,6 +107,7 @@
 	:root
 		--options-bar-height: 42px
 		--page-padding: 16px
+		--ease-out-cubic: cubic-bezier(0.33, 1, 0.68, 1)
 	:global(html), :global(body)
 		background-color: hsl(220, 17%, 7%)
 	:global(html)

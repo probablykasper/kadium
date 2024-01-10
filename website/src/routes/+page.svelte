@@ -8,22 +8,22 @@
 </svelte:head>
 
 <Revealed
-	class="mx-2 mb-4 mt-20 text-center transition-all ease-out"
+	class="ease-out-cubic mx-2 mb-4 mt-20 text-center transition-all"
 	options={{ opacity: 0, scale: 0.9, duration: 750 }}
 >
 	<h1 class="inline-block text-7xl font-extrabold">Kadium</h1>
 </Revealed>
 <Revealed
-	class="mx-2 mb-12 text-center transition-all ease-out"
+	class="ease-out-cubic mx-2 mb-12 text-center transition-all"
 	options={{ opacity: 0, y: -10, duration: 550, delay: 250 }}
 >
-	<p class="text-xl text-blue-100 opacity-60 transition-all duration-500 ease-out">
+	<p class="ease-out-cubic text-xl text-blue-100 opacity-60 transition-all duration-500">
 		An app for staying ontop of YouTube channels' uploads
 	</p>
 </Revealed>
 
 <Revealed
-	class="mb-24 flex justify-center transition-all ease-out"
+	class="ease-out-cubic mb-24 flex justify-center transition-all"
 	options={{ opacity: 0, scale: 0.9, duration: 550, delay: 450 }}
 >
 	<div>

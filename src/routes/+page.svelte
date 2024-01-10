@@ -332,7 +332,6 @@
 </main>
 
 <style lang="sass">
-	$ease-md: cubic-bezier(0.4, 0.0, 0.2, 1)
 	.selectable
 		user-select: text
 	main
@@ -400,12 +399,9 @@
 		font-weight: 500
 		color: #ffffff
 		opacity: 1
-		transition: 100ms opacity $ease-md
 		margin-top: 1px
-	.channel
-		transition: 80ms opacity $ease-md
-		&:hover
-			color: hsl(210, 8%, 90%)
+	.channel:hover
+		color: hsl(210, 8%, 90%)
 	p.sub
 		font-size: 12px
 		color: hsl(210, 8%, 80%)
@@ -426,7 +422,7 @@
 		border: none
 		transform: translate3d(0, 0, 0) // fix glitch after transform/opacity
 		opacity: 0
-		transition: opacity 120ms $ease-md
+		transition: opacity 140ms var(--ease-out-cubic)
 		svg
 			fill: #ffffff
 			width: 16px
@@ -444,7 +440,7 @@
 			path.checkmark
 				transform: scale(1)
 				transform-origin: 20% 80%
-				transition: all 120ms $ease-md
+				transition: all 140ms var(--ease-out-cubic)
 			&:active path.checkmark
 				transform: scale(0.8)
 				opacity: 0
@@ -452,7 +448,7 @@
 			path.checkmark
 				transform: scale(0.8)
 				opacity: 0
-				transition: all 120ms $ease-md
+				transition: all 140ms var(--ease-out-cubic)
 			&:active path.checkmark
 				opacity: 1
 				transform: scale(1)

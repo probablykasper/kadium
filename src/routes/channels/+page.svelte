@@ -117,7 +117,6 @@
 </main>
 
 <style lang="sass">
-	$ease-md: cubic-bezier(0.4, 0.0, 0.2, 1)
 	main
 		display: flex
 		flex-direction: column
@@ -151,7 +150,7 @@
 		box-sizing: border-box
 		border: 1px solid hsla(0, 0%, 50%, 0.2)
 		background-color: hsl(225, 14%, 20%)
-		transition: all 120ms $ease-md
+		transition: all 120ms var(--ease-out-cubic)
 		&:hover
 			border-color: hsla(0, 0%, 50%, 0.5)
 		&:focus
@@ -168,7 +167,7 @@
 		display: flex
 		align-items: center
 		border-radius: 7px
-		transition: border 120ms $ease-md
+		transition: border 140ms var(--ease-out-cubic)
 		padding: 15px 5px
 		border: 1px solid transparent
 		@media screen and (min-width: 600px)
@@ -200,7 +199,7 @@
 		height: 28px
 		box-sizing: border-box
 		padding: 0px 6px
-		transition: all 120ms $ease-md
+		transition: all 120ms var(--ease-out-cubic)
 		&:focus
 			border-color: hsla(220, 100%, 50%, 1)
 			box-shadow: 0px 0px 0px 3px hsla(220, 100%, 50%, 0.5)

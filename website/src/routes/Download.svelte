@@ -118,10 +118,10 @@
 			class:opacity-50={loading}
 		>
 			<div
-				class="opacity-0 transition-all duration-700 ease-out group-hover:opacity-40 group-focus:opacity-40"
+				class="ease-out-cubic opacity-0 transition-all duration-700 group-hover:opacity-40 group-focus:opacity-40"
 			>
 				<div
-					class="gradient gradient-3 scale-80 absolute inset-0 -z-10 transition-all duration-700 ease-out group-hover:scale-100 group-hover:blur-md group-focus:scale-100 group-focus:blur-md"
+					class="gradient gradient-3 scale-80 ease-out-cubic absolute inset-0 -z-10 transition-all duration-700 group-hover:scale-100 group-hover:blur-md group-focus:scale-100 group-focus:blur-md"
 				/>
 			</div>
 			Download for {suggestedVersion.os}
@@ -133,10 +133,10 @@
 			aria-label="Download for other platforms"
 		>
 			<div
-				class="opacity-0 transition-all duration-700 ease-out group-hover:opacity-40 group-focus:opacity-40"
+				class="ease-out-cubic opacity-0 transition-all duration-700 group-hover:opacity-40 group-focus:opacity-40"
 			>
 				<div
-					class="gradient gradient-3 scale-80 absolute inset-0 -z-10 transition-all duration-700 ease-out group-hover:scale-100 group-hover:blur-md group-focus:scale-100 group-focus:blur-md"
+					class="gradient gradient-3 scale-80 ease-out-cubic absolute inset-0 -z-10 transition-all duration-700 group-hover:scale-100 group-hover:blur-md group-focus:scale-100 group-focus:blur-md"
 				/>
 			</div>
 			<svg

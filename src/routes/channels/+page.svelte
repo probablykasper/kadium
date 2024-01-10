@@ -87,7 +87,11 @@
 	</header>
 	<div bind:this={channels_scroll_el} class="channels">
 		{#each channels as channel, i}
-			<div class="channel selectable" class:show={filter === '' || channel.name.includes(filter)}>
+			{@const lowerName = channel.name.toLowerCase()}
+			<div
+				class="channel selectable"
+				class:show={filter === '' || lowerName.includes(filter.toLowerCase())}
+			>
 				<img src={channel.icon} alt="" />
 				<div class="details">
 					<a

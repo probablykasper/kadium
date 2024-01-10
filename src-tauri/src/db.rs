@@ -156,7 +156,7 @@ pub async fn get_videos(
 	let mut wheres: Vec<&str> = Vec::new();
 	let mut bindings: Vec<&str> = Vec::new();
 	if options.channel_filter != "" {
-		selects.push("INSTR(channelName, ?) channelFilter");
+		selects.push("INSTR(LOWER(channelName), LOWER(?)) channelFilter");
 		wheres.push("channelFilter > 0");
 		bindings.push(&options.channel_filter);
 	}

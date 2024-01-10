@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## 1.6.0 - 2024 Jan 10
 - Make search case insensitive
 - Show Channels page as grid
 - Load 100 videos at a time instead of 50

@@ -106,7 +106,7 @@
 						>
 						<span>Refresh rate: {Number(channel.refresh_rate_ms) / (1000 * 60)} minutes</span>
 					</div>
-					<Tags bind:value={channel.tags} on:update={saveChannels} />
+					<Tags bind:value={channel.tags} onUpdate={saveChannels} />
 				</div>
 				<Link on:click={() => openEditModal(i)}>
 					<div class="edit">Edit</div>

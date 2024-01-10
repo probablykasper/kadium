@@ -1,21 +1,25 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte'
 	import { checkShortcut } from './general'
 
+	export let value: string[]
+	export let onUpdate: () => void
 	let inputEl: HTMLInputElement
 
 	let editing = false
 	function startEditing() {
-		text = value[value.length - 1]
 		editing = true
+		text = value[value.length - 1]
 	}
-	function cancelEditing() {
-		text = ''
+	function startAdding() {
 		editing = false
+		text = ''
 	}
 	function applyEditing() {
 		if (editing) {
-			if (text !== '' && text !== value[value.length - 1]) {
+			if (text === '') {
+				value.pop()
+				update(value)
+			} else if (text !== value[value.length - 1]) {
 				value[value.length - 1] = text
 				update(value)
 			}
@@ -24,13 +28,11 @@
 		}
 	}
 
-	export let value: string[]
-	let text = 'Add tags...'
+	let text = ''
 
-	const dispatch = createEventDispatcher()
 	function update(newValue: string[]) {
 		value = newValue
-		dispatch('update')
+		onUpdate()
 	}
 
 	function onFocus() {
@@ -43,36 +45,39 @@
 			value.push(text)
 			update(value)
 		}
-		text = 'Add tags...'
+		text = ''
 	}
 	let tagXEls: HTMLButtonElement[] = []
-	function editingKeydown(e: KeyboardEvent) {
+	async function editingKeydown(e: KeyboardEvent) {
 		if (checkShortcut(e, 'Enter')) {
 			applyEditing()
 		} else if (checkShortcut(e, 'Backspace')) {
-			if (text.length === 1 && value.length >= 1) {
+			if (text === '' && value.length >= 2) {
+				e.preventDefault()
 				value.pop()
-				cancelEditing()
+				update(value)
+				startEditing()
 			}
 		} else if (checkShortcut(e, 'Escape')) {
-			cancelEditing()
+			startAdding()
 			e.preventDefault()
 		}
 	}
-	function keydown(e: KeyboardEvent) {
+	async function keydown(e: KeyboardEvent) {
 		if (editing) {
 			editingKeydown(e)
 			return
-		} else if (checkShortcut(e, 'Enter')) {
+		}
+		if (checkShortcut(e, 'Enter')) {
 			if (text !== '') {
 				value.push(text)
-				text = ''
 				update(value)
+				startAdding()
 			}
 		} else if (checkShortcut(e, 'Backspace')) {
 			if (text === '' && value.length >= 1) {
-				startEditing()
 				e.preventDefault()
+				startEditing()
 			}
 		} else if (checkShortcut(e, 'Escape')) {
 			e.preventDefault()
@@ -129,49 +134,50 @@
 		display: flex
 		flex-wrap: wrap
 		align-items: center
-		.label, .tag, input
-			margin-right: 4px
-			margin-top: 4px
-			height: 20px
-			line-height: 20px
-		.tag
-			background-color: hsla(230, 20%, 70%, 0.1)
-			color: hsla(231, 10%, 90%)
-			padding: 0px 4px
-			border-radius: 3px
-			border: 1px solid hsla(230, 20%, 70%, 0.1)
+	.label, .tag, input
+		margin-right: 4px
+		margin-top: 4px
+		height: 20px
+		line-height: 20px
+	.tag
+		background-color: hsla(230, 20%, 70%, 0.1)
+		color: hsla(231, 10%, 90%)
+		padding: 0px 4px
+		border-radius: 3px
+		border: 1px solid hsla(230, 20%, 70%, 0.1)
+		display: inline-block
+		button
 			display: inline-block
-			button
-				display: inline-block
-				padding: 0px 3px
-				margin: 0px
-				margin-right: -1px
-				background-color: transparent
-				font-size: inherit
-				border: 2px solid transparent
-				line-height: 1
-				outline: none
-				border-radius: 3px
-				color: hsla(231, 10%, 90%)
-				&:hover
-					color: hsla(231, 10%, 70%)
-				&:focus
-					border-color: hsl(210, 100%, 55%)
-		input
-			width: 70px
+			padding: 0px 3px
+			margin: 0px
+			margin-right: -1px
 			background-color: transparent
 			font-size: inherit
-			color: hsl(210, 100%, 45%)
-			padding: 1px 4px
-			border: 1px solid transparent
+			border: 2px solid transparent
+			line-height: 1
+			outline: none
+			border-radius: 3px
+			color: hsla(231, 10%, 90%)
+			&:hover
+				color: hsla(231, 10%, 70%)
 			&:focus
-				width: 150px
-				background-color: hsla(230, 20%, 70%, 0.1)
-				color: hsla(231, 20%, 100%, 0.8)
-				border-radius: 3px
-				border: 1px solid hsla(230, 20%, 70%, 0.1)
-				outline: none
-			&:empty::before
-				content: 'Add tags...'
-				opacity: 0.5
+				border-color: hsl(210, 100%, 55%)
+	input
+		width: 75px
+		background-color: transparent
+		font-size: inherit
+		padding: 1px 4px
+		border: 1px solid transparent
+		&:not(:focus):global(::placeholder)
+			color: hsl(210, 100%, 45%)
+		&:focus
+			width: 150px
+			background-color: hsla(230, 20%, 70%, 0.1)
+			color: hsla(231, 20%, 100%, 0.8)
+			border-radius: 3px
+			border: 1px solid hsla(230, 20%, 70%, 0.1)
+			outline: none
+		&:empty::before
+			content: 'Add tags...'
+			opacity: 0.5
 </style>

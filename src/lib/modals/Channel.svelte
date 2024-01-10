@@ -68,7 +68,7 @@
   $: if (datePopupVisible) {
     setTimeout(() => {
       datePopupVisible = false
-    }, 10)
+    }, 0)
   }
 </script>
 
@@ -106,7 +106,13 @@
       <input type="number" bind:value={refreshRateMinutes} />
 
       <p>Check for videos after</p>
-      <div class="date-picker">
+      <div
+        role="none"
+        class="date-picker"
+        on:keydown|capture={(e) => {
+          if (e.key === 'Enter') e.stopPropagation()
+        }}
+      >
         <DateInput bind:value={fromTime} bind:visible={datePopupVisible} />
       </div>
 

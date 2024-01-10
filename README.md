@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="./assets/logo.png" width="80">
+	<img src="./assets/logo.png" width="80">
 </p>
 <h3 align="center">Kadium</h3>
 <p align="center">
-  App for staying ontop of YouTube channels' uploads
-  <br/>
-  <a href="https://kadium.kasper.space"><b>Download for Mac, Windows or Linux</b></a>
+	App for staying ontop of YouTube channels' uploads
+	<br/>
+	<a href="https://kadium.kasper.space"><b>Download for Mac, Windows or Linux</b></a>
 </p>
 <br/>
 

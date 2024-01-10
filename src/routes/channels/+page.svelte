@@ -85,12 +85,12 @@
 			{visibleIndexes.length} of {channels.length}
 		</div>
 	</header>
-	<div bind:this={channels_scroll_el} class="channels">
+	<div bind:this={channels_scroll_el} class="channels grid">
 		{#each channels as channel, i}
 			{@const lowerName = channel.name.toLowerCase()}
 			<div
 				class="channel selectable"
-				class:show={filter === '' || lowerName.includes(filter.toLowerCase())}
+				hidden={filter !== '' && !lowerName.includes(filter.toLowerCase())}
 			>
 				<img src={channel.icon} alt="" />
 				<div class="details">
@@ -101,7 +101,6 @@
 						class="title">{channel.name}</a
 					>
 					<div class="content">
-						<!-- <span>{channel.id}</span> -->
 						<span
 							>Check for videos after {new Date(Number(channel.from_time)).toLocaleString()}</span
 						>
@@ -161,24 +160,19 @@
 	.selectable
 		user-select: text
 	.channels
-		flex-wrap: wrap
-		padding: 0px var(--page-padding)
-		height: 0px
-		flex-grow: 1
-		overflow-y: auto
+		padding: var(--page-padding)
+		gap: var(--page-padding)
+		display: grid
+		grid-template-columns: repeat(auto-fill, minmax(550px, 1fr))
 	.channel
-		flex-grow: 1
+		display: flex
 		align-items: center
 		border-radius: 7px
 		transition: border 120ms $ease-md
 		padding: 15px 5px
 		border: 1px solid transparent
-		display: none
-		&.show
-			display: flex
 		@media screen and (min-width: 600px)
 			padding: 15px
-			margin: 15px 0px
 			background-color: hsla(223, 33%, 64%, 0.05)
 			box-shadow: 0px 4px 8px 0px hsla(0, 0%, 0%, 0.1)
 			border: 1px solid hsla(0, 0%, 50%, 0.04)

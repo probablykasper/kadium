@@ -2,6 +2,7 @@
 
 ## Next
 - Make search case insensitive
+- Show Channels page as grid
 - Load 100 videos at a time instead of 50
 - Allow selecting bottom row diagonally with the down arrow key
 

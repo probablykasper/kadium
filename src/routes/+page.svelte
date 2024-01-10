@@ -367,19 +367,17 @@
 	main
 		overflow-y: auto
 		max-width: 100%
-		padding-bottom: 30px
-		scroll-padding-bottom: 30px
 	.drag-ghost
-			font-size: 14px
-			top: -1000px
-			position: absolute
-			background-color: transparent
-			padding-left: 3px
-			div
-				background-color: hsl(220, 17%, 7%)
-				padding: 4px 8px
-				max-width: 300px
-				border-radius: 3px
+		font-size: 14px
+		top: -1000px
+		position: absolute
+		background-color: transparent
+		padding-left: 3px
+		div
+			background-color: hsl(220, 17%, 7%)
+			padding: 4px 8px
+			max-width: 300px
+			border-radius: 3px
 	.grid
 		box-sizing: border-box
 		display: grid

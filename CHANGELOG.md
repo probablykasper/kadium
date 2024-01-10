@@ -1,5 +1,8 @@
 # Changelog
 
+## Next
+- Fix scrolling
+
 ## 1.6.0 - 2024 Jan 10
 - Make search case insensitive
 - Show Channels page as grid

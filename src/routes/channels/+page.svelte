@@ -85,7 +85,7 @@
 			{visibleIndexes.length} of {channels.length}
 		</div>
 	</header>
-	<div bind:this={channels_scroll_el} class="channels grid">
+	<div bind:this={channels_scroll_el} class="channels">
 		{#each channels as channel, i}
 			{@const lowerName = channel.name.toLowerCase()}
 			<div
@@ -121,6 +121,7 @@
 		display: flex
 		flex-direction: column
 		height: 100%
+		overflow-y: auto
 	header
 		display: flex
 		align-items: center

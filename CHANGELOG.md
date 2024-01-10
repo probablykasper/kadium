@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## 1.6.1 - 2024 Jan 10
 - Fix scrolling
 
 ## 1.6.0 - 2024 Jan 10

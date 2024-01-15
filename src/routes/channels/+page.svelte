@@ -90,7 +90,7 @@
 			{@const lowerName = channel.name.toLowerCase()}
 			<div
 				class="channel selectable"
-				hidden={filter !== '' && !lowerName.includes(filter.toLowerCase())}
+				class:hidden={filter !== '' && !lowerName.includes(filter.toLowerCase())}
 			>
 				<img src={channel.icon} alt="" />
 				<div class="details">
@@ -178,6 +178,8 @@
 			border: 1px solid hsla(0, 0%, 50%, 0.04)
 			&:hover
 				border: 1px solid hsla(0, 0%, 50%, 0.2)
+		&.hidden
+			display: none
 	img
 		width: 70px
 		padding-right: 20px

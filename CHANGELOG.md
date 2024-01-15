@@ -1,5 +1,8 @@
 # Changelog
 
+## Next
+- Fix channel page filtering
+
 ## 1.6.1 - 2024 Jan 10
 - Fix scrolling
 

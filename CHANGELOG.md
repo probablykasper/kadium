@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## 1.7.0 - 2024 Jan 21
 - Add basic history page, accessible via `Cmd/Ctrl+Y`.
 - Fix selection staying in the same position when videos update
 - Keep video selected if it moves position

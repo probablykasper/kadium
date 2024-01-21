@@ -1,6 +1,7 @@
 # Changelog
 
 ## Next
+- Add basic history page, accessible via `Cmd/Ctrl+Y`.
 - Fix selection staying in the same position when videos update
 - Keep video selected if it moves position
 - Fix settings link in Get Started popup

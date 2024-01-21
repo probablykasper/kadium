@@ -33,7 +33,7 @@
 			<p class="sub">
 				Kadium has a default API key, but it's vulnerable to abuse and could run out of quota.
 				<Link on:click={() => (keyGuideVisible = true)}>
-					<div>Get your own key</div>
+					<div style="font-size: 13px;">Get your own key</div>
 				</Link>
 			</p>
 			<input class="textbox" type="text" bind:value={apiKey} placeholder="AIzaSyNq5Y9knL..." />

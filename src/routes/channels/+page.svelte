@@ -200,6 +200,7 @@
 				color: hsla(231, 20%, 100%, 0.5)
 	.edit
 		padding: 10px 0px
+		font-size: 13px
 	input
 		height: 28px
 		box-sizing: border-box

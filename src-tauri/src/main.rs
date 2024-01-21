@@ -6,6 +6,7 @@
 use crate::data::{AppPaths, ArcData, Data};
 use crate::settings::yt_email_notifier;
 use crate::settings::VersionedSettings;
+use data::UndoHistory;
 use tauri::api::{dialog, shell};
 #[cfg(target_os = "macos")]
 use tauri::AboutMetadata;
@@ -93,6 +94,7 @@ async fn main() {
 				data::add_channel,
 				data::set_general_settings,
 				data::check_now,
+				data::get_history,
 				db::get_videos,
 				db::archive,
 				db::unarchive
@@ -137,6 +139,7 @@ async fn main() {
 			data::add_channel,
 			data::set_general_settings,
 			data::check_now,
+			data::get_history,
 			db::get_videos,
 			db::archive,
 			db::unarchive,
@@ -184,6 +187,7 @@ async fn main() {
 				versioned_settings: settings,
 				paths: app_paths,
 				window: win.clone(),
+				user_history: UndoHistory::new(),
 			};
 			app.manage(ArcData::new(data));
 
@@ -267,6 +271,10 @@ async fn main() {
 						.into(),
 					CustomMenuItem::new("Show All", "Show All")
 						.accelerator("Alt+CmdOrCtrl+A")
+						.into(),
+					MenuItem::Separator.into(),
+					CustomMenuItem::new("History", "History")
+						.accelerator("CmdOrCtrl+Y")
 						.into(),
 					MenuItem::Separator.into(),
 					MenuItem::EnterFullScreen.into(),

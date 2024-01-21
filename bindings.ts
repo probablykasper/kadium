@@ -38,6 +38,10 @@ export function checkNow() {
     return invoke()<null>("check_now")
 }
 
+export function getHistory() {
+    return invoke()<UndoHistory>("get_history")
+}
+
 export function getVideos(options: Options, after: After | null) {
     return invoke()<Video[]>("get_videos", { options,after })
 }
@@ -55,4 +59,6 @@ export type Options = { show_all: boolean; show_archived: boolean; channel_filte
 export type Video = { id: string; title: string; description: string; publishTimeMs: number; durationMs: number; thumbnailStandard: boolean; thumbnailMaxres: boolean; channelId: string; channelName: string; unread: boolean; archived: boolean }
 export type After = { publishTimeMs: number; id: string }
 export type Channel = { id: string; name: string; icon: string; uploads_playlist_id: string; from_time: number; refresh_rate_ms: number; tags: string[] }
+export type UndoHistory = { entries: ([number, Action])[] }
 export type AddChannelOptions = { url: string; from_time: number; refresh_rate_ms: number; tags: string[] }
+export type Action = "CheckNow" | { Archive: string } | { Unarchive: string } | { AddChannel: string } | { UpdateOrDeleteChannels: string }

@@ -1,5 +1,5 @@
 use crate::api::playlist_items;
-use crate::data::{AppPaths, DataState};
+use crate::data::{Action, AppPaths, DataState};
 use crate::throw;
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -225,19 +225,23 @@ async fn set_archived(pool: &SqlitePool, id: &str, value: bool) -> Result<(), St
 #[command]
 #[specta::specta]
 pub async fn archive(id: String, data: DataState<'_>) -> Result<(), String> {
-	let data = data.0.lock().await;
+	let mut data = data.0.lock().await;
 	match set_archived(&data.db_pool, &id, true).await {
-		Ok(()) => Ok(()),
+		Ok(()) => (),
 		Err(e) => throw!("Error archiving video: {}", e),
 	}
+	data.user_history.push(Action::Archive(id));
+	Ok(())
 }
 
 #[command]
 #[specta::specta]
 pub async fn unarchive(id: String, data: DataState<'_>) -> Result<(), String> {
-	let data = data.0.lock().await;
+	let mut data = data.0.lock().await;
 	match set_archived(&data.db_pool, &id, false).await {
-		Ok(()) => Ok(()),
+		Ok(()) => (),
 		Err(e) => throw!("Error unarchiving video: {}", e),
 	}
+	data.user_history.push(Action::Unarchive(id));
+	Ok(())
 }

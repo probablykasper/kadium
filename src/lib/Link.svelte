@@ -17,6 +17,7 @@
 <style lang="sass">
 	button
 		font-size: 13px
+		font-size: inherit
 		margin: 0px
 		background-color: transparent
 		padding: 0px

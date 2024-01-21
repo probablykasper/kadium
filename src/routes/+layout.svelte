@@ -53,6 +53,8 @@
 			goto('/', { replaceState: true })
 		} else if (payload === 'Channels') {
 			goto('/channels', { replaceState: true })
+		} else if (payload === 'History') {
+			goto('/history', { replaceState: true })
 		} else if (payload === 'Preferences...' || payload === 'Options...') {
 			$settingsOpen = true
 		} else if (payload === 'Add Channel...') {

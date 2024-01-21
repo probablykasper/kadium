@@ -3,14 +3,16 @@ use crate::settings::{Channel, Settings, VersionedSettings};
 use crate::{api, background, throw};
 use atomicwrites::{AtomicFile, OverwriteBehavior};
 use scraper::{Html, Selector};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use specta::Type;
 use sqlx::SqlitePool;
 use std::collections::HashSet;
+use std::convert::TryInto;
 use std::env;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use std::time::{SystemTime, UNIX_EPOCH};
 use tauri::{command, Config, State};
 use tokio::sync::Mutex;
 use url::Url;
@@ -41,6 +43,7 @@ pub struct Data {
 	pub versioned_settings: VersionedSettings,
 	pub paths: AppPaths,
 	pub window: tauri::Window,
+	pub user_history: UndoHistory,
 }
 impl Data {
 	pub fn settings(&mut self) -> &mut Settings {
@@ -122,6 +125,7 @@ pub async fn tags(data: DataState<'_>) -> Result<Vec<String>, String> {
 pub async fn check_now(data: DataState<'_>) -> Result<(), String> {
 	let mut data = data.0.lock().await;
 	data.check_now()?;
+	data.user_history.push(Action::CheckNow);
 	Ok(())
 }
 
@@ -227,6 +231,8 @@ pub async fn set_channels(channels: Vec<Channel>, data: DataState<'_>) -> Result
 	let mut data = data.0.lock().await;
 	data.settings().channels = channels;
 	data.save_settings()?;
+	data.user_history
+		.push(Action::UpdateOrDeleteChannels("".to_string()));
 	Ok(())
 }
 
@@ -256,7 +262,7 @@ pub async fn add_channel(options: AddChannelOptions, data: DataState<'_>) -> Res
 	};
 
 	settings.channels.push(Channel {
-		id: channel.id,
+		id: channel.id.clone(),
 		name: channel.snippet.title,
 		icon: channel.snippet.thumbnails.medium.url,
 		uploads_playlist_id: channel.contentDetails.relatedPlaylists.uploads,
@@ -265,6 +271,7 @@ pub async fn add_channel(options: AddChannelOptions, data: DataState<'_>) -> Res
 		tags: options.tags,
 	});
 	data.save_settings()?;
+	data.user_history.push(Action::AddChannel(channel.id));
 	Ok(())
 }
 
@@ -290,4 +297,43 @@ impl ArcData {
 	pub fn new(data: Data) -> Self {
 		Self(Arc::new(Mutex::new(data)))
 	}
+}
+
+#[derive(Serialize, Clone, Type)]
+pub struct UndoHistory {
+	pub entries: Vec<(u32, Action)>,
+}
+
+impl UndoHistory {
+	pub fn new() -> Self {
+		Self { entries: vec![] }
+	}
+	pub fn push(&mut self, action: Action) {
+		let time: u32 = SystemTime::now()
+			.duration_since(UNIX_EPOCH)
+			.unwrap()
+			.as_secs()
+			.try_into()
+			.unwrap();
+		self.entries.push((time, action));
+		if self.entries.len() > 100 {
+			self.entries.remove(0);
+		}
+	}
+}
+
+#[derive(Serialize, Clone, Type)]
+pub enum Action {
+	CheckNow,
+	Archive(String),
+	Unarchive(String),
+	AddChannel(String),
+	UpdateOrDeleteChannels(String),
+}
+
+#[command]
+#[specta::specta]
+pub async fn get_history(data: DataState<'_>) -> Result<UndoHistory, String> {
+	let data = data.0.lock().await;
+	Ok(data.user_history.clone())
 }

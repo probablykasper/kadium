@@ -4,7 +4,7 @@
 	import Button from '$lib/Button.svelte'
 	import Link from '$lib/Link.svelte'
 
-	export let visible = true
+	export let visible = false
 </script>
 
 {#if visible}

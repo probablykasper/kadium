@@ -288,7 +288,10 @@ async fn main() {
 			)),
 			MenuEntry::Submenu(Submenu::new(
 				"Help",
-				Menu::with_items([CustomMenuItem::new("Learn More", "Learn More").into()]),
+				Menu::with_items([
+					CustomMenuItem::new("Get Started", "Get Started").into(),
+					CustomMenuItem::new("Learn More", "Learn More").into(),
+				]),
 			)),
 		]))
 		.on_menu_event(|event| match event.menu_item_id() {

@@ -1,3 +1,7 @@
+<script lang="ts" context="module">
+	let getStartedWasShown = false
+</script>
+
 <script lang="ts">
 	import { event } from '@tauri-apps/api'
 	import { checkShortcut, checkModifiers } from '$lib/general'
@@ -65,20 +69,21 @@
 			goto('/', { replaceState: true })
 			$viewOptions.show_all = true
 			$viewOptions.show_archived = false
+		} else if (payload === 'Get Started') {
+			showGetStarted = true
 		}
 	})
 	onDestroy(async () => {
 		const unlisten = await unlistenFuture
 		unlisten()
 	})
-	let getStartedWasSeen = false
-	$: if (
-		!getStartedWasSeen &&
-		$settings &&
-		$settings.channels.length === 0 &&
-		$settings.api_key === ''
-	) {
-		getStartedWasSeen = true
+	let showGetStarted = false
+	$: if (showGetStarted) {
+		getStartedWasShown = true
+	}
+
+	$: if (!getStartedWasShown && $settings?.channels.length === 0 && $settings.api_key === '') {
+		showGetStarted = true
 	}
 </script>
 
@@ -94,9 +99,7 @@
 		bind:visible={$settingsOpen}
 	/>
 
-	{#if getStartedWasSeen}
-		<GetStarted />
-	{/if}
+	<GetStarted bind:visible={showGetStarted} />
 {:else if error}
 	Error loading.
 

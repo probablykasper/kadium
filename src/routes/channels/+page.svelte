@@ -163,7 +163,9 @@
 		padding: var(--page-padding)
 		gap: var(--page-padding)
 		display: grid
-		grid-template-columns: repeat(auto-fill, minmax(550px, 1fr))
+		grid-template-columns: 1fr
+		@media screen and (min-width: 600px)
+			grid-template-columns: repeat(auto-fill, minmax(550px, 1fr))
 	.channel
 		display: flex
 		align-items: center

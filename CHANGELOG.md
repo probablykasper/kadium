@@ -1,5 +1,8 @@
 # Changelog
 
+## Next
+- Fix deselection not happening when videos update
+
 ## 1.6.2 - 2024 Jan 15
 - Fix channel page filtering
 

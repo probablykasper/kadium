@@ -21,7 +21,7 @@
 		allLoaded = newVideos.length < $viewOptions.limit
 		videos = newVideos
 		// Remove selection if the video changes position
-		if (!selectedId && selectedId !== videos[selectedIndex]?.id) {
+		if (!selectedId || selectedId !== videos[selectedIndex]?.id) {
 			selectedIndex = 0
 			selectionVisible = false
 		}

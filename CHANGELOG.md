@@ -1,7 +1,8 @@
 # Changelog
 
 ## Next
-- Fix deselection not happening when videos update
+- Fix selection staying in the same position when videos update
+- Keep video selected if it moves position
 
 ## 1.6.2 - 2024 Jan 15
 - Fix channel page filtering

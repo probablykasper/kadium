@@ -16,17 +16,32 @@
 		loading++
 
 		const selectedId = videos[selectedIndex]?.id
+		const oldselectedIndex = selectedIndex
 
 		const newVideos = await commands.getVideos(options, null)
 		allLoaded = newVideos.length < $viewOptions.limit
 		videos = newVideos
-		// Remove selection if the video changes position
-		if (!selectedId || selectedId !== videos[selectedIndex]?.id) {
+
+		// Update the selection index if the video moves
+		const newSelectedIndex = videos.findIndex((v) => v.id === selectedId)
+		if (newSelectedIndex >= 0) {
+			selectedIndex = newSelectedIndex
+			selectionVisible = true
+		} else {
+			// Or clear selection if the video disappeared from view
 			selectedIndex = 0
 			selectionVisible = false
 		}
+		const selectionMoved = selectionVisible && selectedIndex !== oldselectedIndex
 
-		await tick()
+		if (selectionMoved) {
+			allowScrollToBox = false
+			await tick()
+			allowScrollToBox = true
+			scrollToBox(selectedIndex)
+		} else {
+			await tick()
+		}
 		await autoloadHandler()
 		loading--
 	}
@@ -263,8 +278,9 @@
 
 	let boxes: HTMLDivElement[] = []
 	$: scrollToBox(selectedIndex)
+	let allowScrollToBox = true
 	function scrollToBox(index: number) {
-		if (scrollDiv && boxes[index]) {
+		if (scrollDiv && boxes[index] && allowScrollToBox) {
 			const el = boxes[index].getBoundingClientRect()
 			const parent = scrollDiv.getBoundingClientRect()
 			const topOffset = el.top - parent.top

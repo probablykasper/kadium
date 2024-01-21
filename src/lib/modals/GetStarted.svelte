@@ -14,7 +14,13 @@
 			<p>You can add a channel on the Channels page.</p>
 			<p>
 				Consider opening the
-				<Link href="/" on:click={() => ($settingsOpen = true)}>settings</Link>
+				<Link
+					href=""
+					on:click={(e) => {
+						e.preventDefault()
+						$settingsOpen = true
+					}}>settings</Link
+				>
 				to see how to get your own API key. Kadium has a default one, but it's vulnerable to abuse and
 				could run out of quota.
 			</p>

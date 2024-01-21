@@ -3,6 +3,7 @@
 ## Next
 - Fix selection staying in the same position when videos update
 - Keep video selected if it moves position
+- Fix settings link in Get Started popup
 
 ## 1.6.2 - 2024 Jan 15
 - Fix channel page filtering

@@ -24,15 +24,14 @@
 
 		// Update the selection index if the video moves
 		const newSelectedIndex = videos.findIndex((v) => v.id === selectedId)
-		if (newSelectedIndex >= 0) {
+		if (newSelectedIndex >= 0 && selectionVisible) {
 			selectedIndex = newSelectedIndex
-			selectionVisible = true
 		} else {
 			// Or clear selection if the video disappeared from view
 			selectedIndex = 0
 			selectionVisible = false
 		}
-		const selectionMoved = selectionVisible && selectedIndex !== oldselectedIndex
+		const selectionMoved = selectedIndex !== oldselectedIndex && selectionVisible
 
 		if (selectionMoved) {
 			allowScrollToBox = false

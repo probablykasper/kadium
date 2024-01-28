@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## 1.7.1 - 2024 Jan 28
 - Fix selection being created on videos page refresh
 
 ## 1.7.0 - 2024 Jan 21

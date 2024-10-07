@@ -4,7 +4,7 @@
 </script>
 
 <svelte:head>
-	<title>Changelog • Kadium</title>
+	<title>{$page.status} • Kadium</title>
 </svelte:head>
 
 <main class="relative mx-auto mb-24 max-w-3xl p-6">

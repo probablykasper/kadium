@@ -1,8 +1,10 @@
 <script lang="ts">
+	const a_var = 'hey'
 	export let secondary = false
 	export let danger = false
 	export let type: 'button' | 'reset' | 'submit' | null | undefined = 'button'
 	export let children
+	console.log(secondary)
 </script>
 
 <button {type} class:normal={!danger && !secondary} class:secondary class:danger>

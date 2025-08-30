@@ -15,6 +15,7 @@ function script() {
 			if (
 				attributes.lang !== 'ts' ||
 				attributes.context === 'module' ||
+				content.includes('$props(') ||
 				filename.includes('/node_modules/')
 			) {
 				return
@@ -27,7 +28,7 @@ function script() {
 				return
 			}
 
-			console.log(`\n\n\n\n ${resolvedFilename} ::::::::::::::::::`, attributes)
+			console.log(`\n\n\n\n :::::::::::::::::: ${resolvedFilename}`)
 			console.log(content)
 
 			// Create a temporary TS file to get type information
@@ -38,7 +39,7 @@ function script() {
 			// Set up the TypeScript language service and program
 			const servicesHost = {
 				getScriptFileNames: () => [tsFilename],
-				getScriptVersion: (fileName) => '1',
+				getScriptVersion: () => '1',
 				getScriptSnapshot: (fileName) => {
 					if (files.has(fileName)) {
 						return ts.ScriptSnapshot.fromString(files.get(fileName))

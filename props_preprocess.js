@@ -140,37 +140,49 @@ function script() {
 				return
 			}
 
-			const s = new MagicString(content)
-
-			// New logic to determine indentation
-			const firstStatement = originalSourceFile.statements[0]
-			let indent = ''
-			if (firstStatement) {
-				const start = firstStatement.getStart(originalSourceFile, true)
-				const lineStart = content.lastIndexOf('\n', start) + 1
-				indent = content.substring(lineStart, start)
+			if (!exports.length) {
+				console.log('(No props found)')
+				return
 			}
 
+			const s = new MagicString(content)
+			let lastExportNode = null
+
+			// Find the last export statement and remove all of them
 			for (const node of originalSourceFile.statements) {
-				if (ts.isVariableStatement(node)) {
-					const isExport = node.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)
-					if (isExport) {
-						s.remove(node.pos, node.end)
-					}
+				if (
+					ts.isVariableStatement(node) &&
+					node.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)
+				) {
+					lastExportNode = node
+					s.remove(node.pos, node.end)
 				}
+			}
+
+			// FIX: Get indentation from the last export statement
+			let indent = ''
+			if (lastExportNode) {
+				const start = lastExportNode.getStart(originalSourceFile, true)
+				const lineStart = content.lastIndexOf('\n', start) + 1
+				indent = content.substring(lineStart, start)
 			}
 
 			let prop_content = ''
 			let type_content = ''
 			for (const e of exports) {
-				prop_content += `${indent}${indent}${e.name}${e.initializer ? ` = ${e.initializer}` : ''},\n`
-				type_content += `${indent}${indent}${e.name}${e.type ? `: ${e.type}` : ''},\n`
+				prop_content += `${indent}\t${e.name}${e.initializer ? ` = ${e.initializer}` : ''},\n`
+				type_content += `${indent}\t${e.name}${e.type ? `: ${e.type}` : ''},\n`
 			}
 
-			// Prepend the new block with the determined indentation
+			// Construct the new code block with correct indentation
 			const destructure = `${indent}let {\n${prop_content}${indent}}: {\n${type_content}${indent}} = $props();\n`
 
-			s.prepend(destructure)
+			// Insert the new code block at the position of the last removed export statement
+			if (lastExportNode) {
+				s.appendLeft(lastExportNode.end, '\n' + destructure)
+			} else {
+				s.prepend(destructure)
+			}
 
 			console.log('\n ----------->\n')
 			console.log(s.toString())

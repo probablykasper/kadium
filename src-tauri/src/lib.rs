@@ -61,7 +61,7 @@ fn load_data(paths: &AppPaths) -> Result<VersionedSettings, String> {
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
-async fn run() {
+pub async fn run() {
 	let specta_builder =
 		tauri_specta::Builder::<tauri::Wry>::new().commands(tauri_specta::collect_commands![
 			error_popup,
@@ -88,6 +88,24 @@ async fn run() {
 	// We need to prevent that so our intervals are not interrupted.
 	#[cfg(target_os = "macos")]
 	macos_app_nap::prevent();
+
+	let app_paths = AppPaths::from_tauri_config(ctx.config());
+
+	let mut settings = match load_data(&app_paths) {
+		Ok(v) => v,
+		Err(e) => {
+			error_popup_main_thread(&e);
+			panic!("{}", e);
+		}
+	};
+
+	let pool = match db::init(&app_paths).await {
+		Ok(pool) => pool,
+		Err(e) => {
+			error_popup_main_thread(&e);
+			panic!("{}", e);
+		}
+	};
 
 	let app = tauri::Builder::default()
 		.plugin(tauri_plugin_opener::init())
@@ -130,24 +148,6 @@ async fn run() {
 				}
 			}
 
-			let app_paths = AppPaths::from_tauri_config(&app);
-
-			let (mut settings, _note) = match load_data(&app_paths) {
-				Ok(v) => v,
-				Err(e) => {
-					error_popup_main_thread(&e);
-					panic!("{}", e);
-				}
-			};
-
-			let pool = match db::init(&app_paths).await {
-				Ok(pool) => pool,
-				Err(e) => {
-					error_popup_main_thread(&e);
-					panic!("{}", e);
-				}
-			};
-
 			let data = Data {
 				bg_handle: background::spawn_bg(settings.unwrap(), &pool, win.clone()),
 				db_pool: pool,
@@ -162,6 +162,9 @@ async fn run() {
 			if let Some(note) = _note.clone() {
 				dialog::message(Option::Some(&win), note.0, note.1);
 			}
+
+			menu::manage_menu(app)?;
+
 			Ok(())
 		})
 		.build(ctx)

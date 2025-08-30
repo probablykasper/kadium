@@ -13,7 +13,7 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
-use tauri::{command, App, Config, Manager, State};
+use tauri::{command, Config, Error, State};
 use tokio::sync::Mutex;
 use url::Url;
 
@@ -24,11 +24,15 @@ pub struct AppPaths {
 	pub db: String,
 }
 impl AppPaths {
-	pub fn from_tauri_config(app: &App) -> Self {
+	pub fn from_tauri_config(config: &Config) -> Self {
 		let app_dir = match env::var("DEVELOPMENT").is_ok() {
 			true => env::current_dir().unwrap().join("appdata"),
-			false => app.path().app_data_dir().unwrap()
+			false => dirs::data_local_dir()
+				.ok_or(Error::UnknownPath)
+				.map(|dir| dir.join(&config.identifier))
+				.unwrap(),
 		};
+
 		AppPaths {
 			app_dir: app_dir.clone(),
 			settings_file: app_dir.join("Settings.json"),

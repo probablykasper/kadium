@@ -24,8 +24,15 @@ export const settingsOpen = writable(false)
 export const settings: Writable<null | Settings> = writable(null)
 export const tags: Writable<string[]> = writable([])
 export async function loadSettings() {
-	settings.set(await commands.getSettings())
-	tags.set(await commands.tags())
+	const settingsResult = await commands.getSettings()
+	if (settingsResult.status === 'ok') {
+		settings.set(settingsResult.data)
+	}
+
+	const tagsResult = await commands.tags()
+	if (tagsResult.status === 'ok') {
+		tags.set(tagsResult.data)
+	}
 }
 
 export function enableSampleData() {

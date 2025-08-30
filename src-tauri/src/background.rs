@@ -187,12 +187,17 @@ async fn run_interval(options: IntervalOptions, interval_info: IntervalInfo) {
 }
 
 async fn check_channels(options: &IntervalOptions, interval_info: &IntervalInfo) {
-    let app = options.window.app_handle();
+	let app = options.window.app_handle();
 	let window_visible = match options.window.is_visible() {
 		Ok(is_visible) => is_visible,
 		Err(e) => {
 			eprintln!("{}", e);
-			app.notification().builder().title("Failed to check channels").body(e.to_string()).show().expect("Unable to show notification");
+			app.notification()
+				.builder()
+				.title("Failed to check channels")
+				.body(e.to_string())
+				.show()
+				.expect("Unable to show notification");
 			return;
 		}
 	};
@@ -205,7 +210,8 @@ async fn check_channels(options: &IntervalOptions, interval_info: &IntervalInfo)
 			Err(e) => {
 				let title = format!("Error checking {}", channel.name);
 				eprintln!("{}: {}", title, e);
-				app.notification().builder()
+				app.notification()
+					.builder()
 					.title(title)
 					.body(e)
 					.show()

@@ -4,7 +4,7 @@ use tauri::{
 };
 use tauri_plugin_opener::OpenerExt;
 
-pub fn manage_tray(app: &App) -> Result<(), Box<dyn std::error::Error>> {
+pub fn manage_menu(app: &App) -> Result<(), Box<dyn std::error::Error>> {
 	#[allow(unused_mut)]
 	let mut menu = MenuBuilder::new(app);
 

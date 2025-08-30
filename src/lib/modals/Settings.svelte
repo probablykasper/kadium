@@ -9,7 +9,7 @@
 	export let apiKey: string
 	export let maxConcurrentRequests: number
 	export let checkInBackground: boolean
-	export let windowDecorations: boolean
+	export let noWindowDecorations: boolean
 
 	export let visible = false
 	let keyGuideVisible = false
@@ -19,7 +19,7 @@
 			apiKey,
 			maxConcurrentRequests,
 			checkInBackground,
-			windowDecorations,
+			noWindowDecorations,
 		)
 		await loadSettings()
 		visible = false
@@ -51,9 +51,9 @@
 			</div>
 			<div class="toggle-row">
 				<label for="window-decorations">
-					<p>Window Decorations</p>
+					<p>Disable window decorations</p>
 				</label>
-				<Switch id="window-decorations" bind:checked={windowDecorations} />
+				<Switch id="no-window-decorations" bind:checked={noWindowDecorations} />
 			</div>
 			<div class="buttons">
 				<Button secondary on:click={() => (visible = false)}>Cancel</Button>

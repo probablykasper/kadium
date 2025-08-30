@@ -114,7 +114,7 @@ pub async fn run() {
 				.title("Kadium")
 				.inner_size(900.0, 800.0)
 				.min_inner_size(400.0, 150.0)
-				.decorations(settings.unwrap_ref().window_decorations)
+				.decorations(!settings.unwrap_ref().no_window_decorations)
 				.theme(Some(tauri::Theme::Dark));
 
 			#[cfg(target_os = "macos")]

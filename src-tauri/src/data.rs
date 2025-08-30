@@ -287,18 +287,18 @@ pub async fn set_general_settings(
 	api_key: String,
 	max_concurrent_requests: u32,
 	check_in_background: bool,
-	window_decorations: bool,
+	no_window_decorations: bool,
 	data: DataState<'_>,
 ) -> Result<(), String> {
 	let mut data = data.0.lock().await;
 	data.settings().set_api_key(api_key);
 	data.settings().max_concurrent_requests = max_concurrent_requests;
 	data.settings().check_in_background = check_in_background;
-	data.settings().window_decorations = window_decorations;
+	data.settings().no_window_decorations = no_window_decorations;
 	app_handle
 		.get_webview_window("main")
 		.unwrap()
-		.set_decorations(window_decorations)
+		.set_decorations(!no_window_decorations)
 		.unwrap();
 	data.save_settings()?;
 	Ok(())

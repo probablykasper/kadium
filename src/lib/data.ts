@@ -76,6 +76,6 @@ export function enableSampleData() {
 			return channels
 		})(),
 		check_in_background: true,
-		window_decorations: true,
+		no_window_decorations: true,
 	})
 }

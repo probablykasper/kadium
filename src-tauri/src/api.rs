@@ -155,6 +155,7 @@ pub mod videos {
 	}
 	#[derive(Deserialize, Debug)]
 	pub struct Thumbnail {
+		#[allow(dead_code)]
 		pub url: String,
 	}
 }

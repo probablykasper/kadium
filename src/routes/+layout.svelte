@@ -52,13 +52,13 @@
 
 	create_menu()
 
-	$: if ($show_get_started) {
-		get_started_was_shown = true
-	}
+	// $: if ($show_get_started) {
+	// 	get_started_was_shown = true
+	// }
 
-	$: if (!get_started_was_shown && $settings?.channels.length === 0 && $settings.api_key === '') {
-		$show_get_started = true
-	}
+	// $: if (!get_started_was_shown && $settings?.channels.length === 0 && $settings.api_key === '') {
+	// 	$show_get_started = true
+	// }
 </script>
 
 <svelte:window on:keydown={keydown} />

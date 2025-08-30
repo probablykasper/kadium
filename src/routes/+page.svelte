@@ -314,7 +314,7 @@
 <VideoBar loadedVideosCount={videos.length} {allLoaded} />
 
 <div class="drag-ghost" bind:this={dragEl}>
-	<div bind:this={dragElDiv} />
+	<div bind:this={dragElDiv}></div>
 </div>
 
 <main on:scroll={autoloadHandler} bind:this={scrollDiv}>
@@ -413,13 +413,13 @@
 		display: grid
 		grid-template-columns: repeat(auto-fill, minmax(210px, 1fr))
 		grid-gap: 5px
+		padding: var(--page-padding)
 		@media screen and (min-width: 1000px)
 			grid-template-columns: repeat(auto-fill, minmax(220px, 1fr))
 			grid-gap: 10px
 		@media screen and (min-width: 1500px)
 			grid-template-columns: repeat(auto-fill, minmax(230px, 1fr))
 			grid-gap: 10px
-		padding: var(--page-padding)
 		@media screen and (max-width: 450px)
 			grid-template-columns: 1fr
 			.box

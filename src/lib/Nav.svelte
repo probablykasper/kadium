@@ -61,7 +61,7 @@
 		Check Now
 		{#if checking > 0}
 			<div class="loader-container" transition:fade={{ duration: 400 }}>
-				<span class="loader" />
+				<span class="loader"></span>
 			</div>
 		{/if}
 	</button>

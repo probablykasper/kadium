@@ -2,11 +2,12 @@
 	export let secondary = false
 	export let danger = false
 	export let type: 'button' | 'reset' | 'submit' | null | undefined = 'button'
-	let normal = false
-	$: normal = !danger && !secondary
+	export let children
 </script>
 
-<button on:click on:mousedown class:normal class:secondary class:danger {type}><slot /></button>
+<button {type} class:normal={!danger && !secondary} class:secondary class:danger>
+	{@render children?.()}
+</button>
 
 <style lang="sass">
 	button

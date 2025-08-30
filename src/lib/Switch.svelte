@@ -19,7 +19,7 @@
 <label class="switch" class:checked tabindex="0" on:keydown={keydown}>
 	<input class="hidden" type="checkbox" bind:checked {id} />
 	<div class="box" style:background-color={color} style:border-color={color}>
-		<div class="handle" />
+		<div class="handle"></div>
 	</div>
 </label>
 

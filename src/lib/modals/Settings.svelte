@@ -45,7 +45,7 @@
 			</div>
 			<div class="buttons">
 				<Button secondary on:click={() => (visible = false)}>Cancel</Button>
-				<div class="spacer" />
+				<div class="spacer"></div>
 				<Button type="submit">Save</Button>
 			</div>
 		</form>

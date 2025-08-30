@@ -27,6 +27,7 @@ pub fn manage_menu(app: &App) -> Result<(), Box<dyn std::error::Error>> {
 		menu = menu.item(&app_entry);
 	}
 
+	#[allow(unused_mut)]
 	let mut file = SubmenuBuilder::new(app, "File")
 		.item(
 			&MenuItemBuilder::new("Add Channel...")
@@ -119,13 +120,15 @@ pub fn manage_menu(app: &App) -> Result<(), Box<dyn std::error::Error>> {
 		.item(&MenuItemBuilder::new("Learn More").build(app)?)
 		.build()?;
 
-	let _ = menu
+	let menu_built = menu
 		.item(&file.build()?)
 		.item(&edit)
 		.item(&view)
 		.item(&window)
 		.item(&help)
 		.build()?;
+
+	app.set_menu(menu_built)?;
 
 	app.app_handle()
 		.on_menu_event(|app, event| match event.id().0.as_str() {

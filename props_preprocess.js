@@ -108,21 +108,25 @@ function script() {
 						const name = decl.name.text
 						const initializer = decl.initializer ? decl.initializer.getText(source_file) : undefined
 
-						const symbol = checker.getSymbolAtLocation(decl.name)
-						if (!symbol) return
-
-						const type = checker.getTypeOfSymbolAtLocation(symbol, decl.name)
-						const typeString = checker.typeToString(
-							type,
-							source_file,
-							ts.TypeFormatFlags.NoTruncation,
-						)
-
 						const originalDecl = originalDecls.get(name)
-						const hasExplicitType = originalDecl && originalDecl.type
-						const isAnyType = typeString === 'any'
+						let typeString
 
-						if (hasExplicitType || !isAnyType) {
+						if (originalDecl && originalDecl.type) {
+							// FIX: Always use the explicit type from the original Svelte AST
+							typeString = originalDecl.type.getText(originalSourceFile)
+						} else {
+							const symbol = checker.getSymbolAtLocation(decl.name)
+							if (symbol) {
+								const type = checker.getTypeOfSymbolAtLocation(symbol, decl.name)
+								typeString = checker.typeToString(
+									type,
+									source_file,
+									ts.TypeFormatFlags.NoTruncation,
+								)
+							}
+						}
+
+						if (typeString && typeString !== 'any') {
 							exports.push({ name, type: typeString, initializer })
 						} else {
 							exports.push({ name, initializer })

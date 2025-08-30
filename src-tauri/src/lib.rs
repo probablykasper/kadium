@@ -13,7 +13,6 @@ mod api;
 mod background;
 mod data;
 mod db;
-mod menu;
 mod settings;
 
 fn error_popup_main_thread(msg: impl AsRef<str>) {
@@ -155,8 +154,6 @@ pub async fn run() {
 				user_history: UndoHistory::new(),
 			};
 			app.manage(ArcData::new(data));
-
-			menu::manage_menu(app)?;
 
 			Ok(())
 		})

@@ -1,9 +1,11 @@
 <script lang="ts" context="module">
-	let getStartedWasShown = false
+	import { writable } from 'svelte/store'
+
+	let get_started_was_shown = false
+	export let show_get_started = writable(false)
 </script>
 
 <script lang="ts">
-	import { event } from '@tauri-apps/api'
 	import { checkShortcut, checkModifiers } from '$lib/general'
 	import SettingsModal from '$lib/modals/Settings.svelte'
 	import {
@@ -15,10 +17,10 @@
 		settingsOpen,
 	} from '$lib/data'
 	import Nav from '$lib/Nav.svelte'
-	import { onDestroy } from 'svelte'
 	import GetStarted from '$lib/modals/GetStarted.svelte'
 	import { page } from '$app/stores'
 	import { goto } from '$app/navigation'
+	import { create_menu } from './menu'
 
 	let error = false
 	loadSettings().catch(() => {
@@ -48,44 +50,14 @@
 		}
 	}
 
-	const unlistenFuture = event.listen('tauri://menu', ({ payload }) => {
-		if (payload === 'Videos') {
-			goto('/', { replaceState: true })
-		} else if (payload === 'Channels') {
-			goto('/channels', { replaceState: true })
-		} else if (payload === 'History') {
-			goto('/history', { replaceState: true })
-		} else if (payload === 'Preferences...' || payload === 'Options...') {
-			$settingsOpen = true
-		} else if (payload === 'Add Channel...') {
-			goto('/channels?add', { replaceState: true })
-		} else if (payload === 'Show New') {
-			goto('/', { replaceState: true })
-			$viewOptions.show_all = false
-			$viewOptions.show_archived = false
-		} else if (payload === 'Show Archived') {
-			goto('/', { replaceState: true })
-			$viewOptions.show_all = false
-			$viewOptions.show_archived = true
-		} else if (payload === 'Show All') {
-			goto('/', { replaceState: true })
-			$viewOptions.show_all = true
-			$viewOptions.show_archived = false
-		} else if (payload === 'Get Started') {
-			showGetStarted = true
-		}
-	})
-	onDestroy(async () => {
-		const unlisten = await unlistenFuture
-		unlisten()
-	})
-	let showGetStarted = false
-	$: if (showGetStarted) {
-		getStartedWasShown = true
+	create_menu()
+
+	$: if ($show_get_started) {
+		get_started_was_shown = true
 	}
 
-	$: if (!getStartedWasShown && $settings?.channels.length === 0 && $settings.api_key === '') {
-		showGetStarted = true
+	$: if (!get_started_was_shown && $settings?.channels.length === 0 && $settings.api_key === '') {
+		$show_get_started = true
 	}
 </script>
 
@@ -101,7 +73,7 @@
 		bind:visible={$settingsOpen}
 	/>
 
-	<GetStarted bind:visible={showGetStarted} />
+	<GetStarted bind:visible={$show_get_started} />
 {:else if error}
 	Error loading.
 

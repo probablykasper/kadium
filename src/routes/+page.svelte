@@ -8,6 +8,7 @@
 	import { checkModifiers, checkShortcut } from '$lib/general'
 	import VideoBar from './_VideoBar.svelte'
 	import commands from '$lib/commands'
+	import { menu_actions } from './menu'
 
 	let videos: Video[] = []
 	let allLoaded = false
@@ -270,20 +271,23 @@
 		}
 	}
 
-	const unlistenFuture = event.listen('tauri://menu', async ({ payload }) => {
-		if (payload === 'Open Selected Video' && selectionVisible) {
-			openVideo(selectedIndex)
-		} else if (payload === 'Open Selected Channel' && selectionVisible) {
-			openChannel(selectedIndex)
-		} else if (payload === 'Archive' && selectionVisible) {
-			archive(selectedIndex)
-		} else if (payload === 'Unarchive' && selectionVisible) {
-			unarchive(selectedIndex)
-		}
-	})
-	onDestroy(async () => {
-		const unlisten = await unlistenFuture
-		unlisten()
+	menu_actions.Open = () => {
+		if (selectionVisible) openVideo(selectedIndex)
+	}
+	menu_actions['Open Channel'] = () => {
+		if (selectionVisible) openChannel(selectedIndex)
+	}
+	menu_actions.Archive = () => {
+		if (selectionVisible) archive(selectedIndex)
+	}
+	menu_actions.Unarchive = () => {
+		if (selectionVisible) unarchive(selectedIndex)
+	}
+	onDestroy(() => {
+		menu_actions.Open = undefined
+		menu_actions['Open Channel'] = undefined
+		menu_actions.Archive = undefined
+		menu_actions.Unarchive = undefined
 	})
 
 	let boxes: HTMLDivElement[] = []

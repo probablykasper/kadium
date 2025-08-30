@@ -112,7 +112,8 @@ pub async fn run() {
 			let win = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
 				.title("Kadium")
 				.inner_size(900.0, 800.0)
-				.min_inner_size(400.0, 150.0);
+				.min_inner_size(400.0, 150.0)
+				.theme(Some(tauri::Theme::Dark));
 
 			#[cfg(target_os = "macos")]
 			let win = win.title_bar_style(tauri::TitleBarStyle::Transparent);

@@ -31,8 +31,9 @@ function script() {
 			console.log(`\n\n\n\n :::::::::::::::::: ${resolvedFilename}`)
 			console.log(content)
 
-			// Create a temporary TS file to get type information
-			const tsContent = content.replace(/export\s+let/g, 'let')
+			// **FIXED:** Create a temporary TS file using the ORIGINAL content
+			// The original content is needed to correctly identify 'export' modifiers
+			const tsContent = content
 			const tsFilename = resolvedFilename + '.ts'
 			files.set(tsFilename, tsContent)
 
@@ -99,8 +100,12 @@ function script() {
 				}
 			})
 
+			// **FIXED:** ONLY process exported variable statements.
 			source_file.forEachChild((node) => {
-				if (ts.isVariableStatement(node)) {
+				if (
+					ts.isVariableStatement(node) &&
+					node.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)
+				) {
 					node.declarationList.declarations.forEach((decl) => {
 						if (!ts.isIdentifier(decl.name)) return
 
@@ -117,7 +122,7 @@ function script() {
 							ts.TypeFormatFlags.NoTruncation,
 						)
 
-						// FIX: Check if the original declaration had an explicit type and if the inferred type is 'any'
+						// Check if the original declaration had an explicit type and if the inferred type is 'any'
 						const originalDecl = originalDecls.get(name)
 						const hasExplicitType = originalDecl && originalDecl.type
 						const isAnyType = typeString === 'any'
@@ -139,6 +144,8 @@ function script() {
 			}
 
 			const s = new MagicString(content)
+
+			// **FIXED:** ONLY remove exported variable statements from the original file content.
 			for (const node of originalSourceFile.statements) {
 				if (ts.isVariableStatement(node)) {
 					const isExport = node.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)

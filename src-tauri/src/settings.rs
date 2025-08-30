@@ -25,6 +25,7 @@ impl Default for VersionedSettings {
 			max_concurrent_requests: 5,
 			channels: Vec::new(),
 			check_in_background: true,
+			window_decorations: true,
 		})
 	}
 }
@@ -85,12 +86,19 @@ pub struct Channel {
 	pub tags: Vec<String>,
 }
 
+fn default_true() -> bool {
+	true
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 pub struct Settings {
 	api_key: String,
 	pub max_concurrent_requests: u32,
 	pub channels: Vec<Channel>,
 	pub check_in_background: bool,
+	#[serde(default = "default_true")]
+	#[specta(optional = false)]
+	pub window_decorations: bool,
 }
 impl Settings {
 	pub fn wrap(self) -> VersionedSettings {

@@ -13,7 +13,7 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
-use tauri::{command, Config, Error, State};
+use tauri::{command, Config, Error, Manager, State};
 use tokio::sync::Mutex;
 use url::Url;
 
@@ -283,15 +283,23 @@ pub async fn add_channel(options: AddChannelOptions, data: DataState<'_>) -> Res
 #[command]
 #[specta::specta]
 pub async fn set_general_settings(
+	app_handle: tauri::AppHandle,
 	api_key: String,
 	max_concurrent_requests: u32,
 	check_in_background: bool,
+	window_decorations: bool,
 	data: DataState<'_>,
 ) -> Result<(), String> {
 	let mut data = data.0.lock().await;
 	data.settings().set_api_key(api_key);
 	data.settings().max_concurrent_requests = max_concurrent_requests;
 	data.settings().check_in_background = check_in_background;
+	data.settings().window_decorations = window_decorations;
+	app_handle
+		.get_webview_window("main")
+		.unwrap()
+		.set_decorations(window_decorations)
+		.unwrap();
 	data.save_settings()?;
 	Ok(())
 }

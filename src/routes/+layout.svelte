@@ -70,6 +70,7 @@
 		apiKey={$settings.api_key}
 		maxConcurrentRequests={$settings.max_concurrent_requests}
 		checkInBackground={$settings.check_in_background}
+		windowDecorations={$settings.window_decorations ?? true}
 		bind:visible={$settingsOpen}
 	/>
 

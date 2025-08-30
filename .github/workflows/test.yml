@@ -2,7 +2,7 @@ name: Test
 on:
   push:
     branches:
-      - '*'
+      - master
   pull_request:
   workflow_dispatch:
 
@@ -24,6 +24,10 @@ jobs:
           - platform: 'windows-latest'
             target: ''
             args: ''
+    # If it's already running and you push again, cancel the old runs
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.platform }}-${{ matrix.target }}
+      cancel-in-progress: true
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout repository

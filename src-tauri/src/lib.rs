@@ -4,15 +4,11 @@
 )]
 
 use crate::data::{AppPaths, ArcData, Data};
-use crate::settings::yt_email_notifier;
 use crate::settings::VersionedSettings;
 use data::UndoHistory;
-use rfd::MessageDialogResult;
 #[cfg(target_os = "macos")]
 use tauri::AboutMetadata;
-use tauri::{
-	command, Manager, WebviewUrl, WebviewWindowBuilder
-};
+use tauri::{command, Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
 
 mod api;
@@ -52,44 +48,16 @@ fn error_popup(app_handle: tauri::AppHandle, msg: String) {
 		.show(|_| {});
 }
 
-/// Note title and message to show asynchronously when/after the app starts
-type ImportedNote = Option<(String, String)>;
-
 /// This can display dialogs, which needs to happen before tauri runs to not panic
-fn load_data(paths: &AppPaths) -> Result<(VersionedSettings, ImportedNote), String> {
+fn load_data(paths: &AppPaths) -> Result<VersionedSettings, String> {
 	if paths.settings_file.exists() {
 		return match settings::VersionedSettings::load(paths) {
-			Ok(settings) => Ok((settings, None)),
+			Ok(settings) => Ok(settings),
 			Err(e) => Err(e),
 		};
 	}
 
-	let will_import = match yt_email_notifier::can_import() {
-		true => {
-			let result = rfd::MessageDialog::new()
-				.set_title("Import")
-			.set_description("Do you want to import your data from YouTube Email Notifier?")
-			.set_buttons(rfd::MessageButtons::YesNo)
-			.set_level(rfd::MessageLevel::Info)
-			.show();
-
-			match result {
-				MessageDialogResult::Yes => true,
-				_ => false,
-			}
-		},
-		false => false,
-	};
-	if will_import {
-		let imported_stuff = yt_email_notifier::import()?;
-		let versioned_settings = imported_stuff.settings.wrap();
-		versioned_settings.save(paths)?;
-
-		let import_note = Some(("Import note".to_string(), imported_stuff.update_note));
-		return Ok((versioned_settings, import_note));
-	}
-
-	Ok((VersionedSettings::default(), None))
+	Ok(VersionedSettings::default())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -123,8 +91,7 @@ async fn run() {
 
 	let app = tauri::Builder::default()
 		.plugin(tauri_plugin_opener::init())
-  .plugin(tauri_plugin_notification::init())
-
+		.plugin(tauri_plugin_notification::init())
 		.invoke_handler(specta_builder.invoke_handler())
 		.setup(move |app| {
 			let win = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())

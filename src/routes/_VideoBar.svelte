@@ -47,9 +47,9 @@
 		}
 	}
 
-	let filterInput: HTMLInputElement
+	let filterInput: HTMLInputElement | undefined
 	menu_actions.Find = () => {
-		filterInput.focus()
+		filterInput?.focus()
 	}
 
 	function blurEscapeKeydown(e: KeyboardEvent) {

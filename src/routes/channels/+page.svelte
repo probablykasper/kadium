@@ -47,9 +47,9 @@
 	}
 
 	let filter = ''
-	let filterInput: HTMLInputElement
+	let filterInput: HTMLInputElement | undefined
 	menu_actions.Find = () => {
-		filterInput.focus()
+		filterInput?.focus()
 	}
 
 	let channels_scroll_el: HTMLDivElement

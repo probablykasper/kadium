@@ -1,0 +1,14 @@
+// vite.config.ts
+import { sveltekit } from "file:///Users/k/git/kadium/node_modules/@sveltejs/kit/src/exports/vite/index.js";
+import { defineConfig } from "file:///Users/k/git/kadium/node_modules/vite/dist/node/index.js";
+var vite_config_default = defineConfig({
+  clearScreen: false,
+  server: { port: 9e3, strictPort: true, fs: { allow: ["./bindings.ts"] } },
+  build: { sourcemap: true, target: ["chrome64", "edge79", "firefox62", "safari11.1"] },
+  plugins: [sveltekit()],
+  css: { preprocessorOptions: { sass: { api: "modern" } } }
+});
+export {
+  vite_config_default as default
+};
+//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsidml0ZS5jb25maWcudHMiXSwKICAic291cmNlc0NvbnRlbnQiOiBbImNvbnN0IF9fdml0ZV9pbmplY3RlZF9vcmlnaW5hbF9kaXJuYW1lID0gXCIvVXNlcnMvay9naXQva2FkaXVtXCI7Y29uc3QgX192aXRlX2luamVjdGVkX29yaWdpbmFsX2ZpbGVuYW1lID0gXCIvVXNlcnMvay9naXQva2FkaXVtL3ZpdGUuY29uZmlnLnRzXCI7Y29uc3QgX192aXRlX2luamVjdGVkX29yaWdpbmFsX2ltcG9ydF9tZXRhX3VybCA9IFwiZmlsZTovLy9Vc2Vycy9rL2dpdC9rYWRpdW0vdml0ZS5jb25maWcudHNcIjtpbXBvcnQgeyBzdmVsdGVraXQgfSBmcm9tICdAc3ZlbHRlanMva2l0L3ZpdGUnXG5pbXBvcnQgeyBkZWZpbmVDb25maWcgfSBmcm9tICd2aXRlJ1xuXG5leHBvcnQgZGVmYXVsdCBkZWZpbmVDb25maWcoe1xuXHRjbGVhclNjcmVlbjogZmFsc2UsXG5cdHNlcnZlcjogeyBwb3J0OiA5MDAwLCBzdHJpY3RQb3J0OiB0cnVlLCBmczogeyBhbGxvdzogWycuL2JpbmRpbmdzLnRzJ10gfSB9LFxuXHRidWlsZDogeyBzb3VyY2VtYXA6IHRydWUsIHRhcmdldDogWydjaHJvbWU2NCcsICdlZGdlNzknLCAnZmlyZWZveDYyJywgJ3NhZmFyaTExLjEnXSB9LFxuXHRwbHVnaW5zOiBbc3ZlbHRla2l0KCldLFxuXHRjc3M6IHsgcHJlcHJvY2Vzc29yT3B0aW9uczogeyBzYXNzOiB7IGFwaTogJ21vZGVybicgfSB9IH0sXG59KVxuIl0sCiAgIm1hcHBpbmdzIjogIjtBQUEyTyxTQUFTLGlCQUFpQjtBQUNyUSxTQUFTLG9CQUFvQjtBQUU3QixJQUFPLHNCQUFRLGFBQWE7QUFBQSxFQUMzQixhQUFhO0FBQUEsRUFDYixRQUFRLEVBQUUsTUFBTSxLQUFNLFlBQVksTUFBTSxJQUFJLEVBQUUsT0FBTyxDQUFDLGVBQWUsRUFBRSxFQUFFO0FBQUEsRUFDekUsT0FBTyxFQUFFLFdBQVcsTUFBTSxRQUFRLENBQUMsWUFBWSxVQUFVLGFBQWEsWUFBWSxFQUFFO0FBQUEsRUFDcEYsU0FBUyxDQUFDLFVBQVUsQ0FBQztBQUFBLEVBQ3JCLEtBQUssRUFBRSxxQkFBcUIsRUFBRSxNQUFNLEVBQUUsS0FBSyxTQUFTLEVBQUUsRUFBRTtBQUN6RCxDQUFDOyIsCiAgIm5hbWVzIjogW10KfQo=

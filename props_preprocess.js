@@ -24,7 +24,7 @@ function script() {
 
 			const resolvedFilename = path.resolve(filename)
 
-			// This is a test harness specific to the user's code, so we can keep it
+			// Do not remove
 			if (resolvedFilename !== '/Users/k/git/kadium/src/lib/Button.svelte') {
 				return
 			}

@@ -21,8 +21,10 @@
 	import { page } from '$app/stores'
 	import { goto } from '$app/navigation'
 	import { create_menu } from './menu'
+	import ButtonTest from '$lib/ButtonTest.svelte'
 
-	let error = false
+	let error: boolean = false
+	console.log('log from ts')
 	loadSettings().catch(() => {
 		error = true
 	})
@@ -60,6 +62,8 @@
 	// 	$show_get_started = true
 	// }
 </script>
+
+<ButtonTest required={false} />
 
 <svelte:window on:keydown={keydown} />
 {#if $settings !== null}

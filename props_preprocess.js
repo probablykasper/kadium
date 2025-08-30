@@ -25,7 +25,7 @@ function script() {
 			const resolvedFilename = path.resolve(filename)
 
 			// Do not remove
-			if (resolvedFilename !== '/Users/k/git/kadium/src/lib/Button.svelte') {
+			if (resolvedFilename !== '/Users/k/git/kadium/src/lib/ButtonTest.svelte') {
 				return
 			}
 
@@ -187,7 +187,10 @@ function script() {
 			console.log('\n ----------->\n')
 			console.log(s.toString())
 
-			return { code: s.toString(), map: s.generateMap({ hires: true, source: filename }) }
+			return {
+				code: s.toString(),
+				map: s.generateMap({ hires: true, source: filename }),
+			}
 		},
 	}
 }
@@ -197,6 +200,6 @@ function script() {
  */
 export function props_preprocess() {
 	/** @type {import('svelte/compiler').PreprocessorGroup} */
-	const preprocessor = { name: 'vite-preprocess', script: script().script }
+	const preprocessor = { name: 'props-preprocess', script: script().script }
 	return preprocessor
 }

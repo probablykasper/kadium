@@ -120,9 +120,9 @@
 				{#if editIndex !== null}
 					<Button danger on:click={onDelete}>Delete</Button>
 				{/if}
-				<div class="max-spacer" />
+				<div class="max-spacer"></div>
 				<Button secondary on:click={() => (visible = false)}>Cancel</Button>
-				<div class="spacer" />
+				<div class="spacer"></div>
 				<Button type="submit">{editIndex === null ? 'Add' : 'Save'}</Button>
 			</div>
 		</div>

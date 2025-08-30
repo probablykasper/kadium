@@ -23,6 +23,7 @@
 		{/if}
 		<table>
 			{#each history.entries.reverse() as [timestamp, action]}
+				<!-- svelte-ignore node_invalid_placement_ssr -->
 				<tr>
 					<td class="timestamp dark">
 						{new Date(timestamp * 1000).toLocaleString()}

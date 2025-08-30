@@ -105,6 +105,7 @@ pub async fn run() {
 	};
 
 	let app = tauri::Builder::default()
+		.plugin(tauri_plugin_os::init())
 		.plugin(tauri_plugin_opener::init())
 		.plugin(tauri_plugin_notification::init())
 		.invoke_handler(specta_builder.invoke_handler())

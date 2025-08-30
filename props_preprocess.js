@@ -31,13 +31,10 @@ function script() {
 			console.log(`\n\n\n\n :::::::::::::::::: ${resolvedFilename}`)
 			console.log(content)
 
-			// **FIXED:** Create a temporary TS file using the ORIGINAL content
-			// The original content is needed to correctly identify 'export' modifiers
 			const tsContent = content
 			const tsFilename = resolvedFilename + '.ts'
 			files.set(tsFilename, tsContent)
 
-			// Set up the TypeScript language service and program
 			const servicesHost = {
 				getScriptFileNames: () => [tsFilename],
 				getScriptVersion: () => '1',
@@ -81,7 +78,6 @@ function script() {
 			/** @type { name: string; type?: string; initializer?: string }[] */
 			const exports = []
 
-			// To check for explicit types, we need to parse the original content.
 			const originalSourceFile = ts.createSourceFile(
 				resolvedFilename,
 				content,
@@ -100,7 +96,6 @@ function script() {
 				}
 			})
 
-			// **FIXED:** ONLY process exported variable statements.
 			source_file.forEachChild((node) => {
 				if (
 					ts.isVariableStatement(node) &&
@@ -122,16 +117,13 @@ function script() {
 							ts.TypeFormatFlags.NoTruncation,
 						)
 
-						// Check if the original declaration had an explicit type and if the inferred type is 'any'
 						const originalDecl = originalDecls.get(name)
 						const hasExplicitType = originalDecl && originalDecl.type
 						const isAnyType = typeString === 'any'
 
-						// Only push type information if it's not an inferred `any`
 						if (hasExplicitType || !isAnyType) {
 							exports.push({ name, type: typeString, initializer })
 						} else {
-							// For props like `children` with an inferred `any` type, don't add the type to the output
 							exports.push({ name, initializer })
 						}
 					})
@@ -145,7 +137,15 @@ function script() {
 
 			const s = new MagicString(content)
 
-			// **FIXED:** ONLY remove exported variable statements from the original file content.
+			// New logic to determine indentation
+			const firstStatement = originalSourceFile.statements[0]
+			let indent = ''
+			if (firstStatement) {
+				const start = firstStatement.getStart(originalSourceFile, true)
+				const lineStart = content.lastIndexOf('\n', start) + 1
+				indent = content.substring(lineStart, start)
+			}
+
 			for (const node of originalSourceFile.statements) {
 				if (ts.isVariableStatement(node)) {
 					const isExport = node.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)
@@ -158,10 +158,12 @@ function script() {
 			let prop_content = ''
 			let type_content = ''
 			for (const e of exports) {
-				prop_content += `\t${e.name}${e.initializer ? ` = ${e.initializer}` : ''},\n`
-				type_content += `\t${e.name}${e.type ? `: ${e.type}` : ''},\n`
+				prop_content += `${indent}${indent}${e.name}${e.initializer ? ` = ${e.initializer}` : ''},\n`
+				type_content += `${indent}${indent}${e.name}${e.type ? `: ${e.type}` : ''},\n`
 			}
-			const destructure = `let {\n${prop_content}}: {\n${type_content}} = $props();\n`
+
+			// Prepend the new block with the determined indentation
+			const destructure = `${indent}let {\n${prop_content}${indent}}: {\n${type_content}${indent}} = $props();\n`
 
 			s.prepend(destructure)
 

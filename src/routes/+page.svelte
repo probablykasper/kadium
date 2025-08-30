@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { type ViewOptions, viewOptions } from '$lib/data'
-	import { event, shell } from '@tauri-apps/api'
+	import { openUrl } from '@tauri-apps/plugin-opener'
 	import { listen } from '@tauri-apps/api/event'
 	import { onDestroy, tick } from 'svelte'
 	import type { Video } from '../../bindings'
 	import { checkModifiers, checkShortcut } from '$lib/general'
 	import VideoBar from './_VideoBar.svelte'
 	import commands from '$lib/commands'
+	import { menu_actions } from './menu'
 
 	let videos: Video[] = []
 	let allLoaded = false
@@ -19,8 +20,10 @@
 		const oldselectedIndex = selectedIndex
 
 		const newVideos = await commands.getVideos(options, null)
-		allLoaded = newVideos.length < $viewOptions.limit
-		videos = newVideos
+		if (newVideos.status === 'ok') {
+			allLoaded = newVideos.data.length < $viewOptions.limit
+			videos = newVideos.data
+		}
 
 		// Update the selection index if the video moves
 		const newSelectedIndex = videos.findIndex((v) => v.id === selectedId)
@@ -49,8 +52,10 @@
 
 		if (startIndex === 0) {
 			const newVideos = await commands.getVideos($viewOptions, null)
-			allLoaded = newVideos.length < $viewOptions.limit
-			videos = newVideos
+			if (newVideos.status === 'ok') {
+				allLoaded = newVideos.data.length < $viewOptions.limit
+				videos = newVideos.data
+			}
 		} else {
 			const prevVideo = videos[startIndex - 1]
 			const prevVideos = videos.slice(0, startIndex)
@@ -65,12 +70,15 @@
 					id: prevVideo.id,
 				},
 			)
-			videos = prevVideos.concat(reloadedVideos)
-			// Shorten length to a mulpitle of `limit`
-			if (videos.length > $viewOptions.limit) {
-				videos = videos.slice(0, maxLength - (maxLength % $viewOptions.limit))
+
+			if (reloadedVideos.status === 'ok') {
+				videos = prevVideos.concat(reloadedVideos.data)
+				// Shorten length to a mulpitle of `limit`
+				if (videos.length > $viewOptions.limit) {
+					videos = videos.slice(0, maxLength - (maxLength % $viewOptions.limit))
+				}
+				videos = videos.slice(0, maxLength)
 			}
-			videos = videos.slice(0, maxLength)
 		}
 
 		await tick()
@@ -84,8 +92,11 @@
 			publishTimeMs: videos[videos.length - 1].publishTimeMs,
 			id: videos[videos.length - 1].id,
 		})
-		allLoaded = newVideos.length < $viewOptions.limit
-		videos = videos.concat(newVideos)
+
+		if (newVideos.status === 'ok') {
+			allLoaded = newVideos.data.length < $viewOptions.limit
+			videos = videos.concat(newVideos.data)
+		}
 
 		await tick()
 		await autoloadHandler()
@@ -162,10 +173,10 @@
 	}
 
 	function openVideo(index: number) {
-		shell.open('https://youtube.com/watch?v=' + videos[index].id)
+		openUrl('https://youtube.com/watch?v=' + videos[index].id)
 	}
 	function openChannel(index: number) {
-		shell.open('https://www.youtube.com/channel/' + videos[index].channelId)
+		openUrl('https://www.youtube.com/channel/' + videos[index].channelId)
 	}
 	function getColumnCount() {
 		const gridStyle = window.getComputedStyle(grid)
@@ -259,20 +270,23 @@
 		}
 	}
 
-	const unlistenFuture = event.listen('tauri://menu', async ({ payload }) => {
-		if (payload === 'Open Selected Video' && selectionVisible) {
-			openVideo(selectedIndex)
-		} else if (payload === 'Open Selected Channel' && selectionVisible) {
-			openChannel(selectedIndex)
-		} else if (payload === 'Archive' && selectionVisible) {
-			archive(selectedIndex)
-		} else if (payload === 'Unarchive' && selectionVisible) {
-			unarchive(selectedIndex)
-		}
-	})
-	onDestroy(async () => {
-		const unlisten = await unlistenFuture
-		unlisten()
+	menu_actions.Open = () => {
+		if (selectionVisible) openVideo(selectedIndex)
+	}
+	menu_actions['Open Channel'] = () => {
+		if (selectionVisible) openChannel(selectedIndex)
+	}
+	menu_actions.Archive = () => {
+		if (selectionVisible) archive(selectedIndex)
+	}
+	menu_actions.Unarchive = () => {
+		if (selectionVisible) unarchive(selectedIndex)
+	}
+	onDestroy(() => {
+		menu_actions.Open = undefined
+		menu_actions['Open Channel'] = undefined
+		menu_actions.Archive = undefined
+		menu_actions.Unarchive = undefined
 	})
 
 	let boxes: HTMLDivElement[] = []
@@ -312,7 +326,7 @@
 				class:selected={selectionVisible && i === selectedIndex}
 				bind:this={boxes[i]}
 				on:mousedown={() => select(i)}
-				on:dblclick={() => shell.open('https://youtube.com/watch?v=' + video.id)}
+				on:dblclick={() => openUrl('https://youtube.com/watch?v=' + video.id)}
 				on:click={(e) => videoClick(e, i)}
 				draggable="true"
 				on:dragstart={(e) => dragStartVideo(e, video)}

@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte'
 	import { tags, viewOptions } from '$lib/data'
 	import { checkShortcut } from '$lib/general'
-	import { event } from '@tauri-apps/api'
+	import { menu_actions } from './menu'
 
 	export let loadedVideosCount: number
 	export let allLoaded: boolean
@@ -48,16 +47,10 @@
 		}
 	}
 
-	let filterInput: HTMLInputElement
-	const unlistenFuture = event.listen('tauri://menu', ({ payload }) => {
-		if (payload === 'Find') {
-			filterInput.focus()
-		}
-	})
-	onDestroy(async () => {
-		const unlisten = await unlistenFuture
-		unlisten()
-	})
+	let filterInput: HTMLInputElement | undefined
+	menu_actions.Find = () => {
+		filterInput?.focus()
+	}
 
 	function blurEscapeKeydown(e: KeyboardEvent) {
 		if (checkShortcut(e, 'Escape')) {

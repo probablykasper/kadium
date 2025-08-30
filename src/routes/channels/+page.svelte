@@ -4,11 +4,10 @@
 	import Tags from '$lib/Tags.svelte'
 	import type { Channel } from '../../../bindings'
 	import ChannelModal from '$lib/modals/Channel.svelte'
-	import { event } from '@tauri-apps/api'
-	import { onDestroy } from 'svelte'
 	import commands from '$lib/commands'
 	import { page } from '$app/stores'
 	import { goto } from '$app/navigation'
+	import { menu_actions } from '../menu'
 
 	$: channels = $settings?.channels ?? []
 
@@ -48,16 +47,10 @@
 	}
 
 	let filter = ''
-	let filterInput: HTMLInputElement
-	const unlistenFuture = event.listen('tauri://menu', ({ payload }) => {
-		if (payload === 'Find') {
-			filterInput.focus()
-		}
-	})
-	onDestroy(async () => {
-		const unlisten = await unlistenFuture
-		unlisten()
-	})
+	let filterInput: HTMLInputElement | undefined
+	menu_actions.Find = () => {
+		filterInput?.focus()
+	}
 
 	let channels_scroll_el: HTMLDivElement
 </script>

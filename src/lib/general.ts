@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/tauri'
+import { invoke } from '@tauri-apps/api/core'
 
 export function popup(msg: string) {
 	invoke('error_popup', { msg })

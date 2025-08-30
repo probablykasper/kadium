@@ -13,7 +13,7 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
-use tauri::{command, Config, State};
+use tauri::{command, Config, Error, State};
 use tokio::sync::Mutex;
 use url::Url;
 
@@ -27,8 +27,12 @@ impl AppPaths {
 	pub fn from_tauri_config(config: &Config) -> Self {
 		let app_dir = match env::var("DEVELOPMENT").is_ok() {
 			true => env::current_dir().unwrap().join("appdata"),
-			false => tauri::api::path::app_data_dir(config).unwrap(),
+			false => dirs::data_local_dir()
+				.ok_or(Error::UnknownPath)
+				.map(|dir| dir.join(&config.identifier))
+				.unwrap(),
 		};
+
 		AppPaths {
 			app_dir: app_dir.clone(),
 			settings_file: app_dir.join("Settings.json"),
@@ -42,7 +46,7 @@ pub struct Data {
 	pub db_pool: SqlitePool,
 	pub versioned_settings: VersionedSettings,
 	pub paths: AppPaths,
-	pub window: tauri::Window,
+	pub window: tauri::WebviewWindow,
 	pub user_history: UndoHistory,
 }
 impl Data {
@@ -252,7 +256,8 @@ pub async fn add_channel(options: AddChannelOptions, data: DataState<'_>) -> Res
 
 	let url = "https://www.googleapis.com/youtube/v3/channels".to_owned()
 		+ "?part=contentDetails,id,snippet"
-		+ "&id=" + &id;
+		+ "&id="
+		+ &id;
 	let channels = yt_request::<channels::Response>(&url, &settings.api_key_or_default())
 		.await
 		.map_err(|e| format!("Failed to get channel: {}", e))?;

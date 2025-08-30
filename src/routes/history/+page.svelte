@@ -1,9 +1,15 @@
 <script lang="ts">
-	import { getHistory } from '../../../bindings'
+	import { openUrl } from '@tauri-apps/plugin-opener'
+	import { commands } from '../../../bindings'
 	import Link from '$lib/Link.svelte'
-	import { shell } from '@tauri-apps/api'
 
-	const history = getHistory()
+	const history = commands.getHistory().then((result) => {
+		if (result.status == 'ok') {
+			return result.data
+		} else {
+			throw new Error(`Failed to fetch history: ${result.error}`)
+		}
+	})
 </script>
 
 <main>
@@ -27,19 +33,18 @@
 						{:else if 'Archive' in action}
 							{@const id = action.Archive}
 							Archive video ID <Link
-								on:click={() => shell.open(`https://www.youtube.com/watch?v=${id}`)}
+								on:click={() => openUrl(`https://www.youtube.com/watch?v=${id}`)}
 								>{action.Archive}</Link
 							>
 						{:else if 'Unarchive' in action}
 							{@const id = action.Unarchive}
 							Unarchive video ID <Link
-								on:click={() => shell.open(`https://www.youtube.com/watch?v=${id}`)}
+								on:click={() => openUrl(`https://www.youtube.com/watch?v=${id}`)}
 								>{action.Unarchive}</Link
 							>
 						{:else if 'AddChannel' in action}
 							{@const id = action.AddChannel}
-							Added channel <Link
-								on:click={() => shell.open(`https://www.youtube.com/channel/${id}`)}
+							Added channel <Link on:click={() => openUrl(`https://www.youtube.com/channel/${id}`)}
 								>{action.AddChannel}</Link
 							>
 						{:else if 'UpdateOrDeleteChannels' in action}

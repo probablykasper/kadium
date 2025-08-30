@@ -6,8 +6,8 @@ use sqlx::SqlitePool;
 use std::collections::HashMap;
 use std::thread;
 use std::time::Duration;
-use tauri::api::notification::Notification;
-use tauri::Manager;
+use tauri::{Emitter, Manager};
+use tauri_plugin_notification::NotificationExt;
 use tokio::sync::broadcast;
 use tokio::{task, time};
 
@@ -49,7 +49,7 @@ impl BgHandle {
 pub fn spawn_bg(
 	settings: &settings::Settings,
 	pool: &SqlitePool,
-	window: tauri::Window,
+	window: tauri::WebviewWindow,
 ) -> Option<BgHandle> {
 	if settings.check_in_background {
 		spawn(settings, pool, false, window)
@@ -60,7 +60,7 @@ pub fn spawn_bg(
 pub fn spawn_bg_or_check_now(
 	settings: &settings::Settings,
 	pool: &SqlitePool,
-	window: tauri::Window,
+	window: tauri::WebviewWindow,
 ) -> Option<BgHandle> {
 	if settings.check_in_background {
 		spawn(settings, pool, false, window)
@@ -73,7 +73,7 @@ fn spawn(
 	settings: &settings::Settings,
 	pool: &SqlitePool,
 	run_once: bool,
-	window: tauri::Window,
+	window: tauri::WebviewWindow,
 ) -> Option<BgHandle> {
 	if settings.channels.is_empty() {
 		return None;
@@ -126,7 +126,7 @@ struct IntervalOptions {
 	key: String,
 	stop_sender: broadcast::Sender<()>,
 	run_once: bool,
-	window: tauri::Window,
+	window: tauri::WebviewWindow,
 }
 
 #[tokio::main]
@@ -187,12 +187,13 @@ async fn run_interval(options: IntervalOptions, interval_info: IntervalInfo) {
 }
 
 async fn check_channels(options: &IntervalOptions, interval_info: &IntervalInfo) {
-	let identifier = &options.window.app_handle().config().tauri.bundle.identifier;
+	let app = options.window.app_handle();
 	let window_visible = match options.window.is_visible() {
 		Ok(is_visible) => is_visible,
 		Err(e) => {
 			eprintln!("{}", e);
-			Notification::new(identifier)
+			app.notification()
+				.builder()
 				.title("Failed to check channels")
 				.body(e.to_string())
 				.show()
@@ -209,7 +210,8 @@ async fn check_channels(options: &IntervalOptions, interval_info: &IntervalInfo)
 			Err(e) => {
 				let title = format!("Error checking {}", channel.name);
 				eprintln!("{}: {}", title, e);
-				Notification::new(identifier)
+				app.notification()
+					.builder()
 					.title(title)
 					.body(e)
 					.show()
@@ -275,7 +277,8 @@ async fn check_channel(options: &IntervalOptions, channel: &ChannelInfo) -> Resu
 	);
 	let url = "https://www.googleapis.com/youtube/v3/videos".to_string()
 		+ "?part=contentDetails,liveStreamingDetails,snippet"
-		+ "&id=" + &new_ids.join(",");
+		+ "&id="
+		+ &new_ids.join(",");
 	let videos = yt_request::<videos::Response>(&url, &options.key)
 		.await
 		.map_err(|e| format!("Failed to get videos: {}", e))?;

@@ -6,8 +6,6 @@
 use crate::data::{AppPaths, ArcData, Data};
 use crate::settings::VersionedSettings;
 use data::UndoHistory;
-#[cfg(target_os = "macos")]
-use tauri::AboutMetadata;
 use tauri::{command, Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
 
@@ -157,11 +155,6 @@ pub async fn run() {
 				user_history: UndoHistory::new(),
 			};
 			app.manage(ArcData::new(data));
-
-			#[cfg(target_os = "macos")]
-			if let Some(note) = _note.clone() {
-				dialog::message(Option::Some(&win), note.0, note.1);
-			}
 
 			menu::manage_menu(app)?;
 

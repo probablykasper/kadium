@@ -1,0 +1,221 @@
+#![cfg_attr(
+	all(not(debug_assertions), target_os = "windows"),
+	windows_subsystem = "windows"
+)]
+
+use crate::data::{AppPaths, ArcData, Data};
+use crate::settings::yt_email_notifier;
+use crate::settings::VersionedSettings;
+use data::UndoHistory;
+use rfd::MessageDialogResult;
+#[cfg(target_os = "macos")]
+use tauri::AboutMetadata;
+use tauri::{
+	command, Manager, WebviewUrl, WebviewWindowBuilder
+};
+use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
+
+mod api;
+mod background;
+mod data;
+mod db;
+mod menu;
+mod settings;
+
+fn error_popup_main_thread(msg: impl AsRef<str>) {
+	let msg = msg.as_ref().to_string();
+	let builder = rfd::MessageDialog::new()
+		.set_title("Error")
+		.set_description(&msg)
+		.set_buttons(rfd::MessageButtons::Ok)
+		.set_level(rfd::MessageLevel::Error);
+	builder.show();
+}
+
+#[macro_export]
+macro_rules! throw {
+	($($arg:tt)*) => {{
+		return Err(format!($($arg)*))
+	}};
+}
+
+#[command]
+#[specta::specta]
+fn error_popup(app_handle: tauri::AppHandle, msg: String) {
+	eprintln!("Error: {}", msg);
+
+	app_handle
+		.dialog()
+		.message(&msg)
+		.kind(MessageDialogKind::Error)
+		.title("Error")
+		.show(|_| {});
+}
+
+/// Note title and message to show asynchronously when/after the app starts
+type ImportedNote = Option<(String, String)>;
+
+/// This can display dialogs, which needs to happen before tauri runs to not panic
+fn load_data(paths: &AppPaths) -> Result<(VersionedSettings, ImportedNote), String> {
+	if paths.settings_file.exists() {
+		return match settings::VersionedSettings::load(paths) {
+			Ok(settings) => Ok((settings, None)),
+			Err(e) => Err(e),
+		};
+	}
+
+	let will_import = match yt_email_notifier::can_import() {
+		true => {
+			let result = rfd::MessageDialog::new()
+				.set_title("Import")
+			.set_description("Do you want to import your data from YouTube Email Notifier?")
+			.set_buttons(rfd::MessageButtons::YesNo)
+			.set_level(rfd::MessageLevel::Info)
+			.show();
+
+			match result {
+				MessageDialogResult::Yes => true,
+				_ => false,
+			}
+		},
+		false => false,
+	};
+	if will_import {
+		let imported_stuff = yt_email_notifier::import()?;
+		let versioned_settings = imported_stuff.settings.wrap();
+		versioned_settings.save(paths)?;
+
+		let import_note = Some(("Import note".to_string(), imported_stuff.update_note));
+		return Ok((versioned_settings, import_note));
+	}
+
+	Ok((VersionedSettings::default(), None))
+}
+
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
+async fn run() {
+	let specta_builder =
+		tauri_specta::Builder::<tauri::Wry>::new().commands(tauri_specta::collect_commands![
+			error_popup,
+			data::get_settings,
+			data::tags,
+			data::set_channels,
+			data::add_channel,
+			data::set_general_settings,
+			data::check_now,
+			data::get_history,
+			db::get_videos,
+			db::archive,
+			db::unarchive
+		]);
+
+	#[cfg(debug_assertions)]
+	specta_builder
+		.export(specta_typescript::Typescript::default(), "../bindings.ts")
+		.expect("Failed to export typescript bindings");
+
+	let ctx = tauri::generate_context!();
+
+	// macOS "App Nap" periodically pauses our app when it's in the background.
+	// We need to prevent that so our intervals are not interrupted.
+	#[cfg(target_os = "macos")]
+	macos_app_nap::prevent();
+
+	let app = tauri::Builder::default()
+		.plugin(tauri_plugin_opener::init())
+  .plugin(tauri_plugin_notification::init())
+
+		.invoke_handler(specta_builder.invoke_handler())
+		.setup(move |app| {
+			let win = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
+				.title("Kadium")
+				.inner_size(900.0, 800.0)
+				.min_inner_size(400.0, 150.0);
+
+			#[cfg(target_os = "macos")]
+			let win = win.title_bar_style(tauri::TitleBarStyle::Transparent);
+
+			let win = win.build().expect("Unable to create window");
+
+			#[cfg(target_os = "macos")]
+			{
+				use cocoa::appkit::NSWindow;
+				let nsw = win.ns_window().unwrap() as cocoa::base::id;
+				unsafe {
+					// set window to always be dark mode
+					use cocoa::appkit::NSAppearanceNameVibrantDark;
+					use objc::*;
+					let appearance: cocoa::base::id = msg_send![
+						class!(NSAppearance),
+						appearanceNamed: NSAppearanceNameVibrantDark
+					];
+					let () = msg_send![nsw, setAppearance: appearance];
+
+					// set window background color
+					let bg_color = cocoa::appkit::NSColor::colorWithRed_green_blue_alpha_(
+						cocoa::base::nil,
+						34.0 / 255.0,
+						38.0 / 255.0,
+						45.5 / 255.0,
+						1.0,
+					);
+					nsw.setBackgroundColor_(bg_color);
+				}
+			}
+
+			let app_paths = AppPaths::from_tauri_config(&app);
+
+			let (mut settings, _note) = match load_data(&app_paths) {
+				Ok(v) => v,
+				Err(e) => {
+					error_popup_main_thread(&e);
+					panic!("{}", e);
+				}
+			};
+
+			let pool = match db::init(&app_paths).await {
+				Ok(pool) => pool,
+				Err(e) => {
+					error_popup_main_thread(&e);
+					panic!("{}", e);
+				}
+			};
+
+			let data = Data {
+				bg_handle: background::spawn_bg(settings.unwrap(), &pool, win.clone()),
+				db_pool: pool,
+				versioned_settings: settings,
+				paths: app_paths,
+				window: win.clone(),
+				user_history: UndoHistory::new(),
+			};
+			app.manage(ArcData::new(data));
+
+			#[cfg(target_os = "macos")]
+			if let Some(note) = _note.clone() {
+				dialog::message(Option::Some(&win), note.0, note.1);
+			}
+			Ok(())
+		})
+		.build(ctx)
+		.expect("Error running tauri app");
+
+	app.run(|_app_handle, e| match e {
+		tauri::RunEvent::WindowEvent { event, .. } => match event {
+			tauri::WindowEvent::CloseRequested { api: _api, .. } => {
+				#[cfg(target_os = "macos")]
+				{
+					// hide the application
+					// manual for now (PR https://github.com/tauri-apps/tauri/pull/3689)
+					_api.prevent_close();
+					use objc::*;
+					let cls = objc::runtime::Class::get("NSApplication").unwrap();
+					let app: cocoa::base::id = unsafe { msg_send![cls, sharedApplication] };
+					unsafe { msg_send![app, hide: 0] }
+				}
+			}
+			_ => {}
+		},
+		_ => {}
+	});
+}

@@ -6,19 +6,18 @@ default-run = "kadium"
 edition = "2018"
 build = "src/build.rs"
 
+[lib]
+name = "app_lib"
+crate-type = ["staticlib", "cdylib", "rlib", "lib"]
+
 [build-dependencies]
-tauri-build = { version = "1.5", features = [] }
+tauri-build = { version = "2", features = [] }
 
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.5", features = [
-	"devtools",
-	"dialog-message",
-	"notification-all",
-	"shell-open",
-] }
-rfd = "0.10"
+tauri = { version = "2", features = ["devtools"] }
+rfd = { version = "0.15.4", features = ["gtk3"], default-features = false }
 atomicwrites = "0.4"
 tokio = { version = "1.28", features = ["macros", "time", "sync"] }
 reqwest = { version = "0.11", features = ["json"] }
@@ -26,9 +25,13 @@ sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "sqlite"] }
 chrono = "0.4"
 iso8601-duration = "0.2"
 url = "2.3"
-tauri-specta = { version = "1.0", features = ["javascript", "typescript"] }
-specta = "1.0"
+tauri-specta = { version = "=2.0.0-rc.21", features = ["derive", "typescript"] }
+specta-typescript = "0.0.9"
+specta = "=2.0.0-rc.22"
 scraper = "0.18"
+tauri-plugin-notification = "2"
+tauri-plugin-opener = "2"
+tauri-plugin-dialog = "2"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 macos-app-nap = "0.0"

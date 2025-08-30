@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { type ViewOptions, viewOptions } from '$lib/data'
-	import { event, shell } from '@tauri-apps/api'
+	import { event } from '@tauri-apps/api'
 	import { listen } from '@tauri-apps/api/event'
 	import { onDestroy, tick } from 'svelte'
 	import type { Video } from '../../bindings'

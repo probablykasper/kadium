@@ -1,63 +1,51 @@
 {
 	"build": {
-		"distDir": "../build",
-		"devPath": "http://localhost:9000",
+		"beforeBuildCommand": "npm run build:web",
+		"frontendDist": "../build",
 		"beforeDevCommand": "npm run dev:web",
-		"beforeBuildCommand": "npm run build:web"
+		"devUrl": "http://localhost:9000"
 	},
-	"package": {
-		"productName": "Kadium"
-	},
-	"tauri": {
-		"bundle": {
-			"active": true,
-			"targets": ["dmg", "deb", "appimage", "msi"],
-			"identifier": "space.kasper.kadium",
-			"icon": [
-				"icons/32x32.png",
-				"icons/128x128.png",
-				"icons/128x128@2x.png",
-				"icons/icon.icns",
-				"icons/icon.ico"
-			],
-			"resources": [],
-			"externalBin": [],
-			"copyright": "© 2021 kasper.space",
-			"category": "Utility",
-			"shortDescription": "App for YouTube upload notifications",
-			"longDescription": "App for YouTube upload notifications",
+	"bundle": {
+		"active": true,
+		"targets": ["dmg", "deb", "appimage", "msi"],
+		"windows": {
+			"certificateThumbprint": null,
+			"digestAlgorithm": "sha256",
+			"timestampUrl": ""
+		},
+		"icon": [
+			"icons/32x32.png",
+			"icons/128x128.png",
+			"icons/128x128@2x.png",
+			"icons/icon.icns",
+			"icons/icon.ico"
+		],
+		"resources": [],
+		"externalBin": [],
+		"copyright": "© 2021 kasper.space",
+		"category": "Utility",
+		"shortDescription": "App for YouTube upload notifications",
+		"longDescription": "App for YouTube upload notifications",
+		"macOS": {
+			"frameworks": [],
+			"minimumSystemVersion": "10.13",
+			"exceptionDomain": "",
+			"signingIdentity": null,
+			"entitlements": null
+		},
+		"linux": {
 			"deb": {
 				"depends": []
-			},
-			"macOS": {
-				"frameworks": [],
-				"minimumSystemVersion": "10.13",
-				"exceptionDomain": "",
-				"signingIdentity": null,
-				"entitlements": null
-			},
-			"windows": {
-				"certificateThumbprint": null,
-				"digestAlgorithm": "sha256",
-				"timestampUrl": ""
 			}
-		},
-		"updater": {
-			"active": false
-		},
-		"allowlist": {
-			"dialog": {
-				"message": true
-			},
-			"notification": {
-				"all": true
-			},
-			"shell": {
-				"open": true
-			}
-		},
+		}
+	},
+	"productName": "Kadium",
+	"mainBinaryName": "Kadium",
+	"identifier": "space.kasper.kadium",
+	"plugins": {},
+	"app": {
 		"security": {
-			"csp": "default-src 'self'; img-src *; style-src 'unsafe-inline' *"
+			"csp": "default-src 'self'; img-src *; style-src 'unsafe-inline' *; connect-src ipc: http://ipc.localhost"
 		}
 	}
 }

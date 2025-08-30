@@ -34,7 +34,8 @@ pub async fn yt_request<T: DeserializeOwned>(url: &str, key: &str) -> Result<T, 
 pub async fn channel_id_from_video_id(id: &str, key: &str) -> Result<String, String> {
 	let url = "https://youtube.googleapis.com/youtube/v3/videos".to_string()
 		+ "?part=snippet"
-		+ "&id=" + id;
+		+ "&id="
+		+ id;
 	let videos = yt_request::<videos::Response>(&url, key)
 		.await
 		.map_err(|e| format!("Failed to get video: {}", e))?;

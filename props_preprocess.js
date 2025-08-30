@@ -16,6 +16,7 @@ function script() {
 				attributes.lang !== 'ts' ||
 				attributes.context === 'module' ||
 				content.includes('$props(') ||
+				content.includes('$:') ||
 				filename.includes('/node_modules/')
 			) {
 				return

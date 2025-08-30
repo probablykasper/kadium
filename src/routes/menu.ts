@@ -159,14 +159,14 @@ export async function create_menu() {
 			{ item: 'Separator' },
 			{
 				text: 'Videos',
-				accelerator: 'Alt+CmdOrCtrl+1',
+				accelerator: 'Shift+CmdOrCtrl+1',
 				action() {
 					goto('/', { replaceState: true })
 				},
 			},
 			{
 				text: 'Channels',
-				accelerator: 'Alt+CmdOrCtrl+2',
+				accelerator: 'Shift+CmdOrCtrl+2',
 				action() {
 					goto('/channels', { replaceState: true })
 				},

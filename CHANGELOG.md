@@ -1,5 +1,10 @@
 # Changelog
 
+## Next
+- Use Shift instead of Alt for Videos/Channels page shortcuts
+- Fix keyboard input working when modal is open
+- Remove old YouTube Email Notifier migration
+
 ## 1.7.1 - 2024 Jan 28
 - Fix selection being created on videos page refresh
 

@@ -3,10 +3,15 @@ import { settingsOpen, viewOptions } from '$lib/data'
 import { Menu, Submenu, type SubmenuOptions } from '@tauri-apps/api/menu'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import { show_get_started } from './+layout.svelte'
+import { platform } from '@tauri-apps/plugin-os'
 
 export const menu_actions: Partial<
 	Record<'Find' | 'Open' | 'Open Channel' | 'Archive' | 'Unarchive', () => void>
 > = {}
+
+function array_if<const T>(condition: boolean, value: T): T[] | [] {
+	return condition ? [value] : []
+}
 
 export async function create_menu() {
 	const app_menu: SubmenuOptions = {
@@ -64,19 +69,19 @@ export async function create_menu() {
 				accelerator: 'Shift+CmdOrCtrl+Backspace',
 				action: () => menu_actions.Unarchive?.(),
 			},
-			{ item: 'Separator' },
-			{
+			...array_if(platform() !== 'macos', { item: 'Separator' }),
+			...array_if(platform() !== 'macos', {
 				text: 'Options...',
-				id: 'Preferences...',
-				accelerator: 'cmdOrControl+,',
+				accelerator: 'cmdOrCtrl+,',
 				action() {
 					settingsOpen.set(true)
 				},
-			},
+			}),
 			{ item: 'Separator' },
 			{ item: 'CloseWindow' },
 		],
 	}
+
 	const edit_menu: SubmenuOptions = {
 		text: 'Edit',
 		items: [
@@ -86,8 +91,7 @@ export async function create_menu() {
 			{ item: 'Cut' },
 			{ item: 'Copy' },
 			{ item: 'Paste' },
-			// #[cfg(not(target_os = "macos"))]
-			{ item: 'Separator' },
+			...array_if(platform() !== 'macos', { item: 'Separator' }),
 			{ item: 'SelectAll' },
 			{ item: 'Separator' },
 			{
@@ -159,14 +163,14 @@ export async function create_menu() {
 			{ item: 'Separator' },
 			{
 				text: 'Videos',
-				accelerator: 'Alt+CmdOrCtrl+1',
+				accelerator: 'Shift+CmdOrCtrl+1',
 				action() {
 					goto('/', { replaceState: true })
 				},
 			},
 			{
 				text: 'Channels',
-				accelerator: 'Alt+CmdOrCtrl+2',
+				accelerator: 'Shift+CmdOrCtrl+2',
 				action() {
 					goto('/channels', { replaceState: true })
 				},

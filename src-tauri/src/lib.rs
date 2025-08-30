@@ -105,6 +105,7 @@ pub async fn run() {
 	};
 
 	let app = tauri::Builder::default()
+		.plugin(tauri_plugin_os::init())
 		.plugin(tauri_plugin_opener::init())
 		.plugin(tauri_plugin_notification::init())
 		.invoke_handler(specta_builder.invoke_handler())
@@ -112,7 +113,8 @@ pub async fn run() {
 			let win = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
 				.title("Kadium")
 				.inner_size(900.0, 800.0)
-				.min_inner_size(400.0, 150.0);
+				.min_inner_size(400.0, 150.0)
+				.theme(Some(tauri::Theme::Dark));
 
 			#[cfg(target_os = "macos")]
 			let win = win.title_bar_style(tauri::TitleBarStyle::Transparent);
@@ -121,19 +123,10 @@ pub async fn run() {
 
 			#[cfg(target_os = "macos")]
 			{
+				// set window background color because Tauri's .background_color() doesn't work
 				use cocoa::appkit::NSWindow;
 				let nsw = win.ns_window().unwrap() as cocoa::base::id;
 				unsafe {
-					// set window to always be dark mode
-					use cocoa::appkit::NSAppearanceNameVibrantDark;
-					use objc::*;
-					let appearance: cocoa::base::id = msg_send![
-						class!(NSAppearance),
-						appearanceNamed: NSAppearanceNameVibrantDark
-					];
-					let () = msg_send![nsw, setAppearance: appearance];
-
-					// set window background color
 					let bg_color = cocoa::appkit::NSColor::colorWithRed_green_blue_alpha_(
 						cocoa::base::nil,
 						34.0 / 255.0,
@@ -165,13 +158,8 @@ pub async fn run() {
 			tauri::WindowEvent::CloseRequested { api: _api, .. } => {
 				#[cfg(target_os = "macos")]
 				{
-					// hide the application
-					// manual for now (PR https://github.com/tauri-apps/tauri/pull/3689)
 					_api.prevent_close();
-					use objc::*;
-					let cls = objc::runtime::Class::get("NSApplication").unwrap();
-					let app: cocoa::base::id = unsafe { msg_send![cls, sharedApplication] };
-					unsafe { msg_send![app, hide: 0] }
+					_app_handle.hide().unwrap();
 				}
 			}
 			_ => {}

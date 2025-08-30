@@ -8,6 +8,7 @@
 	import VideoBar from './_VideoBar.svelte'
 	import commands from '$lib/commands'
 	import { menu_actions } from './menu'
+	import { modalCount } from 'modal-svelte'
 
 	let videos: Video[] = []
 	let allLoaded = false
@@ -186,7 +187,7 @@
 
 	function keydown(e: KeyboardEvent) {
 		let target = e.target as HTMLElement
-		if (target.nodeName === 'INPUT') {
+		if (target.nodeName === 'INPUT' || $modalCount > 0) {
 			return
 		}
 

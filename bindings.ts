@@ -40,9 +40,9 @@ async addChannel(options: AddChannelOptions) : Promise<Result<null, string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async setGeneralSettings(apiKey: string, maxConcurrentRequests: number, checkInBackground: boolean) : Promise<Result<null, string>> {
+async setGeneralSettings(apiKey: string, maxConcurrentRequests: number, checkInBackground: boolean, noWindowDecorations: boolean) : Promise<Result<null, string>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("set_general_settings", { apiKey, maxConcurrentRequests, checkInBackground }) };
+    return { status: "ok", data: await TAURI_INVOKE("set_general_settings", { apiKey, maxConcurrentRequests, checkInBackground, noWindowDecorations }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -105,7 +105,7 @@ export type AddChannelOptions = { url: string; from_time: number; refresh_rate_m
 export type After = { publishTimeMs: number; id: string }
 export type Channel = { id: string; name: string; icon: string; uploads_playlist_id: string; from_time: number; refresh_rate_ms: number; tags: string[] }
 export type Options = { show_all: boolean; show_archived: boolean; channel_filter: string; tag: string | null; limit: number }
-export type Settings = { api_key: string; max_concurrent_requests: number; channels: Channel[]; check_in_background: boolean }
+export type Settings = { api_key: string; max_concurrent_requests: number; channels: Channel[]; check_in_background: boolean; no_window_decorations?: boolean }
 export type UndoHistory = { entries: ([number, Action])[] }
 export type Video = { id: string; title: string; description: string; publishTimeMs: number; 
 /**

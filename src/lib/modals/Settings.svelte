@@ -9,12 +9,18 @@
 	export let apiKey: string
 	export let maxConcurrentRequests: number
 	export let checkInBackground: boolean
+	export let noWindowDecorations: boolean
 
 	export let visible = false
 	let keyGuideVisible = false
 
 	async function setGeneralSettings() {
-		await commands.setGeneralSettings(apiKey, maxConcurrentRequests, checkInBackground)
+		await commands.setGeneralSettings(
+			apiKey,
+			maxConcurrentRequests,
+			checkInBackground,
+			noWindowDecorations,
+		)
 		await loadSettings()
 		visible = false
 	}
@@ -42,6 +48,12 @@
 					<p>Check for new videos automatically</p>
 				</label>
 				<Switch id="check-in-background" bind:checked={checkInBackground} />
+			</div>
+			<div class="toggle-row">
+				<label for="window-decorations">
+					<p>Disable window decorations</p>
+				</label>
+				<Switch id="no-window-decorations" bind:checked={noWindowDecorations} />
 			</div>
 			<div class="buttons">
 				<Button secondary on:click={() => (visible = false)}>Cancel</Button>

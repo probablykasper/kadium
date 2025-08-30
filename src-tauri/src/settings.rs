@@ -25,6 +25,7 @@ impl Default for VersionedSettings {
 			max_concurrent_requests: 5,
 			channels: Vec::new(),
 			check_in_background: true,
+			no_window_decorations: false,
 		})
 	}
 }
@@ -91,8 +92,11 @@ pub struct Settings {
 	pub max_concurrent_requests: u32,
 	pub channels: Vec<Channel>,
 	pub check_in_background: bool,
+	#[serde(default)]
+	pub no_window_decorations: bool,
 }
 impl Settings {
+	#[allow(dead_code)]
 	pub fn wrap(self) -> VersionedSettings {
 		VersionedSettings::V1(self)
 	}

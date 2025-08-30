@@ -165,13 +165,8 @@ pub async fn run() {
 			tauri::WindowEvent::CloseRequested { api: _api, .. } => {
 				#[cfg(target_os = "macos")]
 				{
-					// hide the application
-					// manual for now (PR https://github.com/tauri-apps/tauri/pull/3689)
 					_api.prevent_close();
-					use objc::*;
-					let cls = objc::runtime::Class::get("NSApplication").unwrap();
-					let app: cocoa::base::id = unsafe { msg_send![cls, sharedApplication] };
-					unsafe { msg_send![app, hide: 0] }
+					_app_handle.hide().unwrap();
 				}
 			}
 			_ => {}

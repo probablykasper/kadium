@@ -1,5 +1,8 @@
 # Changelog
 
+## Next
+- Remove old YouTube Email Notifier migration
+
 ## 1.7.1 - 2024 Jan 28
 - Fix selection being created on videos page refresh
 

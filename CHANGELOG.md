@@ -3,6 +3,7 @@
 ## Next
 - Use Shift instead of Alt for Videos/Channels page shortcuts
 - Add option to disable window decorations
+- Fix error when a channel has scheduled livestreams
 - Fix keyboard input working when modal is open
 - Remove old YouTube Email Notifier migration
 

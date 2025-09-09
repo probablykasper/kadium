@@ -124,7 +124,7 @@ pub mod videos {
 	}
 	#[derive(Deserialize, Debug)]
 	pub struct ContentDetails {
-		pub duration: String,
+		pub duration: Option<String>,
 	}
 	#[derive(Deserialize, Debug)]
 	#[allow(non_snake_case)]

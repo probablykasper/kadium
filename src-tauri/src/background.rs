@@ -285,6 +285,14 @@ async fn check_channel(options: &IntervalOptions, channel: &ChannelInfo) -> Resu
 
 	let mut videos_to_add: Vec<db::Video> = Vec::new();
 	for video in videos.items {
+		let content_details = video.contentDetails.ok_or("No contentDetails")?;
+		let duration = match content_details.duration {
+			Some(duration) => duration,
+			None => {
+				// Scheduled live streams don't have a duration
+				continue;
+			}
+		};
 		let publish_time = match video.liveStreamingDetails {
 			Some(live_streaming_details) => match live_streaming_details.actualStartTime {
 				Some(actual_start_time) => parse_datetime(&actual_start_time)?,
@@ -295,8 +303,7 @@ async fn check_channel(options: &IntervalOptions, channel: &ChannelInfo) -> Resu
 			},
 			None => parse_datetime(&video.snippet.publishedAt)?,
 		};
-		let content_details = video.contentDetails.ok_or("No contentDetails")?;
-		let duration_ms = parse_absolute_duration(&content_details.duration)?;
+		let duration_ms = parse_absolute_duration(&duration)?;
 		videos_to_add.push(db::Video {
 			id: video.id,
 			title: video.snippet.title,

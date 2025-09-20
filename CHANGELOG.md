@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## 1.8.1 - 2025 Sep 20
 - Fix help menu not showing on macOS
 
 ## 1.8.0 - 2025 Sep 9

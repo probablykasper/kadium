@@ -197,7 +197,5 @@ export async function create_menu() {
 	const menu = await Menu.new({
 		items: [app_menu, file_menu, edit_menu, view_menu, window_menu, help_menu],
 	})
-	menu.setAsAppMenu()
-	// https://github.com/tauri-apps/tauri/issues/12652
-	help_menu.setAsHelpMenuForNSApp()
+	await menu.setAsAppMenu()
 }

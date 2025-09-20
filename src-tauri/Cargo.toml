@@ -35,6 +35,9 @@ tauri-plugin-dialog = "2"
 dirs = "6.0.0"
 tauri-plugin-os = "2"
 
+[patch.crates-io]
+tauri = { git = "https://github.com/probablykasper/tauri", branch = "fix/help-menu-mac" }
+
 [target.'cfg(target_os = "macos")'.dependencies]
 macos-app-nap = "0.0"
 cocoa = "0.25"

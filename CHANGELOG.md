@@ -1,5 +1,8 @@
 # Changelog
 
+## Next
+- Fix help menu not showing on macOS
+
 ## 1.8.0 - 2025 Sep 9
 - Use Shift instead of Alt for Videos/Channels page shortcuts
 - Add option to disable window decorations
